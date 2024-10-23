@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Move Simulator Project
 
 This project consists of two sub-projects: `move-simulator-vscode` and `move-simulator-server`. Below are the instructions on how to use the scripts defined in the root `package.json` to manage these sub-projects.
@@ -41,3 +42,7 @@ npm run webview:build
 
 For more detailed information about each sub-project, refer to their respective README files.
 
+=======
+# Movelazy
+The Movement extension 
+>>>>>>> 348a213 (Initial commit)
