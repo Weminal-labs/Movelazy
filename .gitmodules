@@ -1,0 +1,6 @@
+[submodule "Movelazy-server"]
+	path = Movelazy-server
+	url = https://github.com/Menh1505/Movelazy-server.git
+[submodule "Movelazy-vscode"]
+	path = Movelazy-vscode
+	url = https://github.com/Menh1505/Movelazy-vscode.git
