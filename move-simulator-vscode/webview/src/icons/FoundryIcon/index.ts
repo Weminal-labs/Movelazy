@@ -1,1 +1,0 @@
-export { FoundryIcon } from "./FoundryIcon";
