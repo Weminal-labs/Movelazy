@@ -1,5 +1,4 @@
-//@ts-ignore
-import React from 'react';
+
 import App from './App';
 import { createRoot } from 'react-dom/client';
 import { Route, MemoryRouter, Routes } from 'react-router-dom';
@@ -7,16 +6,12 @@ import { RootLayout } from './RootLayout';
 import Aptos from './Pages/Aptos';
 import Foundry from './Pages/Foundry';
 import AccountBalance from './features/AccountBalance';
-import Deploy from './features/Deploy';
-import Faucets from './features/Faucets';
-import YourAddress from './features/YourAddress/index';
-import YourAddressAptos from './features/YourAddress/YoruAddress - Aptos'
+// import Deploy from './features/Deploy';
+import DeployFoundry from './features/Deploy/DeployFoundry';
+import DeployAptos from './features/Deploy/DeployAptos';
+import AddressFoundry from './features/YourAddress/AddressFoundry';
+import YourAddressAptos from './features/YourAddress/AddressAptos'
 
-declare const acquireVsCodeApi: <T = unknown>() => {
-  getState: () => T;
-  setState: (data: T) => void;
-  postMessage: (msg: unknown) => void;
-};
 
 const root = createRoot(document.getElementById('root')!);
 if (root) {
@@ -28,9 +23,9 @@ if (root) {
           <Route path="aptos" element={<Aptos />} />
           <Route path="foundry" element={<Foundry />} />
           <Route path="account-balance" element={<AccountBalance />} />
-          <Route path="deploy" element={<Deploy />} />
-          <Route path="faucets" element={<Faucets />} />
-          <Route path="your-address" element={<YourAddress />} />
+          <Route path="deploy-aptos" element={< DeployAptos />} />
+          <Route path="deploy-foundry" element={< DeployFoundry />} />
+          <Route path="your-address-foundry" element={<AddressFoundry />} />
           <Route path="your-address-aptos" element={<YourAddressAptos />} />
         </Route>
       </Routes>

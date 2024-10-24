@@ -20,7 +20,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ file, setFile, page, setFileNam
 
   return (
     <div className="mb-4">
-      <label className="block text-white text-xl font-semibold mb-2 text-gray-700" htmlFor="file">
+      <label className="block text-white text-xl font-semibold mb-2" htmlFor="file">
         Upload Contract File
       </label>
       <input
