@@ -1,10 +1,13 @@
 import React from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Routes, Route } from "react-router-dom";
 import { Tab } from '../../components/Tab';
 import { CoinIcon } from '../../assets/icons/CoinIcon';
 import { AptosIcon } from '../../assets/icons/AptosIcon';
 import { WalletIcon } from '../../assets/icons/WalletIcon';
 import NavigateTitle from '../../components/Header';
+import YourAddressAptos from '../../components/aptos/AddressAptos';
+import DeployAptos from '../../components/aptos/DeployAptos';
+import AccountBalance from '../../components/aptos/account';
 
 const Aptos: React.FC = () => {
 
@@ -24,7 +27,7 @@ const Aptos: React.FC = () => {
               <button
                 className="px-4 py-2 bg-[#ffffff1a] text-white rounded hover:bg-[#ffffff33] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full"
               >
-                <Link to="/your-address-aptos" className="focus:outline-none"
+                <Link to="your-address-aptos" className="focus:outline-none"
                   state={{ page: 'aptos' }}
                 >
                   <Tab
@@ -37,7 +40,7 @@ const Aptos: React.FC = () => {
                 className="px-4 py-2 bg-[#ffffff1a] text-white rounded hover:bg-[#ffffff33] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full"
 
               >
-                <Link to="/account-balance" className="focus:outline-none"
+                <Link to="account-balance" className="focus:outline-none"
                   state={{ page: 'aptos' }}
                 >
                   <Tab
@@ -50,7 +53,7 @@ const Aptos: React.FC = () => {
               <button
                 className="px-4 py-2 bg-[#ffffff1a] text-white rounded hover:bg-[#ffffff33] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full"
               >
-                <Link to="/deploy-aptos" className="focus:outline-none"
+                <Link to="deploy-aptos" className="focus:outline-none"
                   state={{ page: 'aptos' }}
                 >
                   <Tab
@@ -63,8 +66,15 @@ const Aptos: React.FC = () => {
           </div>
         </div>
       </div>
+      <Routes>
+        <Route index element={
+          <NavigateTitle handleNavigate={handleNavigate} iconType="aptos" title="Aptos" />
+        } />
+        <Route path="your-address-aptos" element={<YourAddressAptos />} />
+        <Route path="deploy-aptos" element={<DeployAptos />} />
+        <Route path="account-balance" element={<AccountBalance />} />
+      </Routes>
     </div>
-
   );
 };
 
