@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import { Tab } from '../components/Tab';
-import { CoinIcon } from '../icons/CoinIcon';
-import { AptosIcon } from '../icons/AptosIcon';
-import { WalletIcon } from '../icons/WalletIcon';
-import NavigateTitle from '../components/Header';
+import { Tab } from '../../components/Tab';
+import { CoinIcon } from '../../icons/CoinIcon';
+import { AptosIcon } from '../../icons/AptosIcon';
+import { WalletIcon } from '../../icons/WalletIcon';
+import NavigateTitle from '../../components/Header';
 
 const Aptos: React.FC = () => {
 

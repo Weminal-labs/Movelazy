@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import { Tab } from '../components/Tab';
-import { CoinIcon } from '../icons/CoinIcon';
-import { FoundryIcon } from '../icons/FoundryIcon';
-import { WalletIcon } from '../icons/WalletIcon';
-import { FaucetIcon } from '../icons/FaucetIcon';
-import NavigateTitle from '../components/Header';
+import { Tab } from '../../components/Tab';
+import { CoinIcon } from '../../icons/CoinIcon';
+import { FoundryIcon } from '../../icons/FoundryIcon';
+import { WalletIcon } from '../../icons/WalletIcon';
+import { FaucetIcon } from '../../icons/FaucetIcon';
+import NavigateTitle from '../../components/Header';
 
 const Foundry: React.FC = () => {
   const navigate = useNavigate();
