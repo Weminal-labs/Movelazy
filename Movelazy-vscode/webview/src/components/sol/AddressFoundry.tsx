@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
-import InputWallet from "../../components/InputWallet";
-import NavigateTitle from "../../components/Header";
-import ButtonAccount from "../../components/ButtonAccount";
+import InputWallet from "../InputWallet";
+import NavigateTitle from "../Header";
+import ButtonAccount from "../ButtonAccount";
 
 const AddressFoundry = () => {
     const [walletAddress, setWalletAddress] = useState<string>(() => localStorage.getItem('walletAddress') || '');
@@ -42,7 +42,7 @@ const AddressFoundry = () => {
 
     const navigate = useNavigate();
     const handleNavigate = () => {
-        navigate(`/${page}`);
+        navigate(-1); // Thay vì navigate(`/${page}`)
     };
 
     return (

@@ -2,7 +2,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import NavigateTitle from "../../components/Header";
+import NavigateTitle from "../Header";
 const AccountBalance = () => {
     //@ts-ignore
     const [walletAddress, setWalletAddress] = useState<string>(() => localStorage.getItem('walletAddress') || '');
@@ -33,7 +33,6 @@ const AccountBalance = () => {
     const handleNavigate = () => {
         navigate(`/${page}`);
     };
-
 
     return (
         <>

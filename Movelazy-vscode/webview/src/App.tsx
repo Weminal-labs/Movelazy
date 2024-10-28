@@ -1,15 +1,12 @@
-
-
-
 import { Link, Outlet } from 'react-router-dom';
-import './App.css';
+import './styles/App.css';
 import Aptos from './Pages/aptos/Aptos';
 import Foundry from './Pages/sol/Foundry';
 import { Logo } from "./components/Logo";
 import { useState } from 'react';
 import { Tab } from './components/Tab';
-import { AptosIcon } from './icons/AptosIcon';
-import { FoundryIcon } from './icons/FoundryIcon';
+import { AptosIcon } from './assets/icons/AptosIcon';
+import { FoundryIcon } from './assets/icons/FoundryIcon';
 
 
 function App() {
@@ -30,7 +27,7 @@ function App() {
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full">
-            <div className="text-white text-lg sm:text-xl mb-4 text-center">Select a simulator to Start</div>
+            <div className="text-white text-lg sm:text-xl mb-4 text-center">Select a tool to Start</div>
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
               <button
                 className="px-4 py-2 bg-[#ffffff1a] text-white rounded hover:bg-[#ffffff33] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1"
