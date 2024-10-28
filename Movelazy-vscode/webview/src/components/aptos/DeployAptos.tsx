@@ -2,10 +2,10 @@
 import axios from 'axios';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import FileUpload from "../../components/FileUpload";
-import NavigateTitle from '../../components/Header';
-import InputWallet from '../../components/InputWallet';
-import DeployButton from '../../components/DeployButton';
+import FileUpload from "../FileUpload";
+import NavigateTitle from '../Header';
+import InputWallet from '../InputWallet';
+import DeployButton from '../DeployButton';
 
 const DeployAptos = () => {
     //@ts-ignore

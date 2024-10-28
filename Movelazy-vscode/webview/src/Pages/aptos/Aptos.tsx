@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { Tab } from '../../components/Tab';
-import { CoinIcon } from '../../icons/CoinIcon';
-import { AptosIcon } from '../../icons/AptosIcon';
-import { WalletIcon } from '../../icons/WalletIcon';
+import { CoinIcon } from '../../assets/icons/CoinIcon';
+import { AptosIcon } from '../../assets/icons/AptosIcon';
+import { WalletIcon } from '../../assets/icons/WalletIcon';
 import NavigateTitle from '../../components/Header';
 
 const Aptos: React.FC = () => {

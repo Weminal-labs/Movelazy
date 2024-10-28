@@ -1,17 +1,11 @@
-
 import App from './App';
 import { createRoot } from 'react-dom/client';
 import { Route, MemoryRouter, Routes } from 'react-router-dom';
 import { RootLayout } from './RootLayout';
 import Aptos from './Pages/aptos/Aptos';
 import Foundry from './Pages/sol/Foundry';
-import AccountBalance from './features/AccountBalance';
-// import Deploy from './features/Deploy';
-import DeployFoundry from './features/Deploy/DeployFoundry';
-import DeployAptos from './features/Deploy/DeployAptos';
-import AddressFoundry from './features/YourAddress/AddressFoundry';
-import YourAddressAptos from './features/YourAddress/AddressAptos'
-
+import DeployAptos from './components/aptos/DeployAptos';
+import YourAddressAptos from './components/aptos/AddressAptos';
 
 const root = createRoot(document.getElementById('root')!);
 if (root) {
@@ -21,11 +15,8 @@ if (root) {
         <Route element={<RootLayout />}>
           <Route index element={<App />} />
           <Route path="aptos" element={<Aptos />} />
-          <Route path="foundry" element={<Foundry />} />
-          <Route path="account-balance" element={<AccountBalance />} />
+          <Route path="foundry/*" element={<Foundry />} />
           <Route path="deploy-aptos" element={< DeployAptos />} />
-          <Route path="deploy-foundry" element={< DeployFoundry />} />
-          <Route path="your-address-foundry" element={<AddressFoundry />} />
           <Route path="your-address-aptos" element={<YourAddressAptos />} />
         </Route>
       </Routes>

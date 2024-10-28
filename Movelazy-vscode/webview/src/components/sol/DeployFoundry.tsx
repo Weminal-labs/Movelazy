@@ -2,10 +2,10 @@
 import axios from 'axios';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import FileUpload from "../../components/FileUpload";
-import DeployButton from '../../components/DeployButton';
-import InputWallet from '../../components/InputWallet';
-import NavigateTitle from '../../components/Header';
+import FileUpload from "../FileUpload";
+import DeployButton from '../DeployButton';
+import InputWallet from '../InputWallet';
+import NavigateTitle from '../Header';
 
 const DeployFoundry = () => {
     //@ts-ignore
@@ -84,7 +84,7 @@ const DeployFoundry = () => {
 
     const navigate = useNavigate();
     const handleNavigate = () => {
-        navigate(`/${page}`);
+        navigate(-1); // Thay vì navigate(`/${page}`)
     };
 
     return (

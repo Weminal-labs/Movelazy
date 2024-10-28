@@ -1,4 +1,4 @@
-import { ArrowRight } from "../icons/ArrowRight";
+import { ArrowRight } from "../assets/icons/ArrowRight";
 
 interface TabProps {
     icon: JSX.Element;
