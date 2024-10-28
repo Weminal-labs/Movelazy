@@ -3,8 +3,8 @@
 
 import { Link, Outlet } from 'react-router-dom';
 import './App.css';
-import Aptos from './Pages/Aptos';
-import Foundry from './Pages/Foundry';
+import Aptos from './Pages/aptos/Aptos';
+import Foundry from './Pages/sol/Foundry';
 import { Logo } from "./components/Logo";
 import { useState } from 'react';
 import { Tab } from './components/Tab';
