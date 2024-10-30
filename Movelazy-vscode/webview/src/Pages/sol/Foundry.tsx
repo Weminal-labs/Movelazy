@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Route, Router, Routes, useNavigate } from "react-router-dom";
+import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import { Tab } from '../../components/Tab';
 import { CoinIcon } from '../../assets/icons/CoinIcon';
 import { FoundryIcon } from '../../assets/icons/FoundryIcon';

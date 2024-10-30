@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import InputWallet from "../InputWallet";
 import NavigateTitle from "../Header";
@@ -26,8 +26,8 @@ const AddressFoundry = () => {
 
     };
 
-    const location = useLocation();
-    const page = location.state?.page;
+    // const location = useLocation();
+    // const page = location.state?.page;
 
     useEffect(() => {
         const savedWalletAddress = localStorage.getItem('walletAddress') || '';
