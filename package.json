@@ -1,16 +1,73 @@
 {
-  "name": "move-simulator",
-  "version": "1.0.0",
+  "name": "move-simulator-vscode",
+  "displayName": "move-simulator-vscode",
+  "icon": "media/icon.png",
+  "publisher": "Movelazy",
+  "description": "move with GUI",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "move-simulator-vscode.openSimulator",
+        "title": "open simulator"
+      },
+      {
+        "command": "move-simulator-vscode.openWebview",
+        "title": "open webview"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "move-simulator",
+          "title": "Move Simulator",
+          "icon": "media/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "move-simulator": [
+        {
+          "type": "webview",
+          "id": "moveSimulatorView",
+          "name": "Move Simulator",
+          "icon": "media/logo.svg",
+          "contextualTitle": "Move Simulator"
+        }
+      ]
+    }
+  },
   "scripts": {
-    "start:vscode": "cd move-simulator-vscode && npm start",
-    "start:server": "cd move-simulator-server && npm start",
-    "start:all": "npm run start:vscode & npm run start:server",
-    "build:vscode": "cd move-simulator-vscode && npm run build",
-    "build:server": "cd move-simulator-server && npm run build",
-    "build:all": "npm run build:vscode && npm run build:server",
-    "test:vscode": "cd move-simulator-vscode && npm test",
-    "test:server": "cd move-simulator-server && npm test",
-    "test:all": "npm run test:vscode && npm run test:server",
-    "install:all": "cd move-simulator-vscode && npm run install:all && cd ../move-simulator-server && npm install"
+    "install:all": "npm install && cd webview && npm install && npm install vite && npm install ethers",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test",
+    "debug": "node ./node_modules/vscode/bin/test",
+    "webview:build": "cd webview && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "20.x",
+    "@types/vscode": "^1.93.0",
+    "@typescript-eslint/eslint-plugin": "^8.3.0",
+    "@typescript-eslint/parser": "^8.3.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.9.1",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "move-simulator-vscode": "file:",
+    "react-router-dom": "^6.26.2"
   }
 }
