@@ -1,10 +1,10 @@
 import { Outlet } from 'react-router-dom'
-import { SolNavbar } from '../../components/sol/SolNavbar'
+import { AptosNavbar } from './components/AptosNavbar'
 
-const SolPage = () => {
+const AptosPage = () => {
   return (
     <div className="min-h-screen bg-[#0e0f0e]">
-      <SolNavbar />
+      <AptosNavbar />
       <main className="p-4">
         <Outlet />
       </main>
@@ -12,4 +12,4 @@ const SolPage = () => {
   )
 }
 
-export default SolPage
+export default AptosPage
