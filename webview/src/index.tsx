@@ -12,9 +12,12 @@ import DeployerPage from './Pages/sol/pages/deployer'
 
 //------------------- Aptos imports --------------------- //
 import AptosPage from './Pages/aptos'
-import CompilerPageAptos from './Pages/aptos/pages/compiler'
-import TesterPageAptos from './Pages/aptos/pages/tester'
+import CompilerPageAptos from './Pages/aptos/pages/YourAddress'
+import TesterPageAptos from './Pages/aptos/pages/AccountBalance'
 import DeployerPageAptos from './Pages/aptos/pages/deployer'
+import YourAddress from './Pages/aptos/pages/YourAddress'
+import { AccountAddress } from '@aptos-labs/ts-sdk'
+import AccountBalance from './Pages/aptos/pages/AccountBalance'
 
 // Router configuration
 const router = createMemoryRouter([
@@ -49,12 +52,12 @@ const router = createMemoryRouter([
         element: <AptosPage />,
         children: [
           {
-            path: 'compiler',
-            element: <CompilerPageAptos />
+            path: 'YourAddress',
+            element: <YourAddress />
           },
           {
-            path: 'tester',
-            element: <TesterPageAptos />
+            path: 'AccountBalance',
+            element: <AccountBalance />
           },
           {
             path: 'deployer',
