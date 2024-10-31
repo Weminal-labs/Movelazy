@@ -1,6 +1,6 @@
 {
-  "name": "move-simulator-vscode",
-  "displayName": "move-simulator-vscode",
+  "name": "movelazy",
+  "displayName": "movelazy",
   "icon": "media/icon.png",
   "publisher": "Movelazy",
   "description": "move with GUI",
@@ -16,11 +16,11 @@
   "contributes": {
     "commands": [
       {
-        "command": "move-simulator-vscode.openSimulator",
+        "command": "movelazy.openSimulator",
         "title": "open simulator"
       },
       {
-        "command": "move-simulator-vscode.openWebview",
+        "command": "movelazy.openWebview",
         "title": "open webview"
       }
     ],
@@ -37,7 +37,7 @@
       "move-simulator": [
         {
           "type": "webview",
-          "id": "moveSimulatorView",
+          "id": "MovelazyView",
           "name": "Move Simulator",
           "icon": "media/logo.svg",
           "contextualTitle": "Move Simulator"

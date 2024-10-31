@@ -1,12 +1,11 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { ethers } from 'ethers';
-import { WorkspaceService } from './workspace';
 
 export class HardhatService {
   private hre!: HardhatRuntimeEnvironment;
   private provider!: ethers.providers.JsonRpcProvider;
 
-  constructor(private workspace: WorkspaceService) { }
+  // constructor(private workspace: WorkspaceService) { }
 
   async initialize() {
     if (!this.hre) {
