@@ -1,7 +1,7 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import type { UserConfig } from 'vite'
+import react from "@vitejs/plugin-react"
 
-export default defineConfig({
+const config: UserConfig = {
   plugins: [react()],
   build: {
     minify: 'esbuild',
@@ -21,4 +21,6 @@ export default defineConfig({
       host: "localhost",
     },
   },
-});
+}
+
+export default config
