@@ -7,7 +7,10 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-8">
-      <img src={logo} alt="Logo" className="w-32 h-32 mb-8" />
+      <div className="flex flex-col items-center">
+        <img src={logo} alt="Logo" className="w-32 h-32" />
+        <h1 className="font-pacifico text-4xl text-white mt-4 mb-8">Movelazy</h1>
+      </div>
       
       <button
         onClick={() => navigate('/sol')}
