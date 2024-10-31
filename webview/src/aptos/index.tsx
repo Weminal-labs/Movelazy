@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import { AptosNavbar } from '../../components/aptos/AptosNavbar'
+import { AptosNavbar } from './components/AptosNavbar'
 
 const AptosPage = () => {
     return (

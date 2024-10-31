@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import { SolNavbar } from '../../components/sol/SolNavbar'
+import { SolNavbar } from './components/SolNavbar'
 
 const SolPage = () => {
   return (
