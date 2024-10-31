@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Account, Aptos, AptosConfig, Network, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
-import { AptosAccount } from "aptos";
 import NavigateTitle from "../../components/Header";
 import InputWallet from "../../components/InputWallet";
 import ButtonAccount from "../../components/ButtonAccount";
