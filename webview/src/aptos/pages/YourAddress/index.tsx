@@ -65,10 +65,12 @@ const YourAddress = () => {
     };
 
     return (
-        <div className="text-white h-[300vh] grow overflow-y-scroll">
-            <div className="absolute w-[640px] sidebar:w-[400px] h-[766px] top-[-178px] left-[25px]">
-                <div className="flex flex-col w-full items-start gap-[20px] absolute top-[228px] left-0">
-                    <NavigateTitle handleNavigate={handleNavigate} iconType="aptos" title="Account Aptos" />
+        <div className="h-[calc(100vh-64px)] flex flex-col">
+          <div className="flex-1 overflow-auto bg-background-light">
+            <div className="min-h-full w-full border border-border">
+               <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-text text-2xl font-medium">YourAddress</h3>
+                      </div>
                     <div className="flex flex-col gap-[24px] my-5 w-full ">
                         <InputWallet label="Wallet address" value={walletAddress} />
                         <InputWallet label="Private Key" value={privatekey} />
