@@ -37,7 +37,7 @@
       "move-simulator": [
         {
           "type": "webview",
-          "id": "moveSimulatorView",
+          "id": "MovelazyView",
           "name": "Move Simulator",
           "icon": "media/logo.svg",
           "contextualTitle": "Move Simulator"
