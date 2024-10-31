@@ -3,8 +3,15 @@ import { createRoot } from 'react-dom/client'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import './styles/index.css'
 import { RootLayout } from './RootLayout'
-import SolPage from './Pages/sol'
 import HomePage from './Pages/home'
+//------------------- Solidity imports --------------------- //
+import SolPage from './Pages/sol'
+import CompilerPage from './Pages/sol/pages/compiler'
+import TesterPage from './Pages/sol/pages/tester'
+import DeployerPage from './Pages/sol/pages/deployer'
+
+//------------------- Aptos imports --------------------- //
+import AptosPage from './Pages/aptos'
 
 
 // Router configuration
@@ -21,16 +28,27 @@ const router = createMemoryRouter([
         path: 'sol',
         element: <SolPage />,
         children: [
-          // Các nested routes của Sol có thể thêm ở đây
+          {
+            path: 'compiler',
+            element: <CompilerPage />
+          },
+          {
+            path: 'tester',
+            element: <TesterPage />
+          },
+          {
+            path: 'deployer',
+            element: <DeployerPage />
+          }
         ]
       },
-/*       {
+      {
         path: 'aptos',
         element: <AptosPage />,
         children: [
           // Các nested routes của Aptos có thể thêm ở đây
         ]
-      } */
+      }
     ]
   }
 ])
