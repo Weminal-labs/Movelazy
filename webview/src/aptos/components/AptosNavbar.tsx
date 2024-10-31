@@ -16,13 +16,13 @@ export const AptosNavbar = () => {
 
       <ul className="flex gap-4">
         <li>
-          <Link to="/aptos/compiler" className="text-white hover:text-white/80">
-              Compiler
+          <Link to="/aptos/YourAddress" className="text-white hover:text-white/80">
+              YourAddress
             </Link>
           </li>
           <li>
-            <Link to="/aptos/tester" className="text-white hover:text-white/80">
-              Tester
+            <Link to="/aptos/AccountBalance" className="text-white hover:text-white/80">
+              AccountBalance
             </Link>
           </li>
           <li>
