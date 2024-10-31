@@ -46,15 +46,15 @@
     }
   },
   "scripts": {
-    "install:all": "npm install && cd webview && npm install && npm install vite && npm install ethers",
-    "vscode:prepublish": "npm run compile",
+    "install:all": "npm install && cd webview && npm install",
+    "vscode:prepublish": "npm run compile && npm run webview:build",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
-    "debug": "node ./node_modules/vscode/bin/test",
-    "webview:build": "cd webview && npm run build"
+    "webview:build": "cd webview && npm run build",
+    "webview:dev": "cd webview && npm run dev"
   },
   "devDependencies": {
     "@types/node": "20.x",
@@ -67,7 +67,10 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "move-simulator-vscode": "file:",
-    "react-router-dom": "^6.26.2"
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.22.15",
+    "glob": "^11.0.0",
+    "lru-cache": "^11.0.1"
   }
 }

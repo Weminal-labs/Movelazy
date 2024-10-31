@@ -1,10 +1,14 @@
 import * as vscode from 'vscode';
 import { MoveSimulatorViewProvider } from './MoveSimulatorViewProvider';
+import { WorkspaceService } from './services/workspace';
+import { HardhatService } from './services/hardhat';
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "move-simulator-vscode" is now active!');
 
 	const provider = new MoveSimulatorViewProvider(context);
+	const workspace = new WorkspaceService();
+	const hardhat = new HardhatService(workspace);
 
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(MoveSimulatorViewProvider.viewType, provider)
@@ -14,16 +18,26 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('move-simulator-vscode.openWebview', () => {
 			// Tạo một WebviewPanel
 			const panel = vscode.window.createWebviewPanel(
-				'webview',
-				'Sample Webview',
+				'solidity',
+				'Solidity IDE',
 				vscode.ViewColumn.One,
 				{
 					enableScripts: true, // Cho phép script nếu cần
 				}
 			);
 
-			// Thiết lập nội dung HTML cho webview
-			panel.webview.html = provider._getHtmlForWebview(panel.webview);
+			// Xử lý messages từ webview
+			panel.webview.onDidReceiveMessage(
+				async message => {
+					switch (message.command) {
+						case 'compile':
+							const result = await hardhat.compile(message.contractPath);
+							panel.webview.postMessage({ command: 'compiled', data: result });
+							break;
+						// Xử lý các commands khác
+					}
+				}
+			);
 		})
 	);
 }
