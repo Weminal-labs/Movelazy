@@ -1,17 +1,17 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
-import './styles/index.css'
+import './index.css'
 import { RootLayout } from './RootLayout'
-import HomePage from './Pages/home'
+import HomePage from './home'
 //------------------- Solidity imports --------------------- //
-import SolPage from './Pages/sol'
-import CompilerPage from './Pages/sol/pages/compiler'
-import TesterPage from './Pages/sol/pages/tester'
-import DeployerPage from './Pages/sol/pages/deployer'
+import SolPage from './sol'
+import CompilerPage from './sol/pages/compiler'
+import TesterPage from './sol/pages/tester'
+import DeployerPage from './sol/pages/deployer'
 
 //------------------- Aptos imports --------------------- //
-import AptosPage from './Pages/aptos'
+import AptosPage from './aptos'
 
 
 // Router configuration
