@@ -1,7 +1,7 @@
 import React from 'react';
-import { ArrowLeft } from '../../../assets/icons/ArrowLeft';
-import { FoundryIcon } from '../../../assets/icons/FoundryIcon';
-import { AptosIcon } from '../../../assets/icons/AptosIcon';
+import { ArrowLeft } from '../../assets/icons/ArrowLeft';
+import { FoundryIcon } from '../../assets/icons/FoundryIcon';
+import { AptosIcon } from '../../assets/icons/AptosIcon';
 interface NavigateTitle {
     handleNavigate: () => void;
     iconType: 'foundry' | 'aptos';
