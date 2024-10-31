@@ -33,7 +33,10 @@ export default {
           light: 'rgba(255, 255, 255, 0.05)',
           dark: 'rgba(255, 255, 255, 0.15)',
         }
-      }
+      },
+      fontFamily: {
+        pacifico: ['Pacifico', 'cursive'],
+      },
     },
     screens: {
       'sidebar': { 'max': '700px' },
