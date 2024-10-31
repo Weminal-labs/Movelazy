@@ -1,4 +1,4 @@
-const TesterPageAptos = () => {
+const AccountBalance = () => {
   return (
     <div className="text-white">
       <h2>Aptos Tester</h2>
@@ -6,4 +6,4 @@ const TesterPageAptos = () => {
   )
 }
 
-export default TesterPageAptos 
+export default AccountBalance
