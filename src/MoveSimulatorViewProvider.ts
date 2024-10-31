@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export class MoveSimulatorViewProvider implements vscode.WebviewViewProvider {
+export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
-    public static readonly viewType = 'moveSimulatorView';
+    public static readonly viewType = 'MovelazyView';
 
     constructor(private readonly _context: vscode.ExtensionContext) { }
 
