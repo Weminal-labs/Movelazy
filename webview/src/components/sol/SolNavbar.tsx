@@ -5,10 +5,10 @@ export const SolNavbar = () => {
   const navigate = useNavigate()
 
   return (
-    <nav className="flex items-center justify-between p-4 border-b border-white/10">
+    <nav className="flex items-center justify-between p-4 border-b border-border bg-background-light">
       <button
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-white hover:text-white/80"
+        className="flex items-center gap-2 text-text hover:text-text-muted"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>Back</span>
