@@ -14,7 +14,7 @@ import DeployerPage from './sol/pages/deployer'
 import AptosPage from './aptos'
 import DeployerPageAptos from './aptos/pages/deployer'
 import YourAddress from './aptos/pages/YourAddress'
-
+import AccountBalance from './aptos/pages/AccountBalance'
 
 
 // Router configuration
