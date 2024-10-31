@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import NavigateTitle from "../../components/Header";
 const AccountBalance = () => {
     //@ts-ignore
-    const [walletAddress, setWalletAddress] = useState<string>(() => localStorage.getItem('walletAddress') || '');
+    const [walletAddress] = useState<string>(() => localStorage.getItem('walletAddress') || '');
 
 
     const [balance, setBalance] = useState<string>(() => localStorage.getItem('balance') || '0');
@@ -17,8 +17,8 @@ const AccountBalance = () => {
                 if (!address) return; // Nếu địa chỉ không tồn tại, không làm gì cả
                 try {
                     const balance = await provider.getBalance(address);
-                    const balanceMove = ethers.formatUnits(balance, 18);
-                    setBalance(balanceMove.toString());
+                    const balanceMove = ethers.utils.formatEther(balance);
+                    setBalance(balanceMove);
                 } catch (error) {
                     console.error('Lỗi khi lấy số dư:', error);
                 }

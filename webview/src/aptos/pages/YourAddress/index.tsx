@@ -13,6 +13,7 @@ const YourAddress = () => {
     const [balance, setBalance] = useState<string>(() => localStorage.getItem('balance') || '0');
 
     const createAccount = async () => {
+        console.log(balance);
         const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
         try {
             const privateKey = Ed25519PrivateKey.generate();

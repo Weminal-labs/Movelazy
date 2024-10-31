@@ -1,21 +1,19 @@
 import * as vscode from 'vscode';
-import { MoveSimulatorViewProvider } from './MoveSimulatorViewProvider';
-import { WorkspaceService } from './services/workspace';
+import { MovelazyViewProvider } from './MovelazyViewProvider';
 import { HardhatService } from './services/hardhat';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "move-simulator-vscode" is now active!');
+	console.log('Congratulations, your extension "movelazy" is now active!');
 
-	const provider = new MoveSimulatorViewProvider(context);
-	const workspace = new WorkspaceService();
-	const hardhat = new HardhatService(workspace);
+	const provider = new MovelazyViewProvider(context);
+	const hardhat = new HardhatService();
 
 	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(MoveSimulatorViewProvider.viewType, provider)
+		vscode.window.registerWebviewViewProvider(MovelazyViewProvider.viewType, provider)
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('move-simulator-vscode.openWebview', () => {
+		vscode.commands.registerCommand('movelazy.openWebview', () => {
 			// Tạo một WebviewPanel
 			const panel = vscode.window.createWebviewPanel(
 				'solidity',
