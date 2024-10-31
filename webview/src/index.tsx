@@ -12,7 +12,9 @@ import DeployerPage from './Pages/sol/pages/deployer'
 
 //------------------- Aptos imports --------------------- //
 import AptosPage from './Pages/aptos'
-
+import CompilerPageAptos from './Pages/aptos/pages/compiler'
+import TesterPageAptos from './Pages/aptos/pages/tester'
+import DeployerPageAptos from './Pages/aptos/pages/deployer'
 
 // Router configuration
 const router = createMemoryRouter([
@@ -46,7 +48,18 @@ const router = createMemoryRouter([
         path: 'aptos',
         element: <AptosPage />,
         children: [
-          // Các nested routes của Aptos có thể thêm ở đây
+          {
+            path: 'compiler',
+            element: <CompilerPageAptos />
+          },
+          {
+            path: 'tester',
+            element: <TesterPageAptos />
+          },
+          {
+            path: 'deployer',
+            element: <DeployerPageAptos />
+          }
         ]
       }
     ]
