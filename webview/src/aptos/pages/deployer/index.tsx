@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import axios from 'axios';
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import FileUpload from "../../components/FileUpload";
-import NavigateTitle from "../../components/Header";
 import InputWallet from "../../components/InputWallet";
 import DeployButton from '../../components/DeployButton';
 const Deployer = () => {
@@ -99,11 +98,6 @@ const Deployer = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const navigate = useNavigate();
-    const handleNavigate = () => {
-        navigate(`/${page}`);
     };
 
     return (
