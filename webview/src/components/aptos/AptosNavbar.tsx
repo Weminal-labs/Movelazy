@@ -21,7 +21,7 @@ export const AptosNavbar = () => {
             </Link>
           </li>
           <li>
-            <Link to="/aptos/tester" className="text-white hover:text-white/80">
+            <Link to="/aptos/AccountBalance" className="text-white hover:text-white/80">
               AccountBalance
             </Link>
           </li>
