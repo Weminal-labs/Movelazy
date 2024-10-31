@@ -1,11 +1,15 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { WorkspaceService } from './services/workspace';
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
     public static readonly viewType = 'MovelazyView';
+    private workspaceService: WorkspaceService;
 
-    constructor(private readonly _context: vscode.ExtensionContext) { }
+    constructor(private readonly _context: vscode.ExtensionContext) {
+        this.workspaceService = new WorkspaceService();
+    }
 
     public resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext, token: vscode.CancellationToken) {
         webviewView.webview.options = {
@@ -16,6 +20,14 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
         };
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+
+        webviewView.webview.onDidReceiveMessage(async message => {
+            switch (message.command) {
+                case 'updateConfig':
+                    await this.workspaceService.updateHardhatConfig(message.settings);
+                    break;
+            }
+        });
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
