@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Account, Aptos, AptosConfig, Network, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
-import NavigateTitle from "../../components/Header";
 import InputWallet from "../../components/InputWallet";
 import ButtonAccount from "../../components/ButtonAccount";
 
@@ -60,9 +59,6 @@ const YourAddress = () => {
     const location = useLocation();
     const page = location.state?.page;
     const navigate = useNavigate();
-    const handleNavigate = () => {
-        navigate(`/${page}`);
-    };
 
     return (
         <div className="h-[calc(100vh-64px)] flex flex-col">
@@ -77,7 +73,6 @@ const YourAddress = () => {
                         <InputWallet label="Public Key" value={publicKey} />
                         <div className="mt-5">
                             <ButtonAccount handleClick={createAccount} span="Create account" />
-                            <ButtonAccount handleClick={handleNavigate} span="Account already exist" />
                         </div>
                     </div>
                 </div>
