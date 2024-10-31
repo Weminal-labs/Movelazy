@@ -16,11 +16,20 @@ export const AptosNavbar = () => {
 
       <ul className="flex gap-4">
         <li>
-          <Link to="/aptos/move" className="text-white hover:text-white/80">
-            Move
-          </Link>
+          <Link to="/aptos/compiler" className="text-white hover:text-white/80">
+              Compiler
+            </Link>
+          </li>
+          <li>
+            <Link to="/aptos/tester" className="text-white hover:text-white/80">
+              Tester
+            </Link>
+          </li>
+          <li>
+            <Link to="/aptos/deployer" className="text-white hover:text-white/80">
+              Deployer
+            </Link>
         </li>
-        {/* Thêm các links khác cho Aptos */}
       </ul>
     </nav>
   )
