@@ -69,8 +69,9 @@
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "ethers": "^5.7.2",
-    "hardhat": "^2.22.15",
     "glob": "^11.0.0",
-    "lru-cache": "^11.0.1"
+    "hardhat": "^2.22.15",
+    "lru-cache": "^11.0.1",
+    "movelazy": "file:"
   }
 }
