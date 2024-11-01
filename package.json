@@ -11,9 +11,6 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onView:MovelazyView"
-  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
