@@ -35,10 +35,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             vscode.Uri.joinPath(this._context.extensionUri, 'webview', 'build', 'assets', 'index.js')
         );
         const styleUri = webview.asWebviewUri(
-            vscode.Uri.joinPath(this._context.extensionUri, 'webview', 'build', 'assets', 'index.css')
-        );
-        const logoUri = webview.asWebviewUri(
-            vscode.Uri.joinPath(this._context.extensionUri, 'webview', 'build', 'assets', 'logo.svg')
+            vscode.Uri.joinPath(this._context.extensionUri, 'webview', 'build', 'assets', 'style.css')
         );
 
         return `
@@ -47,14 +44,14 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; script-src ${webview.cspSource}; style-src ${webview.cspSource};">
+                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https:; script-src ${webview.cspSource} 'unsafe-inline'; style-src ${webview.cspSource} 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
                 <title>MoveLazy</title>
                 <link href="${styleUri}" rel="stylesheet">
+                <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
             </head>
             <body>
-                <img src="${logoUri}" alt="MoveLazy Logo" />
                 <div id="root"></div>
-                <script src="${scriptUri}"></script>
+                <script type="module" src="${scriptUri}"></script>
             </body>
             </html>`;
     }

@@ -12,12 +12,12 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.registerWebviewViewProvider(MovelazyViewProvider.viewType, provider)
 	);
 
-	context.subscriptions.push(
+	/* context.subscriptions.push(
 		vscode.commands.registerCommand('movelazy.openWebview', () => {
 			// Tạo một WebviewPanel
 			const panel = vscode.window.createWebviewPanel(
-				'solidity',
-				'Solidity IDE',
+				'Movelazy',
+				'Movelazy',
 				vscode.ViewColumn.One,
 				{
 					enableScripts: true, // Cho phép script nếu cần
@@ -37,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			);
 		})
-	);
+	); */
 }
 
 export function deactivate() { }
