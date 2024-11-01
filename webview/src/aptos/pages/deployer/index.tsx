@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import axios from 'axios';
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import FileUpload from "../../components/FileUpload";
-import NavigateTitle from "../../components/Header";
 import InputWallet from "../../components/InputWallet";
 import DeployButton from '../../components/DeployButton';
 const Deployer = () => {
@@ -101,17 +100,14 @@ const Deployer = () => {
         }
     };
 
-    const navigate = useNavigate();
-    const handleNavigate = () => {
-        navigate(`/${page}`);
-    };
-
     return (
         <>
-            <div className="flex flex-wrap h-[300vh] grow overflow-y-scroll ">
-                <div className="absolute w-[640px] sidebar:w-[400px] h-[766px] top-[-178px] left-[25px]">
-                    <div className="flex flex-col w-full items-start gap-[20px] absolute top-[228px] left-0">
-                        <NavigateTitle handleNavigate={handleNavigate} iconType="aptos" title="Deploy Aptos" />
+           <div className="h-[calc(100vh-64px)] flex flex-col">
+                <div className="flex-1 overflow-auto bg-background-light">
+                   <div className="min-h-full w-full border border-border">
+                     <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
+                      </div>
                         <div className="flex flex-col gap-[24px] my-5 w-full ">
                             <div>
                                 <FileUpload file={file} setFile={setFile} page={page} setFileName={setFileName} />
