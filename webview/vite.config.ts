@@ -1,8 +1,9 @@
 import type { UserConfig } from 'vite'
 import react from "@vitejs/plugin-react"
+import svgr from 'vite-plugin-svgr';
 
 const config: UserConfig = {
-  plugins: [react()],
+  plugins: [react(), svgr()],
   build: {
     minify: 'esbuild',
     outDir: "build",
@@ -13,7 +14,11 @@ const config: UserConfig = {
         assetFileNames: `assets/[name].[ext]`,
       },
     },
+    sourcemap: true,
+    cssCodeSplit: false,
+    assetsInlineLimit: 0,
   },
+  base: './',
   server: {
     port: 3000,
     hmr: {
