@@ -6,24 +6,22 @@ const execAsync = promisify(exec);
 
 export class CompilerService {
     async compile(webview: vscode.Webview) {
-        try {
-            // Kiểm tra xem hardhat đã được cài đặt chưa
-            try {
-                await execAsync('npx hardhat --version', {
-                    cwd: vscode.workspace.workspaceFolders?.[0].uri.fsPath
-                });
-            } catch {
-                webview.postMessage({
-                    type: 'compileStatus',
-                    success: false,
-                    message: 'Hardhat is not installed. Please run: npm install --save-dev hardhat'
-                });
-                return;
-            }
-
-            const { stdout, stderr } = await execAsync('npx hardhat compile', {
-                cwd: vscode.workspace.workspaceFolders?.[0].uri.fsPath
+        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        if (!workspacePath) {
+            webview.postMessage({
+                type: 'compileStatus',
+                success: false,
+                message: 'No workspace folder found.'
             });
+            return;
+        }
+
+        try {
+            // Check if Hardhat is installed
+            await execAsync('npx hardhat --version', { cwd: workspacePath });
+
+            // Compile contracts
+            const { stdout, stderr } = await execAsync('npx hardhat compile', { cwd: workspacePath });
 
             if (stderr && !stderr.includes('Compiled')) {
                 webview.postMessage({
