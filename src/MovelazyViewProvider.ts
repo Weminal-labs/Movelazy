@@ -1,19 +1,20 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { WorkspaceService } from './services/workspace';
-import { CompilerService } from './services/compiler';
+import { SolidityService } from './services/solidity';
+import { AptosService } from './services/aptos';
+
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
     public static readonly viewType = 'MovelazyView';
-    private readonly workspaceService: WorkspaceService;
-    private readonly compilerService: CompilerService;
+    private readonly solidityService: SolidityService;
+    private readonly aptosService: AptosService;
 
     constructor(
         private readonly context: vscode.ExtensionContext
     ) {
-        this.workspaceService = new WorkspaceService(this.context);
-        this.compilerService = new CompilerService();
+        this.solidityService = new SolidityService(context);
+        this.aptosService = new AptosService(context);
     }
 
     public resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext, token: vscode.CancellationToken) {
@@ -29,19 +30,18 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage(async message => {
             try {
                 switch (message.command) {
+                    case 'solidity.compile':
+                        await this.solidityService.compile(webviewView.webview);
+                        break;
                     case 'getSettings':
-                        const settings = this.workspaceService.getSettings();
+                        const settings = this.solidityService.getSettings();
                         webviewView.webview.postMessage({
                             type: 'settings',
                             settings
                         });
                         break;
                     case 'updateConfig':
-                        await this.workspaceService.updateHardhatConfig(message.settings);
-                        await this.workspaceService.saveSettings(message.settings);
-                        break;
-                    case 'compile':
-                        await this.compilerService.compile(webviewView.webview);
+                        await this.solidityService.updateConfig(message.settings);
                         break;
                     case 'initWorkspace':
                         webviewView.webview.postMessage({
@@ -49,7 +49,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                             loading: true
                         });
                         try {
-                            await this.workspaceService.initializeWorkspace();
+                            await this.solidityService.initWorkspace();
                             webviewView.webview.postMessage({
                                 type: 'workspaceStatus',
                                 initialized: true,
@@ -66,8 +66,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                 }
             } catch (error) {
                 webviewView.webview.postMessage({
-                    type: 'compileStatus',
-                    success: false,
+                    type: 'error',
                     message: (error as Error).message
                 });
             }

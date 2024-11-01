@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { execAsync } from '../utils/execAsync';
+import { execAsync } from '../../utils/execAsync';
 
 export class WorkspaceService {
     private readonly stateKey = 'compiler.settings';
-    
-    constructor(private context: vscode.ExtensionContext) {}
+
+    constructor(private context: vscode.ExtensionContext) { }
 
     private getWorkspacePath(): string {
         const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -40,21 +40,23 @@ export class WorkspaceService {
 
     public async initializeWorkspace() {
         const workspacePath = this.getWorkspacePath();
-        
+
         try {
             // Check if npm is installed
             await execAsync('npm --version');
-            
+
             // Initialize npm if needed
             if (!fs.existsSync(path.join(workspacePath, 'package.json'))) {
                 await execAsync('npm init -y', { cwd: workspacePath });
             }
-            
-            // Install dependencies
-            await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox', {
-                cwd: workspacePath
-            });
-            
+
+            // Install Hardhat if not installed
+            if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'))) {
+                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox', {
+                    cwd: workspacePath
+                });
+            }
+
             return true;
         } catch (error) {
             throw new Error(`Failed to initialize workspace: ${(error as Error).message}`);
@@ -109,7 +111,7 @@ export default config;
     public async getContractFiles(): Promise<string[]> {
         const workspacePath = this.getWorkspacePath();
         const contractsPath = path.join(workspacePath, 'contracts');
-        
+
         if (!fs.existsSync(contractsPath)) {
             return [];
         }
