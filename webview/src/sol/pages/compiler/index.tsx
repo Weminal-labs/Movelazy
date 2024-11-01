@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BasicSettings } from './components/BasicSettings'
 import { OptimizerSettings } from './components/OptimizerSettings'
 import { AdvancedSettings } from './components/AdvancedSettings'
@@ -24,9 +24,34 @@ const CompilerPage = () => {
         debug: {
             debugInfo: ['location', 'snippet']
         }
-    })
+    });
+
+    const [compiling, setCompiling] = useState(false);
+    const [compileStatus, setCompileStatus] = useState<{
+        type: 'success' | 'error' | null;
+        message: string;
+    }>({ type: null, message: '' });
+
+    useEffect(() => {
+        // Lắng nghe message từ extension
+        window.addEventListener('message', event => {
+            const message = event.data;
+            switch (message.type) {
+                case 'compileStatus':
+                    setCompiling(false);
+                    setCompileStatus({
+                        type: message.success ? 'success' : 'error',
+                        message: message.message
+                    });
+                    break;
+            }
+        });
+    }, []);
 
     const handleCompile = async () => {
+        setCompiling(true);
+        setCompileStatus({ type: null, message: '' });
+        
         vscode.postMessage({
             command: 'updateConfig',
             settings: settings
@@ -43,12 +68,24 @@ const CompilerPage = () => {
                 <div className="p-8">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
-                        <button 
-                            onClick={handleCompile}
-                            className="px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors"
-                        >
-                            Compile
-                        </button>
+                        <div className="flex items-center gap-4">
+                            {compileStatus.type && (
+                                <span className={`text-sm ${
+                                    compileStatus.type === 'success' ? 'text-green-500' : 'text-red-500'
+                                }`}>
+                                    {compileStatus.message}
+                                </span>
+                            )}
+                            <button 
+                                onClick={handleCompile}
+                                disabled={compiling}
+                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${
+                                    compiling ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                            >
+                                {compiling ? 'Compiling...' : 'Compile'}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="space-y-6">

@@ -1,75 +1,37 @@
 import * as vscode from 'vscode';
-import { glob } from 'glob';
-import { readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
-
-interface CompilerSettings {
-  version: string;
-  evmVersion: string;
-  optimizer: {
-    enabled: boolean;
-    runs: number;
-  };
-  metadata: {
-    bytecodeHash: string;
-  };
-  viaIR: boolean;
-  debug: {
-    debugInfo: string[];
-  };
-}
+import * as fs from 'fs';
+import * as path from 'path';
+import { execAsync } from '../utils/execAsync';
 
 export class WorkspaceService {
-  private workspacePath: string;
-
-  constructor() {
-    if (vscode.workspace.workspaceFolders?.[0]) {
-      this.workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    } else {
-      throw new Error('No workspace folder found');
+    private getWorkspacePath(): string {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders) {
+            throw new Error('No workspace folder found');
+        }
+        return workspaceFolders[0].uri.fsPath;
     }
-  }
 
-  async fileExists(path: string): Promise<boolean> {
-    try {
-      await readFile(path);
-      return true;
-    } catch {
-      return false;
-    }
-  }
+    public async updateHardhatConfig(settings: any) {
+        const workspacePath = this.getWorkspacePath();
+        const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
 
-  async createDefaultConfig(): Promise<void> {
-    const configContent = `
+        // Nếu file không tồn tại, tạo mới
+        if (!fs.existsSync(hardhatConfigPath)) {
+            // Kiểm tra và cài đặt hardhat nếu cần
+            try {
+                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox', {
+                    cwd: workspacePath
+                });
+            } catch (error) {
+                throw new Error('Failed to install Hardhat. Please check your npm installation.');
+            }
+        }
+
+        // Tạo nội dung config mới
+        const configContent = `
 import { HardhatUserConfig } from "hardhat/config";
-import "@nomiclabs/hardhat-ethers";
-
-const config: HardhatUserConfig = {
-  solidity: "0.8.20",
-  networks: {
-    hardhat: {
-      chainId: 31337
-    }
-  }
-};
-
-export default config;`;
-
-    await writeFile(
-      join(this.workspacePath, 'hardhat.config.ts'),
-      configContent
-    );
-  }
-
-  async getContracts(): Promise<string[]> {
-    const pattern = join(this.workspacePath, 'contracts/**/*.sol');
-    return glob(pattern);
-  }
-
-  async updateHardhatConfig(settings: CompilerSettings): Promise<void> {
-    const configContent = `
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomiclabs/hardhat-ethers";
+import "@nomicfoundation/hardhat-toolbox";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -80,27 +42,30 @@ const config: HardhatUserConfig = {
         runs: ${settings.optimizer.runs}
       },
       evmVersion: "${settings.evmVersion}",
+      viaIR: ${settings.viaIR},
       metadata: {
         bytecodeHash: "${settings.metadata.bytecodeHash}"
-      },
-      viaIR: ${settings.viaIR},
-      debug: {
-        debugInfo: ${JSON.stringify(settings.debug.debugInfo)}
       }
-    }
-  },
-  networks: {
-    hardhat: {
-      chainId: 31337
     }
   }
 };
 
-export default config;`;
+export default config;
+        `;
 
-    await writeFile(
-      join(this.workspacePath, 'hardhat.config.ts'),
-      configContent
-    );
-  }
+        // Ghi file
+        await fs.promises.writeFile(hardhatConfigPath, configContent);
+    }
+
+    public async getContractFiles(): Promise<string[]> {
+        const workspacePath = this.getWorkspacePath();
+        const contractsPath = path.join(workspacePath, 'contracts');
+        
+        if (!fs.existsSync(contractsPath)) {
+            return [];
+        }
+
+        const files = await fs.promises.readdir(contractsPath);
+        return files.filter(file => file.endsWith('.sol'));
+    }
 }
