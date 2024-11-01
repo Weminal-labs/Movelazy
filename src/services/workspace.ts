@@ -4,12 +4,61 @@ import * as path from 'path';
 import { execAsync } from '../utils/execAsync';
 
 export class WorkspaceService {
+    private readonly stateKey = 'compiler.settings';
+    
+    constructor(private context: vscode.ExtensionContext) {}
+
     private getWorkspacePath(): string {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) {
             throw new Error('No workspace folder found');
         }
         return workspaceFolders[0].uri.fsPath;
+    }
+
+    public async saveSettings(settings: any) {
+        await this.context.workspaceState.update(this.stateKey, settings);
+    }
+
+    public getSettings(): any {
+        return this.context.workspaceState.get(this.stateKey) || {
+            version: '0.8.20',
+            evmVersion: 'london',
+            optimizer: {
+                enabled: false,
+                runs: 200
+            },
+            metadata: {
+                bytecodeHash: 'ipfs'
+            },
+            viaIR: false,
+            debug: {
+                debugInfo: ['location', 'snippet']
+            }
+        };
+    }
+
+    public async initializeWorkspace() {
+        const workspacePath = this.getWorkspacePath();
+        
+        try {
+            // Check if npm is installed
+            await execAsync('npm --version');
+            
+            // Initialize npm if needed
+            if (!fs.existsSync(path.join(workspacePath, 'package.json'))) {
+                await execAsync('npm init -y', { cwd: workspacePath });
+            }
+            
+            // Install dependencies
+            await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox', {
+                cwd: workspacePath
+            });
+            
+            return true;
+        } catch (error) {
+            throw new Error(`Failed to initialize workspace: ${(error as Error).message}`);
+        }
     }
 
     public async updateHardhatConfig(settings: any) {

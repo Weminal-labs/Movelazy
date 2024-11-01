@@ -6,11 +6,13 @@ import { CompilerService } from './services/compiler';
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
     public static readonly viewType = 'MovelazyView';
-    private workspaceService: WorkspaceService;
-    private compilerService: CompilerService;
+    private readonly workspaceService: WorkspaceService;
+    private readonly compilerService: CompilerService;
 
-    constructor(private readonly _context: vscode.ExtensionContext) {
-        this.workspaceService = new WorkspaceService();
+    constructor(
+        private readonly context: vscode.ExtensionContext
+    ) {
+        this.workspaceService = new WorkspaceService(this.context);
         this.compilerService = new CompilerService();
     }
 
@@ -18,7 +20,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [
-                vscode.Uri.joinPath(this._context.extensionUri, 'webview', 'build')
+                vscode.Uri.joinPath(this.context.extensionUri, 'webview', 'build')
             ]
         };
 
@@ -27,11 +29,39 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage(async message => {
             try {
                 switch (message.command) {
+                    case 'getSettings':
+                        const settings = this.workspaceService.getSettings();
+                        webviewView.webview.postMessage({
+                            type: 'settings',
+                            settings
+                        });
+                        break;
                     case 'updateConfig':
                         await this.workspaceService.updateHardhatConfig(message.settings);
+                        await this.workspaceService.saveSettings(message.settings);
                         break;
                     case 'compile':
                         await this.compilerService.compile(webviewView.webview);
+                        break;
+                    case 'initWorkspace':
+                        webviewView.webview.postMessage({
+                            type: 'workspaceStatus',
+                            loading: true
+                        });
+                        try {
+                            await this.workspaceService.initializeWorkspace();
+                            webviewView.webview.postMessage({
+                                type: 'workspaceStatus',
+                                initialized: true,
+                                loading: false
+                            });
+                        } catch (error) {
+                            webviewView.webview.postMessage({
+                                type: 'workspaceStatus',
+                                error: (error as Error).message,
+                                loading: false
+                            });
+                        }
                         break;
                 }
             } catch (error) {
@@ -46,10 +76,10 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
     private _getHtmlForWebview(webview: vscode.Webview) {
         const scriptUri = webview.asWebviewUri(
-            vscode.Uri.joinPath(this._context.extensionUri, 'webview', 'build', 'assets', 'index.js')
+            vscode.Uri.joinPath(this.context.extensionUri, 'webview', 'build', 'assets', 'index.js')
         );
         const styleUri = webview.asWebviewUri(
-            vscode.Uri.joinPath(this._context.extensionUri, 'webview', 'build', 'assets', 'style.css')
+            vscode.Uri.joinPath(this.context.extensionUri, 'webview', 'build', 'assets', 'style.css')
         );
 
         return `
