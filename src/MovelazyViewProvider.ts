@@ -31,19 +31,20 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             try {
                 switch (message.command) {
                     case 'solidity.compile':
+                        await this.solidityService.updateConfig(message.settings);
                         await this.solidityService.compile(webviewView.webview);
                         break;
-                    case 'getSettings':
+                    case 'solidity.getSettings':
                         const settings = this.solidityService.getSettings();
                         webviewView.webview.postMessage({
                             type: 'settings',
                             settings
                         });
                         break;
-                    case 'updateConfig':
+                    case 'solidity.updateConfig':
                         await this.solidityService.updateConfig(message.settings);
                         break;
-                    case 'initWorkspace':
+                    case 'solidity.initWorkspace':
                         webviewView.webview.postMessage({
                             type: 'workspaceStatus',
                             loading: true
@@ -94,6 +95,17 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             </head>
             <body>
                 <div id="root"></div>
+                <script>
+                    (function() {
+                        try {
+                            const vscode = acquireVsCodeApi();
+                            window.vscode = vscode;
+                            console.log('VSCode API initialized successfully');
+                        } catch (error) {
+                            console.error('Failed to initialize VSCode API:', error);
+                        }
+                    })();
+                </script>
                 <script type="module" src="${scriptUri}"></script>
             </body>
             </html>`;

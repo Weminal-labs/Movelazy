@@ -1,19 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BasicSettings } from './components/BasicSettings'
 import { OptimizerSettings } from './components/OptimizerSettings'
 import { AdvancedSettings } from './components/AdvancedSettings'
 import { DebugSettings } from './components/DebugSettings'
 import { CompilerSettings } from './types/settings'
-import { VSCodeApi } from './types/messages'
+import { VSCodeApi } from './types/vscode';
 
-// Declare vscode API
 declare global {
     interface Window {
-        vscode?: VSCodeApi;
+        vscode: VSCodeApi;
     }
 }
-
-const vscode = window.vscode;
 
 const CompilerPage = () => {
     const [settings, setSettings] = useState<CompilerSettings>({
@@ -38,146 +35,44 @@ const CompilerPage = () => {
         message: string;
     }>({ type: null, message: '' });
 
-    const [workspaceStatus, setWorkspaceStatus] = useState<{
-        initialized: boolean;
-        loading: boolean;
-        error: string | null;
-    }>({
-        initialized: false,
-        loading: false,
-        error: null
-    });
-
-    // Load saved settings from workspace
-    useEffect(() => {
-        if (!vscode) {
-            setWorkspaceStatus({
-                initialized: false,
-                loading: false,
-                error: 'VSCode API not available'
-            });
-            return;
-        }
-
-        vscode.postMessage({
-            command: 'getSettings'
-        });
-
-        window.addEventListener('message', event => {
-            const message = event.data;
-            switch (message.type) {
-                case 'settings':
-                    setSettings(message.settings);
-                    break;
-                case 'workspaceStatus':
-                    setWorkspaceStatus({
-                        initialized: message.initialized,
-                        loading: message.loading,
-                        error: message.error
-                    });
-                    break;
-            }
-        });
-    }, []);
-
-    useEffect(() => {
-        if (!vscode) {
-            setCompileStatus({
-                type: 'error',
-                message: 'VSCode API not available'
-            });
-            return;
-        }
-
-        // Lắng nghe message từ extension
-        window.addEventListener('message', event => {
-            const message = event.data;
-            switch (message.type) {
-                case 'compileStatus':
-                    setCompiling(false);
-                    setCompileStatus({
-                        type: message.success ? 'success' : 'error',
-                        message: message.message
-                    });
-                    break;
-            }
-        });
-    }, []);
-
     const handleCompile = async () => {
-        if (!vscode) {
-            setCompileStatus({
-                type: 'error',
-                message: 'VSCode API not available'
-            });
-            return;
-        }
+        console.log('Compile button clicked');
+        console.log('window object:', window);
+        console.log('vscode object:', window.vscode);
+        console.log('settings:', settings);
 
-        setCompiling(true);
-        setCompileStatus({ type: null, message: '' });
-        
-        vscode.postMessage({
-            command: 'updateConfig',
-            settings: settings
-        });
-        
-        vscode.postMessage({
-            command: 'compile'
-        });
+        try {
+            window.vscode.postMessage({
+                command: 'solidity.compile',
+                settings: settings
+            });
+            console.log('Message posted successfully');
+        } catch (error) {
+            console.error('Error posting message:', error);
+        }
     };
 
     return (
         <div className="flex items-center justify-center w-full h-[calc(100vh-64px)]">
             <div className="w-full h-full bg-background-light border border-border">
                 <div className="p-8">
-                    {workspaceStatus.loading ? (
-                        <div className="flex flex-col items-center justify-center h-full">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-                            <p className="mt-4 text-text-muted">Initializing workspace...</p>
-                        </div>
-                    ) : workspaceStatus.error ? (
-                        <div className="text-center text-red-500">
-                            <p>{workspaceStatus.error}</p>
-                            <button 
-                                onClick={() => {
-                                    if (vscode) {
-                                        vscode.postMessage({ command: 'initWorkspace' });
-                                    } else {
-                                        setWorkspaceStatus({
-                                            initialized: false,
-                                            loading: false,
-                                            error: 'VSCode API not available'
-                                        });
-                                    }
-                                }}
-                                className="mt-4 px-4 py-2 bg-primary text-white rounded"
+                    <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
+                        <div className="flex items-center gap-4">
+                            {compileStatus.type && (
+                                <span className={`text-sm ${compileStatus.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
+                                    {compileStatus.message}
+                                </span>
+                            )}
+                            <button
+                                onClick={handleCompile}
+                                disabled={compiling}
+                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${compiling ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                Retry
+                                {compiling ? 'Compiling...' : 'Compile'}
                             </button>
                         </div>
-                    ) : (
-                        <div className="flex justify-between items-center mb-8">
-                            <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
-                            <div className="flex items-center gap-4">
-                                {compileStatus.type && (
-                                    <span className={`text-sm ${
-                                        compileStatus.type === 'success' ? 'text-green-500' : 'text-red-500'
-                                    }`}>
-                                        {compileStatus.message}
-                                    </span>
-                                )}
-                                <button 
-                                    onClick={handleCompile}
-                                    disabled={compiling}
-                                    className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${
-                                        compiling ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
-                                >
-                                    {compiling ? 'Compiling...' : 'Compile'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    </div>
 
                     <div className="space-y-6">
                         <BasicSettings
@@ -185,36 +80,28 @@ const CompilerPage = () => {
                             evmVersion={settings.evmVersion}
                             onChange={(key, value) => setSettings({ ...settings, [key]: value })}
                         />
-
                         <OptimizerSettings
                             enabled={settings.optimizer.enabled}
                             runs={settings.optimizer.runs}
                             onChange={(enabled, runs) => setSettings({
                                 ...settings,
-                                optimizer: {
-                                    enabled,
-                                    runs: runs || settings.optimizer.runs
-                                }
+                                optimizer: { enabled, runs: runs || settings.optimizer.runs }
                             })}
                         />
-
                         <AdvancedSettings
                             bytecodeHash={settings.metadata.bytecodeHash}
                             viaIR={settings.viaIR}
                             onChange={(key, value) => {
-                                if (key === 'bytecodeHash') {
-                                    if (typeof value === 'string') {
-                                        setSettings({
-                                            ...settings,
-                                            metadata: { ...settings.metadata, bytecodeHash: value }
-                                        })
-                                    }
+                                if (key === 'bytecodeHash' && typeof value === 'string') {
+                                    setSettings({
+                                        ...settings,
+                                        metadata: { ...settings.metadata, bytecodeHash: value }
+                                    })
                                 } else {
                                     setSettings({ ...settings, [key]: value })
                                 }
                             }}
                         />
-
                         <DebugSettings
                             debugInfo={settings.debug.debugInfo}
                             onChange={(debugInfo) => setSettings({
