@@ -35,6 +35,8 @@ const CompilerPage = () => {
         message: string;
     }>({ type: null, message: '' });
 
+    const [cleaning, setCleaning] = useState(false);
+
     useEffect(() => {
         const messageHandler = (event: MessageEvent) => {
             const message = event.data;
@@ -45,8 +47,16 @@ const CompilerPage = () => {
                     type: message.success ? 'success' : 'error',
                     message: message.message
                 });
+            } else if (message.type === 'cleanStatus') {
+                setCleaning(false);
+                setCompileStatus({
+                    type: message.success ? 'success' : 'error',
+                    message: message.message
+                });
+            }
 
-                // Clear status after 5 seconds
+            // Clear status after 5 seconds
+            if (message.type === 'compileStatus' || message.type === 'cleanStatus') {
                 setTimeout(() => {
                     setCompileStatus({ type: null, message: '' });
                 }, 5000);
@@ -75,25 +85,59 @@ const CompilerPage = () => {
         }
     };
 
+    const handleClean = async () => {
+        setCleaning(true);
+        setCompileStatus({ type: null, message: '' });
+
+        try {
+            window.vscode.postMessage({
+                command: 'solidity.clean'
+            });
+        } catch {
+            setCleaning(false);
+            setCompileStatus({
+                type: 'error',
+                message: 'Failed to clean artifacts'
+            });
+        }
+    };
+
     return (
         <div className="flex flex-col w-full h-[calc(100vh-64px)]">
             <div className="flex-1 bg-background-light border border-border overflow-y-auto">
                 <div className="p-8">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
-                        <button
-                            onClick={handleCompile}
-                            disabled={compiling}
-                            className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${compiling ? 'opacity-50 cursor-not-allowed' : ''
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handleClean}
+                                disabled={cleaning || compiling}
+                                className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${
+                                    (cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
-                        >
-                            {compiling ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    Compiling...
-                                </div>
-                            ) : 'Compile'}
-                        </button>
+                            >
+                                {cleaning ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Cleaning...
+                                    </div>
+                                ) : 'Clean'}
+                            </button>
+                            <button
+                                onClick={handleCompile}
+                                disabled={cleaning || compiling}
+                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${
+                                    (cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                            >
+                                {compiling ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Compiling...
+                                    </div>
+                                ) : 'Compile'}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="space-y-6">

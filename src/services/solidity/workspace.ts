@@ -62,19 +62,50 @@ export class WorkspaceService {
             if (!fs.existsSync(tsconfigPath)) {
                 const tsconfigContent = {
                     compilerOptions: {
+                        module: "NodeNext",
+                        moduleResolution: "NodeNext",
                         target: "es2020",
-                        module: "commonjs",
-                        moduleResolution: "node",
-                        esModuleInterop: true,
-                        forceConsistentCasingInFileNames: true,
+                        outDir: "dist",
+                        rootDir: "./",
                         strict: true,
-                        skipLibCheck: true
+                        esModuleInterop: true,
+                        forceConsistentCasingInFileNames: true
                     }
                 };
                 await fs.promises.writeFile(
                     tsconfigPath, 
                     JSON.stringify(tsconfigContent, null, 2)
                 );
+            }
+
+            // Create hardhat.config.ts with default settings
+            const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
+            if (!fs.existsSync(hardhatConfigPath)) {
+                const defaultSettings = this.getSettings();
+                const configContent = `
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
+
+const config: HardhatUserConfig = {
+  solidity: {
+    version: "${defaultSettings.version}",
+    settings: {
+      optimizer: {
+        enabled: ${defaultSettings.optimizer.enabled},
+        runs: ${defaultSettings.optimizer.runs}
+      },
+      evmVersion: "${defaultSettings.evmVersion}",
+      viaIR: ${defaultSettings.viaIR},
+      metadata: {
+        bytecodeHash: "${defaultSettings.metadata.bytecodeHash}"
+      }
+    }
+  }
+};
+
+export default config;
+                `;
+                await fs.promises.writeFile(hardhatConfigPath, configContent);
             }
 
             // Create contracts directory if it doesn't exist

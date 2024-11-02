@@ -31,4 +31,8 @@ export class SolidityService {
     async checkWorkspace() {
         return this.workspace.isHardhatWorkspace();
     }
+
+    async clean(webview: vscode.Webview) {
+        return this.compiler.clean(webview);
+    }
 } 

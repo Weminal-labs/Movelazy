@@ -46,4 +46,43 @@ export class CompilerService {
             });
         }
     }
+
+    async clean(webview: vscode.Webview) {
+        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        if (!workspacePath) {
+            webview.postMessage({
+                type: 'cleanStatus',
+                success: false,
+                message: 'No workspace folder found.'
+            });
+            return;
+        }
+
+        try {
+            // Run hardhat clean
+            const { stdout, stderr } = await execAsync('npx hardhat clean', { cwd: workspacePath });
+
+            if (stderr) {
+                webview.postMessage({
+                    type: 'cleanStatus',
+                    success: false,
+                    message: stderr
+                });
+                return;
+            }
+
+            webview.postMessage({
+                type: 'cleanStatus',
+                success: true,
+                message: stdout || 'Cleaned successfully!'
+            });
+
+        } catch (error) {
+            webview.postMessage({
+                type: 'cleanStatus',
+                success: false,
+                message: (error as Error).message
+            });
+        }
+    }
 } 
