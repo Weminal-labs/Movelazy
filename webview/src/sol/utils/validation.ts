@@ -1,4 +1,4 @@
-import { CompilerSettings } from '../../../types/settings';
+import { CompilerSettings } from '../types/settings';
 
 export const validateSettings = (settings: CompilerSettings) => {
     const errors: Record<string, string> = {};

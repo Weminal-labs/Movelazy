@@ -1,4 +1,4 @@
-import { ConstructorParam } from "../../../types/constructor"
+import { ConstructorParam } from "../../types/constructor"
 
 interface ContractDeployerProps {
   selectedContract: string
