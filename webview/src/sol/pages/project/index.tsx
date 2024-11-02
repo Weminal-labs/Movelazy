@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../../../assets/logo.svg';
 
 interface WorkspaceStatus {
     loading: boolean;
@@ -77,7 +78,11 @@ const ProjectPage = () => {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white">
             <div className="max-w-2xl text-center">
-                <h1 className="text-3xl font-bold mb-6">Welcome to Solidity Development</h1>
+                <div className="flex flex-col items-center">
+                    <img src={logo} alt="Logo" className="w-32 h-32" />
+                    <h1 className="font-pacifico text-4xl text-white mt-4 mb-8">Movelazy</h1>
+                </div>
+                <h1 className="text-3xl font-bold mb-6">Movelazy Solidity tool</h1>
 
                 {status.error ? (
                     <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-6">
