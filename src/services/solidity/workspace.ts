@@ -52,9 +52,35 @@ export class WorkspaceService {
 
             // Install Hardhat if not installed
             if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'))) {
-                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox', {
+                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox typescript ts-node', {
                     cwd: workspacePath
                 });
+            }
+
+            // Create tsconfig.json if it doesn't exist
+            const tsconfigPath = path.join(workspacePath, 'tsconfig.json');
+            if (!fs.existsSync(tsconfigPath)) {
+                const tsconfigContent = {
+                    compilerOptions: {
+                        target: "es2020",
+                        module: "commonjs",
+                        moduleResolution: "node",
+                        esModuleInterop: true,
+                        forceConsistentCasingInFileNames: true,
+                        strict: true,
+                        skipLibCheck: true
+                    }
+                };
+                await fs.promises.writeFile(
+                    tsconfigPath, 
+                    JSON.stringify(tsconfigContent, null, 2)
+                );
+            }
+
+            // Create contracts directory if it doesn't exist
+            const contractsDir = path.join(workspacePath, 'contracts');
+            if (!fs.existsSync(contractsDir)) {
+                await fs.promises.mkdir(contractsDir);
             }
 
             return true;
