@@ -1,7 +1,7 @@
 import { CompilerSettings } from './settings';
 
 export type CompilerMessage = {
-    command: 'solidity.compile' | 'solidity.getSettings' | 'solidity.updateConfig' | 'solidity.initWorkspace' | 'solidity.checkWorkspace';
+    command: 'solidity.compile' | 'solidity.getSettings' | 'solidity.updateConfig' | 'solidity.initWorkspace' | 'solidity.checkWorkspace' | 'solidity.clean';
     settings?: CompilerSettings;
 };
 

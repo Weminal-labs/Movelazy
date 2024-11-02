@@ -72,6 +72,9 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                             loading: false
                         });
                         break;
+                    case 'solidity.clean':
+                        await this.solidityService.clean(webviewView.webview);
+                        break;
                 }
             } catch (error) {
                 webviewView.webview.postMessage({
