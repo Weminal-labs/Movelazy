@@ -31,7 +31,6 @@ const ProjectPage = () => {
         };
 
         window.addEventListener('message', messageHandler);
-        // Check if workspace is a Hardhat project
         window.vscode.postMessage({ command: 'solidity.checkWorkspace' });
 
         return () => window.removeEventListener('message', messageHandler);
@@ -41,10 +40,9 @@ const ProjectPage = () => {
         window.vscode.postMessage({ command: 'solidity.initWorkspace' });
     };
 
-    // If workspace is already initialized, show a different message
     if (status.initialized) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white">
+            <div className="h-[calc(100vh-48px)] flex items-center justify-center">
                 <div className="max-w-2xl text-center">
                     <h1 className="text-3xl font-bold mb-6">Hardhat Project Initialized</h1>
                     <p className="text-gray-400 mb-6">
@@ -61,10 +59,9 @@ const ProjectPage = () => {
         );
     }
 
-    // Rest of your existing loading and initialization UI...
     if (status.loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="h-[calc(100vh-48px)] flex items-center justify-center">
                 <div className="flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                     <p className="text-gray-400 mt-4">The initialization process speed base on your PC specs.</p>
@@ -76,13 +73,13 @@ const ProjectPage = () => {
     }
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white">
-            <div className="max-w-2xl text-center">
+        <div className="h-[calc(100vh-48px)] flex items-center justify-center">
+            <div className="max-w-2xl text-center px-4">
                 <div className="flex flex-col items-center">
-                    <img src={logo} alt="Logo" className="w-32 h-32" />
+                    <img src={logo} alt="Logo" className="w-24 h-24" />
                     <h1 className="font-pacifico text-4xl text-white mt-4 mb-8">Movelazy</h1>
                 </div>
-                <h1 className="text-3xl font-bold mb-6">Movelazy Solidity tool</h1>
+                <h1 className="text-3xl font-bold mb-6">Solidity</h1>
 
                 {status.error ? (
                     <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-6">
