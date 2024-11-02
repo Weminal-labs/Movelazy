@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { BasicSettings } from './components/BasicSettings'
-import { OptimizerSettings } from './components/OptimizerSettings'
-import { AdvancedSettings } from './components/AdvancedSettings'
-import { DebugSettings } from './components/DebugSettings'
+import { BasicSettings } from '../../components/compiler/BasicSettings'
+import { OptimizerSettings } from '../../components/compiler/OptimizerSettings'
+import { AdvancedSettings } from '../../components/compiler/AdvancedSettings'
+import { DebugSettings } from '../../components/compiler/DebugSettings'
 import { CompilerSettings } from '../../types/settings'
 import { VSCodeApi } from '../../types/vscode';
 
