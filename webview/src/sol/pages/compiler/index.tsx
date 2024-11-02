@@ -3,8 +3,8 @@ import { BasicSettings } from './components/BasicSettings'
 import { OptimizerSettings } from './components/OptimizerSettings'
 import { AdvancedSettings } from './components/AdvancedSettings'
 import { DebugSettings } from './components/DebugSettings'
-import { CompilerSettings } from './types/settings'
-import { VSCodeApi } from './types/vscode';
+import { CompilerSettings } from '../../types/settings'
+import { VSCodeApi } from '../../types/vscode';
 
 declare global {
     interface Window {

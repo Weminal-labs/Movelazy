@@ -27,4 +27,8 @@ export class SolidityService {
     getSettings() {
         return this.workspace.getSettings();
     }
+
+    async checkWorkspace() {
+        return this.workspace.isHardhatWorkspace();
+    }
 } 
