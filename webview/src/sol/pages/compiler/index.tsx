@@ -66,7 +66,7 @@ const CompilerPage = () => {
                 command: 'solidity.compile',
                 settings: settings
             });
-        } catch (error) {
+        } catch {
             setCompiling(false);
             setCompileStatus({
                 type: 'error',
