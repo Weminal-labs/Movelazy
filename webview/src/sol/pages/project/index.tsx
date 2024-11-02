@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../../../assets/logo.svg';
+import logo from '../../../assets/logo.svg';
 
 interface WorkspaceStatus {
     loading: boolean;
