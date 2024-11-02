@@ -15,7 +15,7 @@ import AptosPage from './aptos'
 import DeployerPageAptos from './aptos/pages/deployer'
 import YourAddress from './aptos/pages/YourAddress'
 import AccountBalance from './aptos/pages/AccountBalance'
-
+import ProjectPage from './sol/pages/project'
 
 // Router configuration
 const router = createMemoryRouter([
@@ -31,6 +31,10 @@ const router = createMemoryRouter([
         path: 'sol',
         element: <SolPage />,
         children: [
+          {
+            path: 'project',
+            element: <ProjectPage />
+          },
           {
             path: 'compiler',
             element: <CompilerPage />
