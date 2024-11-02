@@ -119,4 +119,42 @@ export default config;
         const files = await fs.promises.readdir(contractsPath);
         return files.filter(file => file.endsWith('.sol'));
     }
+
+    public async isHardhatWorkspace(): Promise<boolean> {
+        const workspacePath = this.getWorkspacePath();
+        
+        try {
+            // Check 1: npx hardhat --version
+            try {
+                await execAsync('npx hardhat --version', { cwd: workspacePath });
+            } catch {
+                return false;
+            }
+
+            // Check 2: hardhat.config.ts exists
+            const configExists = fs.existsSync(path.join(workspacePath, 'hardhat.config.ts'));
+            if (!configExists) {
+                return false;
+            }
+
+            // Check 3: node_modules/hardhat exists
+            const nodeModulesExists = fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'));
+            if (!nodeModulesExists) {
+                return false;
+            }
+
+            // Check 4: package.json has hardhat dependency
+            const packageJsonPath = path.join(workspacePath, 'package.json');
+            if (!fs.existsSync(packageJsonPath)) {
+                return false;
+            }
+
+            const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, 'utf8'));
+            const hasHardhatDep = !!(packageJson.dependencies?.hardhat || packageJson.devDependencies?.hardhat);
+            
+            return hasHardhatDep;
+        } catch {
+            return false;
+        }
+    }
 }

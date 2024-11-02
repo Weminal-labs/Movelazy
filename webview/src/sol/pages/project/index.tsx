@@ -12,25 +12,17 @@ const ProjectPage = () => {
   const [status, setStatus] = useState<WorkspaceStatus>({ loading: true });
 
   useEffect(() => {
-    const checkWorkspace = () => {
-      window.vscode.postMessage({ command: 'solidity.getSettings' });
-    };
-
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
       
       switch (message.type) {
-        case 'settings':
-          // If we got settings, workspace is initialized
-          navigate('/sol/compiler');
-          break;
         case 'workspaceStatus':
           setStatus({
             loading: message.loading,
             initialized: message.initialized,
             error: message.error
           });
-          if (message.initialized) {
+          if (message.initialized && !message.loading) {
             navigate('/sol/compiler');
           }
           break;
@@ -38,7 +30,8 @@ const ProjectPage = () => {
     };
 
     window.addEventListener('message', messageHandler);
-    checkWorkspace();
+    // Check if workspace is a Hardhat project
+    window.vscode.postMessage({ command: 'solidity.checkWorkspace' });
 
     return () => window.removeEventListener('message', messageHandler);
   }, [navigate]);
@@ -47,6 +40,27 @@ const ProjectPage = () => {
     window.vscode.postMessage({ command: 'solidity.initWorkspace' });
   };
 
+  // If workspace is already initialized, show a different message
+  if (status.initialized) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-8 text-white">
+        <div className="max-w-2xl text-center">
+          <h1 className="text-3xl font-bold mb-6">Hardhat Project Initialized</h1>
+          <p className="text-gray-400 mb-6">
+            Your workspace is already set up for Hardhat development.
+          </p>
+          <button
+            onClick={() => navigate('/sol/compiler')}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
+          >
+            Go to Compiler
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Rest of your existing loading and initialization UI...
   if (status.loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">

@@ -31,6 +31,10 @@ const router = createMemoryRouter([
         path: 'sol',
         element: <SolPage />,
         children: [
+/*           {
+            path: '',
+            element: <ProjectPage />
+          }, */
           {
             path: 'project',
             element: <ProjectPage />

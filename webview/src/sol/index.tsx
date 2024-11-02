@@ -1,7 +1,54 @@
-import { Outlet } from 'react-router-dom'
-import { SolNavbar } from './components/SolNavbar'
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { SolNavbar } from './components/SolNavbar';
+import { useState, useEffect } from 'react';
+
+interface WorkspaceStatus {
+  loading: boolean;
+  initialized?: boolean;
+  error?: string;
+}
 
 const SolPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [status, setStatus] = useState<WorkspaceStatus>({ loading: true });
+
+  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      const message = event.data;
+      
+      switch (message.type) {
+        case 'settings':
+          setStatus({
+            loading: false,
+            initialized: true
+          });
+          if (location.pathname === '/sol') {
+            navigate('/sol/project');
+          }
+          break;
+        case 'workspaceStatus':
+          setStatus({
+            loading: message.loading,
+            initialized: message.initialized,
+            error: message.error
+          });
+          break;
+      }
+    };
+
+    window.addEventListener('message', messageHandler);
+    window.vscode.postMessage({ command: 'solidity.getSettings' });
+
+    return () => window.removeEventListener('message', messageHandler);
+  }, [navigate, location]);
+
+  useEffect(() => {
+    if (!status.loading && !status.initialized && location.pathname === '/sol/compiler') {
+      navigate('/sol/project');
+    }
+  }, [status, navigate, location.pathname]);
+
   return (
     <div className="min-h-screen bg-[#0e0f0e]">
       <SolNavbar />
@@ -9,7 +56,7 @@ const SolPage = () => {
         <Outlet />
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default SolPage
+export default SolPage;

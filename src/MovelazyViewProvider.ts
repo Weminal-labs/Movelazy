@@ -64,6 +64,14 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                             });
                         }
                         break;
+                    case 'solidity.checkWorkspace':
+                        const isHardhatWorkspace = await this.solidityService.checkWorkspace();
+                        webviewView.webview.postMessage({
+                            type: 'workspaceStatus',
+                            initialized: isHardhatWorkspace,
+                            loading: false
+                        });
+                        break;
                 }
             } catch (error) {
                 webviewView.webview.postMessage({

@@ -16,6 +16,11 @@ export const SolNavbar = () => {
 
       <ul className="flex gap-4">
         <li>
+          <Link to="/sol/project" className="text-white hover:text-white/80">
+            Project
+          </Link>
+        </li>
+        <li>
           <Link to="/sol/compiler" className="text-white hover:text-white/80">
             Compile
           </Link>
