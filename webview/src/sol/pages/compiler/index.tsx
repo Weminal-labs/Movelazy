@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BasicSettings } from './components/BasicSettings'
 import { OptimizerSettings } from './components/OptimizerSettings'
 import { AdvancedSettings } from './components/AdvancedSettings'
@@ -35,43 +35,65 @@ const CompilerPage = () => {
         message: string;
     }>({ type: null, message: '' });
 
+    useEffect(() => {
+        const messageHandler = (event: MessageEvent) => {
+            const message = event.data;
+
+            if (message.type === 'compileStatus') {
+                setCompiling(false);
+                setCompileStatus({
+                    type: message.success ? 'success' : 'error',
+                    message: message.message
+                });
+
+                // Clear status after 5 seconds
+                setTimeout(() => {
+                    setCompileStatus({ type: null, message: '' });
+                }, 5000);
+            }
+        };
+
+        window.addEventListener('message', messageHandler);
+        return () => window.removeEventListener('message', messageHandler);
+    }, []);
+
     const handleCompile = async () => {
-        console.log('Compile button clicked');
-        console.log('window object:', window);
-        console.log('vscode object:', window.vscode);
-        console.log('settings:', settings);
+        setCompiling(true);
+        setCompileStatus({ type: null, message: '' });
 
         try {
             window.vscode.postMessage({
                 command: 'solidity.compile',
                 settings: settings
             });
-            console.log('Message posted successfully');
         } catch (error) {
-            console.error('Error posting message:', error);
+            setCompiling(false);
+            setCompileStatus({
+                type: 'error',
+                message: 'Failed to start compilation'
+            });
         }
     };
 
     return (
-        <div className="flex items-center justify-center w-full h-[calc(100vh-64px)]">
-            <div className="w-full h-full bg-background-light border border-border">
+        <div className="flex flex-col w-full h-[calc(100vh-64px)]">
+            <div className="flex-1 bg-background-light border border-border overflow-y-auto">
                 <div className="p-8">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
-                        <div className="flex items-center gap-4">
-                            {compileStatus.type && (
-                                <span className={`text-sm ${compileStatus.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
-                                    {compileStatus.message}
-                                </span>
-                            )}
-                            <button
-                                onClick={handleCompile}
-                                disabled={compiling}
-                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${compiling ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                {compiling ? 'Compiling...' : 'Compile'}
-                            </button>
-                        </div>
+                        <button
+                            onClick={handleCompile}
+                            disabled={compiling}
+                            className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${compiling ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                        >
+                            {compiling ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Compiling...
+                                </div>
+                            ) : 'Compile'}
+                        </button>
                     </div>
 
                     <div className="space-y-6">
@@ -112,8 +134,22 @@ const CompilerPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Compilation Status Bar */}
+            {compileStatus.type && (
+                <div
+                    className={`p-4 border-t border-border transition-all ${compileStatus.type === 'success'
+                            ? 'bg-green-500/5 text-green-500 border-green-500/20'
+                            : 'bg-red-500/5 text-red-500 border-red-500/20'
+                        }`}
+                >
+                    <pre className="font-mono text-sm whitespace-pre-wrap">
+                        {compileStatus.message}
+                    </pre>
+                </div>
+            )}
         </div>
-    )
-}
+    );
+};
 
 export default CompilerPage
