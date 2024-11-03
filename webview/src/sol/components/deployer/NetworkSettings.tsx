@@ -1,43 +1,50 @@
-import { NetworkConfig } from '../../types/settings';
+import { NetworkSettingsProps } from '../../types/network';
 
-interface NetworkSettingsProps {
-    networks: { [key: string]: NetworkConfig };
-    onChange: (networks: { [key: string]: NetworkConfig }) => void;
-}
-
-export const NetworkSettings = ({ networks, onChange }: NetworkSettingsProps) => {
-    const handleNetworkChange = (networkName: string, config: NetworkConfig) => {
-        onChange({
-            ...networks,
-            [networkName]: config
-        });
-    };
-
+export const NetworkSettings = ({ network, onChange }: NetworkSettingsProps) => {
     return (
-        <div className="bg-white rounded-lg p-6 shadow-sm">
+        <div className="p-4 bg-background rounded-lg border border-border">
             <h4 className="text-lg font-medium mb-4">Network Settings</h4>
             <div className="space-y-4">
-                {Object.entries(networks).map(([name, config]) => (
-                    <div key={name} className="space-y-2">
-                        <h5 className="font-medium">{name}</h5>
-                        <div className="grid grid-cols-2 gap-4">
-                            <input
-                                type="text"
-                                placeholder="RPC URL"
-                                value={config.url || ''}
-                                onChange={(e) => handleNetworkChange(name, { ...config, url: e.target.value })}
-                                className="border rounded p-2"
-                            />
-                            <input
-                                type="number"
-                                placeholder="Chain ID"
-                                value={config.chainId || ''}
-                                onChange={(e) => handleNetworkChange(name, { ...config, chainId: parseInt(e.target.value) })}
-                                className="border rounded p-2"
-                            />
-                        </div>
-                    </div>
-                ))}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Network Name</label>
+                    <input
+                        type="text"
+                        value={network.name}
+                        onChange={(e) => onChange({ ...network, name: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        placeholder="goerli"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">RPC URL</label>
+                    <input
+                        type="text"
+                        value={network.url}
+                        onChange={(e) => onChange({ ...network, url: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        placeholder="https://goerli.infura.io/v3/YOUR-PROJECT-ID"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Private Key</label>
+                    <input
+                        type="password"
+                        value={network.accounts[0] || ''}
+                        onChange={(e) => onChange({ ...network, accounts: [e.target.value] })}
+                        className="w-full p-2 border rounded"
+                        placeholder="Your wallet private key"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Chain ID</label>
+                    <input
+                        type="number"
+                        value={network.chainId}
+                        onChange={(e) => onChange({ ...network, chainId: parseInt(e.target.value) })}
+                        className="w-full p-2 border rounded"
+                        placeholder="5"
+                    />
+                </div>
             </div>
         </div>
     );
