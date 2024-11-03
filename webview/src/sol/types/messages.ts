@@ -1,7 +1,21 @@
 import { CompilerSettings } from './settings';
 
 export type CompilerMessage = {
-    command: 'solidity.compile' | 'solidity.getSettings' | 'solidity.updateConfig' | 'solidity.initWorkspace' | 'solidity.checkWorkspace' | 'solidity.clean' | 'solidity.getContractFiles';
+    command: 'solidity.compile'
+    | 'solidity.getSettings'
+    | 'solidity.updateConfig'
+    | 'solidity.initWorkspace'
+    | 'solidity.checkWorkspace'
+    | 'solidity.clean'
+    | 'solidity.getContractFiles'
+    | 'solidity.startLocalNode'
+    | 'solidity.stopLocalNode'
+    | 'solidity.deploy'
+    | 'solidity.getAccounts'
+    | 'solidity.setAccount'
+    | 'solidity.getAccountBalance'
+    | 'solidity.getAccountPrivateKey'
+    | 'solidity.getAccountNonce';
     settings?: CompilerSettings;
 };
 
