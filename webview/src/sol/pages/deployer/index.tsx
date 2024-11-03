@@ -98,8 +98,12 @@ const DeployerPage = () => {
         window.vscode.postMessage({
             command: 'solidity.deploy',
             settings: {
-                ...settings,
-                selectedAccount
+                environment: settings.environment,
+                network: settings.network,
+                gasLimit: settings.gasLimit,
+                value: settings.value,
+                selectedContract: settings.selectedContract,
+                constructorParams: settings.constructorParams.map(param => param.value)
             }
         });
     };
