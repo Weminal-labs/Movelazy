@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { EnvironmentSelector } from '../../components/deployer/EnvironmentSelector'
 import { AccountInfo } from '../../components/deployer/AccountInfo'
+import { NetworkConfig } from '../../components/deployer/NetworkConfig'
 import { GasSettings } from '../../components/deployer/GasSettings'
 import { ContractDeployer } from '../../components/deployer/ContractDeployer'
 import { DeployedContracts } from '../../components/deployer/DeployedContracts'
-import { AbiItem } from '../../types/abi'
-import { ConstructorParam } from '../../types/constructor'
 import { HardhatAccount } from '../../types/account'
 
 interface DeployerState {
@@ -14,18 +13,16 @@ interface DeployerState {
         rpcUrl: string
         privateKey: string
     }
-    account: string
-    balance: string
     gasLimit: number
     value: string
     selectedContract: string
-    constructorParams: ConstructorParam[]
-    deployedContracts: {
+    constructorParams: any[]
+    deployedContracts: Array<{
         address: string
-        abi: AbiItem[]
+        abi: any[]
         name: string
         network: string
-    }[]
+    }>
 }
 
 const DeployerPage = () => {
@@ -35,8 +32,6 @@ const DeployerPage = () => {
             rpcUrl: '',
             privateKey: ''
         },
-        account: '',
-        balance: '0',
         gasLimit: 3000000,
         value: '0',
         selectedContract: '',
@@ -47,31 +42,16 @@ const DeployerPage = () => {
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
     const [selectedAccount, setSelectedAccount] = useState<string>('');
     const [loading, setLoading] = useState(false);
-    const [contracts, setContracts] = useState<string[]>([]);
-
-    // Check if workspace is initialized
-    useEffect(() => {
-        window.vscode.postMessage({
-            command: 'solidity.checkWorkspace'
-        });
-    }, []);
-
-    // Get contract files when workspace is ready
-    useEffect(() => {
-        window.vscode.postMessage({
-            command: 'solidity.getContractFiles'
-        });
-    }, []);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
             const message = event.data;
-            console.log('DeployerPage received message:', message);
-            
             switch (message.type) {
                 case 'accounts':
-                    console.log('Setting accounts:', message.accounts);
                     setAccounts(message.accounts);
+                    break;
+                case 'deployStatus':
+                    setLoading(false);
                     break;
             }
         };
@@ -82,10 +62,49 @@ const DeployerPage = () => {
 
     useEffect(() => {
         if (settings.environment === 'local') {
-            console.log('Starting local node...');
-            window.vscode.postMessage({ command: 'solidity.startLocalNode' });
+            const storedAccounts = localStorage.getItem('hardhat_accounts');
+            if (!storedAccounts) {
+                window.vscode.postMessage({ command: 'solidity.startLocalNode' });
+            } else {
+                setAccounts(JSON.parse(storedAccounts));
+            }
+            // Clear network config when switching to local
+            setSettings(prev => ({
+                ...prev,
+                network: { rpcUrl: '', privateKey: '' }
+            }));
+        } else {
+            // Clear selected account when switching to testnet/mainnet
+            setSelectedAccount('');
         }
     }, [settings.environment]);
+
+    // Update deployment settings based on environment
+    useEffect(() => {
+        if (settings.environment === 'local' && selectedAccount) {
+            const account = accounts.find(acc => acc.address === selectedAccount);
+            if (account) {
+                setSettings(prev => ({
+                    ...prev,
+                    network: {
+                        rpcUrl: 'http://127.0.0.1:8545',
+                        privateKey: account.privateKey
+                    }
+                }));
+            }
+        }
+    }, [settings.environment, selectedAccount, accounts]);
+
+    const handleDeploy = () => {
+        setLoading(true);
+        window.vscode.postMessage({
+            command: 'solidity.deploy',
+            settings: {
+                ...settings,
+                selectedAccount
+            }
+        });
+    };
 
     return (
         <div className="h-[calc(100vh-64px)] flex flex-col">
@@ -103,16 +122,25 @@ const DeployerPage = () => {
                                 environment={settings.environment}
                                 onChange={(env) => setSettings({
                                     ...settings,
-                                    environment: env,
-                                    network: { rpcUrl: '', privateKey: '' }
+                                    environment: env
                                 })}
                             />
 
-                            <AccountInfo
-                                account={selectedAccount}
-                                accounts={accounts}
-                                onAccountChange={setSelectedAccount}
-                            />
+                            {settings.environment === 'local' ? (
+                                <AccountInfo
+                                    account={selectedAccount}
+                                    accounts={accounts}
+                                    onAccountChange={setSelectedAccount}
+                                />
+                            ) : (
+                                <NetworkConfig
+                                    network={settings.network}
+                                    onChange={(network) => setSettings({
+                                        ...settings,
+                                        network
+                                    })}
+                                />
+                            )}
 
                             <GasSettings
                                 gasLimit={settings.gasLimit}
@@ -123,7 +151,7 @@ const DeployerPage = () => {
                                 })}
                             />
 
-                            {/* <ContractDeployer
+                            <ContractDeployer
                                 selectedContract={settings.selectedContract}
                                 constructorParams={settings.constructorParams}
                                 onChange={(contract, params) => setSettings({
@@ -131,16 +159,9 @@ const DeployerPage = () => {
                                     selectedContract: contract,
                                     constructorParams: params
                                 })}
-                                onDeploy={() => {
-                                    window.vscode.postMessage({
-                                        command: 'solidity.deploy',
-                                        settings: settings
-                                    });
-                                }}
-                                disabled={loading ||
-                                    (settings.environment !== 'local' &&
-                                        (!settings.network.rpcUrl || !settings.network.privateKey))}
-                            /> */}
+                                onDeploy={handleDeploy}
+                                disabled={loading || !settings.network.privateKey || !settings.network.rpcUrl}
+                            />
 
                             <DeployedContracts
                                 contracts={settings.deployedContracts}
