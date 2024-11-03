@@ -8,8 +8,8 @@ interface EnvironmentSelectorProps {
 export const EnvironmentSelector = ({ environment, onChange }: EnvironmentSelectorProps) => {
     const environments = [
         { value: 'local', label: 'Hardhat Network (Local)', description: 'Deploy to local development network' },
-        { value: 'testnet', label: 'Test Network', description: 'Deploy to public test networks' },
-        { value: 'mainnet', label: 'Main Network', description: 'Deploy to production networks' }
+        { value: 'testnet', label: 'TestNet', description: 'Deploy to public test networks' },
+        { value: 'mainnet', label: 'MainNet', description: 'Deploy to production networks' }
     ] as const;
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
