@@ -6,9 +6,12 @@ interface AccountInfoProps {
     onAccountChange: (account: string) => void;
 }
 
+const shortenAddress = (address: string) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
 export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoProps) => {
-    console.log('AccountInfo render:', { account, accounts });
-    
     return (
         <div className="space-y-4">
             <div>
@@ -19,15 +22,17 @@ export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoP
                     <select
                         className="flex-1 bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
                         value={account}
-                        onChange={(e) => {
-                            console.log('Account selected:', e.target.value);
-                            onAccountChange(e.target.value);
-                        }}
+                        onChange={(e) => onAccountChange(e.target.value)}
+                        title={account}
                     >
                         <option value="">Select an account...</option>
                         {accounts.map((acc, index) => (
-                            <option key={acc.address} value={acc.address}>
-                                ({index}) {acc.address} ({acc.balance})
+                            <option 
+                                key={acc.address} 
+                                value={acc.address}
+                                title={`${acc.address} (${acc.balance})`}
+                            >
+                                ({index}) {shortenAddress(acc.address)} ({acc.balance})
                             </option>
                         ))}
                     </select>
@@ -40,7 +45,12 @@ export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoP
                         Balance
                     </label>
                     <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
-                        {accounts.find(acc => acc.address === account)?.balance || '0'}
+                        <div className="flex justify-between items-center">
+                            <span title={account} className="truncate">
+                                {shortenAddress(account)}
+                            </span>
+                            <span>{accounts.find(acc => acc.address === account)?.balance || '0'}</span>
+                        </div>
                     </div>
                 </div>
             )}

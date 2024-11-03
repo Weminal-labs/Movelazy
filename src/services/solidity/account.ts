@@ -5,6 +5,7 @@ import { WorkspaceService } from './workspace';
 interface HardhatAccount {
     address: string;
     balance: string;
+    privateKey: string;
 }
 
 export class AccountService {
@@ -31,26 +32,41 @@ export class AccountService {
                 shell: true 
             });
 
+            let buffer = '';
             this.hardhatNode.stdout?.on('data', (data: Buffer) => {
-                const output = data.toString();
-                console.log('Hardhat node output:', output);
+                buffer += data.toString();
+                console.log('Hardhat node output:', buffer);
                 
-                if (output.includes('Account #')) {
-                    const accounts: HardhatAccount[] = output.split('\n')
-                        .filter((line: string) => line.includes('Account #'))
-                        .map((line: string) => {
-                            console.log('Processing account line:', line);
-                            const [addressPart, balancePart] = line.split('(');
-                            const address = addressPart.split(':')[1].trim();
-                            const balance = balancePart.split(')')[0].trim();
-                            return { address, balance };
-                        });
+                if (buffer.includes('Account #') && buffer.includes('Private Key')) {
+                    const lines = buffer.split('\n');
+                    const accounts: HardhatAccount[] = [];
+                    
+                    for (let i = 0; i < lines.length; i++) {
+                        if (lines[i].includes('Account #')) {
+                            const addressLine = lines[i];
+                            const privateLine = lines[i + 1];
+                            
+                            if (addressLine && privateLine) {
+                                const [addressPart, balancePart] = addressLine.split('(');
+                                const address = addressPart.split(':')[1]?.trim() || '';
+                                const balance = balancePart?.split(')')[0]?.trim() || '';
+                                const privateKey = privateLine.split(':')[1]?.trim() || '';
+                                
+                                if (address && balance && privateKey) {
+                                    accounts.push({ address, balance, privateKey });
+                                }
+                            }
+                        }
+                    }
 
-                    console.log('Parsed accounts:', accounts);
-                    webview.postMessage({
-                        type: 'accounts',
-                        accounts
-                    });
+                    if (accounts.length > 0) {
+                        console.log('Parsed accounts:', accounts);
+                        webview.postMessage({
+                            type: 'accounts',
+                            accounts
+                        });
+                        buffer = ''; // Clear buffer after processing
+                    }
                 }
             });
 
