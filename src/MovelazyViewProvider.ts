@@ -75,6 +75,12 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                     case 'solidity.clean':
                         await this.solidityService.clean(webviewView.webview);
                         break;
+                    case 'solidity.startLocalNode':
+                        await this.solidityService.startLocalNode(webviewView.webview);
+                        break;
+                    case 'solidity.stopLocalNode':
+                        await this.solidityService.stopLocalNode();
+                        break;
                 }
             } catch (error) {
                 webviewView.webview.postMessage({
