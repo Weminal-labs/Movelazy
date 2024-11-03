@@ -1,4 +1,5 @@
 import { HardhatAccount } from '../../types/account';
+import { useEffect } from 'react';
 
 interface AccountInfoProps {
     account: string;
@@ -6,17 +7,31 @@ interface AccountInfoProps {
     onAccountChange: (account: string) => void;
 }
 
+const STORAGE_KEY = 'hardhat_accounts';
+
 const shortenAddress = (address: string) => {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 
 export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoProps) => {
+    useEffect(() => {
+        // If we receive new accounts from hardhat node, store them
+        if (accounts.length > 0) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+        }
+    }, [accounts]);
+
+    // Get accounts from storage if none provided
+    const displayAccounts = accounts.length > 0 
+        ? accounts 
+        : JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
     return (
         <div className="space-y-4">
             <div>
                 <label className="block text-text-muted text-sm mb-2">
-                    Account ({accounts.length} accounts available)
+                    Account ({displayAccounts.length} accounts available)
                 </label>
                 <div className="flex items-center gap-4">
                     <select
@@ -26,7 +41,7 @@ export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoP
                         title={account}
                     >
                         <option value="">Select an account...</option>
-                        {accounts.map((acc, index) => (
+                        {displayAccounts.map((acc: HardhatAccount, index: number) => (
                             <option 
                                 key={acc.address} 
                                 value={acc.address}
@@ -49,7 +64,7 @@ export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoP
                             <span title={account} className="truncate">
                                 {shortenAddress(account)}
                             </span>
-                            <span>{accounts.find(acc => acc.address === account)?.balance || '0'}</span>
+                            <span>{displayAccounts.find((acc: HardhatAccount) => acc.address === account)?.balance || '0'}</span>
                         </div>
                     </div>
                 </div>
