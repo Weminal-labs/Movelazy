@@ -40,7 +40,7 @@ export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoP
                         Balance
                     </label>
                     <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
-                        {accounts.find(acc => acc.address === account)?.balance || '0'} ETH
+                        {accounts.find(acc => acc.address === account)?.balance || '0'}
                     </div>
                 </div>
             )}
