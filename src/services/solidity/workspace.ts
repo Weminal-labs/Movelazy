@@ -8,17 +8,18 @@ export class WorkspaceService {
 
     constructor(private context: vscode.ExtensionContext) { }
 
-    private getWorkspacePath(): string {
+    public async saveSettings(settings: any) {
+        await this.context.workspaceState.update(this.stateKey, settings);
+    }
+
+    public getWorkspacePath(): string {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) {
             throw new Error('No workspace folder found');
         }
         return workspaceFolders[0].uri.fsPath;
     }
-
-    public async saveSettings(settings: any) {
-        await this.context.workspaceState.update(this.stateKey, settings);
-    }
+    
 
     public getSettings(): any {
         return this.context.workspaceState.get(this.stateKey) || {
