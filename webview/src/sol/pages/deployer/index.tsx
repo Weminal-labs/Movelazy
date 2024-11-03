@@ -1,32 +1,16 @@
-import { useState, useEffect } from 'react'
-import { EnvironmentSelector } from '../../components/deployer/EnvironmentSelector'
-import { AccountInfo } from '../../components/deployer/AccountInfo'
-import { NetworkConfig } from '../../components/deployer/NetworkConfig'
-import { GasSettings } from '../../components/deployer/GasSettings'
-import { ContractDeployer } from '../../components/deployer/ContractDeployer'
-import { DeployedContracts } from '../../components/deployer/DeployedContracts'
-import { HardhatAccount } from '../../types/account'
-
-interface DeployerState {
-    environment: 'local' | 'testnet' | 'mainnet'
-    network: {
-        rpcUrl: string
-        privateKey: string
-    }
-    gasLimit: number
-    value: string
-    selectedContract: string
-    constructorParams: any[]
-    deployedContracts: Array<{
-        address: string
-        abi: any[]
-        name: string
-        network: string
-    }>
-}
+import { useState, useEffect } from 'react';
+import { EnvironmentSelector } from '../../components/deployer/EnvironmentSelector';
+import { AccountInfo } from '../../components/deployer/AccountInfo';
+import { NetworkConfig } from '../../components/deployer/NetworkConfig';
+import { GasSettings } from '../../components/deployer/GasSettings';
+import { ContractDeployer } from '../../components/deployer/ContractDeployer';
+import { DeployedContracts } from '../../components/deployer/DeployedContracts';
+import { HardhatAccount } from '../../types/account';
+import { DeployerSettings, NetworkType } from '../../types/deployer';
+import { ConstructorParam } from '../../types/constructor';
 
 const DeployerPage = () => {
-    const [settings, setSettings] = useState<DeployerState>({
+    const [settings, setSettings] = useState<DeployerSettings>({
         environment: 'local',
         network: {
             rpcUrl: '',
@@ -74,12 +58,10 @@ const DeployerPage = () => {
                 network: { rpcUrl: '', privateKey: '' }
             }));
         } else {
-            // Clear selected account when switching to testnet/mainnet
             setSelectedAccount('');
         }
     }, [settings.environment]);
 
-    // Update deployment settings based on environment
     useEffect(() => {
         if (settings.environment === 'local' && selectedAccount) {
             const account = accounts.find(acc => acc.address === selectedAccount);
@@ -88,12 +70,28 @@ const DeployerPage = () => {
                     ...prev,
                     network: {
                         rpcUrl: 'http://127.0.0.1:8545',
-                        privateKey: account.privateKey
+                        privateKey: account.privateKey || ''
                     }
                 }));
             }
         }
     }, [settings.environment, selectedAccount, accounts]);
+
+    const handleEnvironmentChange = (environment: NetworkType) => {
+        setSettings(prev => ({ ...prev, environment }));
+    };
+
+    const handleNetworkChange = (network: { rpcUrl: string; privateKey: string }) => {
+        setSettings(prev => ({ ...prev, network }));
+    };
+
+    const handleConstructorParamsChange = (contract: string, params: ConstructorParam[]) => {
+        setSettings(prev => ({
+            ...prev,
+            selectedContract: contract,
+            constructorParams: params
+        }));
+    };
 
     const handleDeploy = () => {
         setLoading(true);
@@ -120,10 +118,7 @@ const DeployerPage = () => {
                         <div className="space-y-6">
                             <EnvironmentSelector
                                 environment={settings.environment}
-                                onChange={(env) => setSettings({
-                                    ...settings,
-                                    environment: env
-                                })}
+                                onChange={handleEnvironmentChange}
                             />
 
                             {settings.environment === 'local' ? (
@@ -135,30 +130,23 @@ const DeployerPage = () => {
                             ) : (
                                 <NetworkConfig
                                     network={settings.network}
-                                    onChange={(network) => setSettings({
-                                        ...settings,
-                                        network
-                                    })}
+                                    onChange={handleNetworkChange}
                                 />
                             )}
 
                             <GasSettings
                                 gasLimit={settings.gasLimit}
                                 value={settings.value}
-                                onChange={(key, value) => setSettings({
-                                    ...settings,
+                                onChange={(key, value) => setSettings(prev => ({
+                                    ...prev,
                                     [key]: value
-                                })}
+                                }))}
                             />
 
                             <ContractDeployer
                                 selectedContract={settings.selectedContract}
                                 constructorParams={settings.constructorParams}
-                                onChange={(contract, params) => setSettings({
-                                    ...settings,
-                                    selectedContract: contract,
-                                    constructorParams: params
-                                })}
+                                onChange={handleConstructorParamsChange}
                                 onDeploy={handleDeploy}
                                 disabled={loading || !settings.network.privateKey || !settings.network.rpcUrl}
                             />
