@@ -9,7 +9,7 @@ import { ConstructorParam } from '../../types/constructor'
 import { HardhatAccount } from '../../types/account'
 
 interface DeployerState {
-    environment: 'local' | 'testnet' | 'mainnet'
+    environment: 'local' | 'imported'
     network: {
         rpcUrl: string
         privateKey: string
@@ -67,7 +67,7 @@ const DeployerPage = () => {
         const handleMessage = (event: MessageEvent) => {
             const message = event.data;
             console.log('DeployerPage received message:', message);
-            
+
             switch (message.type) {
                 case 'accounts':
                     console.log('Setting accounts:', message.accounts);

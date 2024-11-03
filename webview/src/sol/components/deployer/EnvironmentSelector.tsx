@@ -7,8 +7,16 @@ interface EnvironmentSelectorProps {
 
 export const EnvironmentSelector = ({ environment, onChange }: EnvironmentSelectorProps) => {
     const environments = [
-        { value: 'local', label: 'Hardhat Network (Local)', description: 'Deploy to local development network' },
-        { value: 'imported', label: 'Import Network', description: 'Deploy to imported networks' },
+        { 
+            value: 'local', 
+            label: 'Hardhat Network (Local)', 
+            description: 'Deploy to local development network with chainId 1337' 
+        },
+        { 
+            value: 'imported', 
+            label: 'Import Network', 
+            description: 'Deploy to custom networks like testnet or mainnet' 
+        }
     ] as const;
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
