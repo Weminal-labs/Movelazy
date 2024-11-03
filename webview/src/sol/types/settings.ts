@@ -1,4 +1,10 @@
-export interface CompilerSettings {
+export interface NetworkConfig {
+    url?: string;
+    accounts?: string[];
+    chainId?: number;
+}
+
+export interface HardhatConfig {
     version: string;
     evmVersion: string;
     optimizer: {
@@ -11,5 +17,13 @@ export interface CompilerSettings {
     viaIR: boolean;
     debug: {
         debugInfo: string[];
+    };
+    networks?: {
+        [key: string]: NetworkConfig;
+    };
+    namedAccounts?: {
+        deployer: {
+            default: number;
+        };
     };
 }

@@ -3,7 +3,8 @@ import { BasicSettings } from '../../components/compiler/BasicSettings'
 import { OptimizerSettings } from '../../components/compiler/OptimizerSettings'
 import { AdvancedSettings } from '../../components/compiler/AdvancedSettings'
 import { DebugSettings } from '../../components/compiler/DebugSettings'
-import { CompilerSettings } from '../../types/settings'
+import { NetworkSettings } from '../../components/compiler/NetworkSettings'
+import { HardhatConfig } from '../../types/settings'
 import { VSCodeApi } from '../../types/vscode';
 
 declare global {
@@ -13,7 +14,7 @@ declare global {
 }
 
 const CompilerPage = () => {
-    const [settings, setSettings] = useState<CompilerSettings>({
+    const [settings, setSettings] = useState<HardhatConfig>({
         version: '0.8.20',
         evmVersion: 'london',
         optimizer: {
@@ -26,6 +27,16 @@ const CompilerPage = () => {
         viaIR: false,
         debug: {
             debugInfo: ['location', 'snippet']
+        },
+        networks: {
+            hardhat: {
+                chainId: 1337
+            }
+        },
+        namedAccounts: {
+            deployer: {
+                default: 0
+            }
         }
     });
 
@@ -174,6 +185,10 @@ const CompilerPage = () => {
                                 ...settings,
                                 debug: { ...settings.debug, debugInfo }
                             })}
+                        />
+                        <NetworkSettings
+                            networks={settings.networks || {}}
+                            onChange={(networks) => setSettings({ ...settings, networks })}
                         />
                     </div>
                 </div>
