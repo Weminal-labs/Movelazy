@@ -1,14 +1,33 @@
 import * as vscode from 'vscode';
 import { execAsync } from '../../utils/execAsync';
-import { WorkspaceService } from './workspace';
+import { WorkspaceService, CompilerSettings } from './workspace';
 
 export class DeployService {
     constructor(private context: vscode.ExtensionContext) { }
 
-    async deploy(webview: vscode.Webview, settings: any) {
+    async deploy(webview: vscode.Webview, settings: CompilerSettings & {
+        selectedContract: string;
+        constructorParams: any[];
+        network: {
+            rpcUrl: string;
+            privateKey: string;
+        };
+        environment: string;
+    }) {
         const workspacePath = new WorkspaceService(this.context).getWorkspacePath();
 
         try {
+            // Update hardhat config with network settings
+            await this.context.workspaceState.update('compiler.settings', {
+                ...settings,
+                networks: {
+                    [settings.environment]: {
+                        url: settings.network.rpcUrl,
+                        accounts: [settings.network.privateKey]
+                    }
+                }
+            });
+
             // Create deploy script
             const scriptContent = `
 const hre = require("hardhat");
