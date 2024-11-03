@@ -4,6 +4,7 @@ import * as path from 'path';
 import { execAsync } from '../../utils/execAsync';
 
 export interface NetworkConfig {
+    name: string;
     url?: string;
     accounts?: string[];
     chainId?: number;
@@ -68,6 +69,7 @@ export class WorkspaceService {
             },
             networks: {
                 hardhat: {
+                    name: 'hardhat',
                     chainId: 1337
                 }
             },
@@ -150,6 +152,7 @@ const config: HardhatUserConfig = {
     },
     networks: {
         hardhat: {
+            name: 'hardhat',
             chainId: 1337
         },
         ${defaultSettings.networks ? Object.entries(defaultSettings.networks)
@@ -212,12 +215,14 @@ const config: HardhatUserConfig = {
     },
     networks: {
         hardhat: {
+            name: 'hardhat',
             chainId: 1337
         },
         ${settings.networks ? Object.entries(settings.networks)
                 .filter(([name]) => name !== 'hardhat')
                 .map(([name, config]) => `
-        ${name}: {
+        ${config.name}: {
+            name: "${config.name}",
             url: "${config.url}",
             accounts: ${JSON.stringify(config.accounts || [])},
             chainId: ${config.chainId || 1337}

@@ -8,7 +8,7 @@ export class DeployService {
 
     async deploy(webview: vscode.Webview, settings: DeploymentSettings) {
         const workspacePath = new WorkspaceService(this.context).getWorkspacePath();
-        const networkName = settings.environment === 'local' ? 'hardhat' : settings.network.url;
+        const networkName = settings.environment === 'local' ? 'hardhat' : settings.network.name;
 
         try {
             // Create deploy script
@@ -17,7 +17,7 @@ const hre = require("hardhat");
 
 async function main() {
     const Contract = await hre.ethers.getContractFactory("${settings.selectedContract}");
-    const contract = await Contract.deploy(${settings.constructorParams.join(', ')});
+    const contract = await Contract.deploy(${settings.constructorParams.map(p => p.value).join(', ')});
     await contract.deployed();
     console.log("Contract deployed to:", contract.address);
 }
