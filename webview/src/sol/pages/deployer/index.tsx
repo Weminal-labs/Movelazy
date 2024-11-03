@@ -6,6 +6,7 @@ import { ContractDeployer } from '../../components/deployer/ContractDeployer'
 import { DeployedContracts } from '../../components/deployer/DeployedContracts'
 import { AbiItem } from '../../types/abi'
 import { ConstructorParam } from '../../types/constructor'
+import { HardhatAccount } from '../../types/account'
 
 interface DeployerState {
     environment: 'local' | 'testnet' | 'mainnet'
@@ -43,7 +44,8 @@ const DeployerPage = () => {
         deployedContracts: []
     });
 
-    const [accounts, setAccounts] = useState<string[]>([]);
+    const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
+    const [selectedAccount, setSelectedAccount] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [contracts, setContracts] = useState<string[]>([]);
 
@@ -62,28 +64,28 @@ const DeployerPage = () => {
     }, []);
 
     useEffect(() => {
-        const messageHandler = (event: MessageEvent) => {
+        const handleMessage = (event: MessageEvent) => {
             const message = event.data;
-
+            console.log('DeployerPage received message:', message);
+            
             switch (message.type) {
                 case 'accounts':
+                    console.log('Setting accounts:', message.accounts);
                     setAccounts(message.accounts);
-                    if (message.accounts.length > 0) {
-                        setSettings(prev => ({
-                            ...prev,
-                            account: message.accounts[0]
-                        }));
-                    }
-                    break;
-                case 'contracts':
-                    setContracts(message.contracts);
                     break;
             }
         };
 
-        window.addEventListener('message', messageHandler);
-        return () => window.removeEventListener('message', messageHandler);
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
     }, []);
+
+    useEffect(() => {
+        if (settings.environment === 'local') {
+            console.log('Starting local node...');
+            window.vscode.postMessage({ command: 'solidity.startLocalNode' });
+        }
+    }, [settings.environment]);
 
     return (
         <div className="h-[calc(100vh-64px)] flex flex-col">
@@ -107,13 +109,9 @@ const DeployerPage = () => {
                             />
 
                             <AccountInfo
-                                account={settings.account}
-                                balance={settings.balance}
-                                accounts={settings.environment === 'local' ? accounts : []}
-                                onAccountChange={(account) => setSettings({
-                                    ...settings,
-                                    account
-                                })}
+                                account={selectedAccount}
+                                accounts={accounts}
+                                onAccountChange={setSelectedAccount}
                             />
 
                             <GasSettings
@@ -125,7 +123,7 @@ const DeployerPage = () => {
                                 })}
                             />
 
-                            <ContractDeployer
+                            {/* <ContractDeployer
                                 selectedContract={settings.selectedContract}
                                 constructorParams={settings.constructorParams}
                                 onChange={(contract, params) => setSettings({
@@ -142,7 +140,7 @@ const DeployerPage = () => {
                                 disabled={loading ||
                                     (settings.environment !== 'local' &&
                                         (!settings.network.rpcUrl || !settings.network.privateKey))}
-                            />
+                            /> */}
 
                             <DeployedContracts
                                 contracts={settings.deployedContracts}
