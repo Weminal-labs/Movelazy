@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
 import { execAsync } from '../../utils/execAsync';
 import { WorkspaceService } from './workspace';
+import { DeploymentSettings } from './types';
 
 export class DeployService {
     constructor(private context: vscode.ExtensionContext) { }
 
-    async deploy(webview: vscode.Webview, settings: any) {
+    async deploy(webview: vscode.Webview, settings: DeploymentSettings) {
         const workspacePath = new WorkspaceService(this.context).getWorkspacePath();
+        const networkName = settings.environment === 'local' ? 'hardhat' : settings.network.url;
 
         try {
             // Create deploy script
@@ -27,7 +29,7 @@ main().catch((error) => {
 
             // Execute deployment
             const { stdout, stderr } = await execAsync(
-                `npx hardhat run --network ${settings.environment} deploy.js`,
+                `npx hardhat run --network ${networkName} deploy.js`,
                 { cwd: workspacePath }
             );
 
