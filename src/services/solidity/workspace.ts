@@ -49,7 +49,7 @@ export class WorkspaceService {
         }
         return workspaceFolders[0].uri.fsPath;
     }
-    
+
 
     public getSettings(): HardhatConfig {
         return this.context.workspaceState.get(this.stateKey) || {
@@ -93,7 +93,7 @@ export class WorkspaceService {
 
             // Install Hardhat if not installed
             if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'))) {
-                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox typescript ts-node', {
+                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox hardhat-deploy dotenv typescript ts-node', {
                     cwd: workspacePath
                 });
             }
@@ -114,7 +114,7 @@ export class WorkspaceService {
                     }
                 };
                 await fs.promises.writeFile(
-                    tsconfigPath, 
+                    tsconfigPath,
                     JSON.stringify(tsconfigContent, null, 2)
                 );
             }
@@ -127,7 +127,7 @@ export class WorkspaceService {
 require("dotenv").config();
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-
+import "hardhat-deploy";
 const config: HardhatUserConfig = {
     solidity: {
         version: "${defaultSettings.version}",
@@ -153,8 +153,8 @@ const config: HardhatUserConfig = {
             chainId: 1337
         },
         ${defaultSettings.networks ? Object.entries(defaultSettings.networks)
-            .filter(([name]) => name !== 'hardhat')
-            .map(([name, config]) => `
+                        .filter(([name]) => name !== 'hardhat')
+                        .map(([name, config]) => `
         ${name}: {
             url: "${config.url}",
             accounts: ${JSON.stringify(config.accounts || [])},
@@ -188,6 +188,7 @@ export default config;
 require("dotenv").config();
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-deploy";
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -214,8 +215,8 @@ const config: HardhatUserConfig = {
             chainId: 1337
         },
         ${settings.networks ? Object.entries(settings.networks)
-            .filter(([name]) => name !== 'hardhat')
-            .map(([name, config]) => `
+                .filter(([name]) => name !== 'hardhat')
+                .map(([name, config]) => `
         ${name}: {
             url: "${config.url}",
             accounts: ${JSON.stringify(config.accounts || [])},
@@ -243,7 +244,7 @@ export default config;`;
 
     public async isHardhatWorkspace(): Promise<boolean> {
         const workspacePath = this.getWorkspacePath();
-        
+
         try {
             // Check 1: npx hardhat --version
             try {
@@ -272,7 +273,7 @@ export default config;`;
 
             const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, 'utf8'));
             const hasHardhatDep = !!(packageJson.dependencies?.hardhat || packageJson.devDependencies?.hardhat);
-            
+
             return hasHardhatDep;
         } catch {
             return false;
