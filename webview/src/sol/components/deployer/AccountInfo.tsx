@@ -7,17 +7,22 @@ interface AccountInfoProps {
 }
 
 export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoProps) => {
+    console.log('AccountInfo render:', { account, accounts });
+    
     return (
         <div className="space-y-4">
             <div>
                 <label className="block text-text-muted text-sm mb-2">
-                    Account
+                    Account ({accounts.length} accounts available)
                 </label>
                 <div className="flex items-center gap-4">
                     <select
                         className="flex-1 bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
                         value={account}
-                        onChange={(e) => onAccountChange(e.target.value)}
+                        onChange={(e) => {
+                            console.log('Account selected:', e.target.value);
+                            onAccountChange(e.target.value);
+                        }}
                     >
                         <option value="">Select an account...</option>
                         {accounts.map((acc, index) => (
