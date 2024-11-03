@@ -3,7 +3,6 @@ import { BasicSettings } from '../../components/compiler/BasicSettings'
 import { OptimizerSettings } from '../../components/compiler/OptimizerSettings'
 import { AdvancedSettings } from '../../components/compiler/AdvancedSettings'
 import { DebugSettings } from '../../components/compiler/DebugSettings'
-import { NetworkSettings } from '../../components/compiler/NetworkSettings'
 import { HardhatConfig } from '../../types/settings'
 import { VSCodeApi } from '../../types/vscode';
 
@@ -185,10 +184,6 @@ const CompilerPage = () => {
                                 ...settings,
                                 debug: { ...settings.debug, debugInfo }
                             })}
-                        />
-                        <NetworkSettings
-                            networks={settings.networks || {}}
-                            onChange={(networks) => setSettings({ ...settings, networks })}
                         />
                     </div>
                 </div>
