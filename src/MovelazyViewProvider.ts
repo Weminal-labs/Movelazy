@@ -75,6 +75,52 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                     case 'solidity.clean':
                         await this.solidityService.clean(webviewView.webview);
                         break;
+                    case 'aptos.compile':
+                        await this.aptosService.updateConfig(message.settings);
+                        await this.aptosService.compile(webviewView.webview);
+                        break;
+                    case 'aptos.updateConfig':
+                        await this.aptosService.updateConfig(message.settings);
+                        break;
+                    case 'aptos.getSettings':
+                        const aptosSettings = this.aptosService.getSettings();
+                        webviewView.webview.postMessage({
+                            type: 'settings',
+                            settings: aptosSettings
+                        });
+                        break;
+                    case 'aptos.initWorkspace':
+                        webviewView.webview.postMessage({
+                            type: 'workspaceStatus',
+                            loading: true
+                        });
+                        try {
+                            await this.aptosService.initWorkspace();
+                            webviewView.webview.postMessage({
+                                type: 'workspaceStatus',
+                                initialized: true,
+                                loading: false
+                            });
+                        } catch (error) {
+                            webviewView.webview.postMessage({
+                                type: 'workspaceStatus',
+                                error: (error as Error).message,
+                                loading: false
+                            });
+
+                        }
+                        break;
+                    case 'aptos.checkWorkspace':
+                        const isAptos = await this.aptosService.checkWorkspace();
+                        webviewView.webview.postMessage({
+                            type: 'workspaceStatus',
+                            initialized: isAptos,
+                            loading: false
+                        });
+                        break;
+                    case 'aptos.clean':
+                        await this.aptosService.clean(webviewView.webview);
+                        break;
                 }
             } catch (error) {
                 webviewView.webview.postMessage({
