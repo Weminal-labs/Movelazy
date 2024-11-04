@@ -1,6 +1,6 @@
 interface AdvancedSettingsProps {
     bytecodeHash: string
-    viaIR: boolean
+    viaIR: boolean | undefined
     onChange: (key: string, value: string | boolean) => void
 }
 
