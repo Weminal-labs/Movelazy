@@ -159,7 +159,16 @@ const CompilerPage = () => {
                         <AdvancedSettings
                             bytecodeHash={settings.metadata?.bytecodeHash || ''}
                             moveVersion={settings.moveVersion || ''}
-                            onChange={(key, value) => setSettings({ ...settings, [key]: value })}
+                            onChange={(key, value) => {
+                                if (key === 'bytecodeHash' && typeof value === 'string') {
+                                    setSettings({
+                                        ...settings,
+                                        metadata: { ...settings.metadata, bytecodeHash: value }
+                                    })
+                                } else {
+                                    setSettings({ ...settings, [key]: value })
+                                }
+                            }}
                         />
                     </div>
                 </div>

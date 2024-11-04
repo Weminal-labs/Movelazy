@@ -15,7 +15,6 @@ export interface CompilerSettings {
         debugInfo: string[];
     };
 
-    bytecodeHash?: string,
     packageDir?: string,
     nameAddresses?: string,
 }
