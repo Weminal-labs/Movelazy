@@ -52,7 +52,7 @@ export class AptosCompilerService {
             // Check if Aptos CLI is installed
             await execAsync('aptos --version', { cwd: workspacePath });
             console.log("check>>>>>>>", packageDir, "   ", namedAddresses);
-            let command = `aptos move compile --package-dir ${packageDir} --named-addresses ${namedAddresses}`;
+            let command = `aptos move compile --package-dir ${packageDir} --named-addresses ${namedAddresses} `;
 
             if (moveVersion === 'Move 2') {
                 command += `--move-2`;
@@ -77,7 +77,7 @@ export class AptosCompilerService {
             webview.postMessage({
                 type: 'compileStatus',
                 success: true,
-                message: stderr + "/n" + stdout || 'Compilation and publishing successful!'
+                message: stderr + stdout || 'Compilation and publishing successful!'
             });
 
         } catch (error) {
