@@ -112,9 +112,8 @@ const CompilerPage = () => {
                             <button
                                 onClick={handleClean}
                                 disabled={cleaning || compiling}
-                                className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${
-                                    (cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${(cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                             >
                                 {cleaning ? (
                                     <div className="flex items-center gap-2">
@@ -126,9 +125,8 @@ const CompilerPage = () => {
                             <button
                                 onClick={handleCompile}
                                 disabled={cleaning || compiling}
-                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${
-                                    (cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${(cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                             >
                                 {compiling ? (
                                     <div className="flex items-center gap-2">
@@ -155,7 +153,7 @@ const CompilerPage = () => {
                             })}
                         />
                         <AdvancedSettings
-                            bytecodeHash={settings.metadata.bytecodeHash}
+                            bytecodeHash={settings.metadata?.bytecodeHash ?? ''}
                             viaIR={settings.viaIR}
                             onChange={(key, value) => {
                                 if (key === 'bytecodeHash' && typeof value === 'string') {
@@ -169,7 +167,7 @@ const CompilerPage = () => {
                             }}
                         />
                         <DebugSettings
-                            debugInfo={settings.debug.debugInfo}
+                            debugInfo={settings.debug?.debugInfo ?? []}
                             onChange={(debugInfo) => setSettings({
                                 ...settings,
                                 debug: { ...settings.debug, debugInfo }
@@ -183,8 +181,8 @@ const CompilerPage = () => {
             {compileStatus.type && (
                 <div
                     className={`p-4 border-t border-border transition-all ${compileStatus.type === 'success'
-                            ? 'bg-green-500/5 text-green-500 border-green-500/20'
-                            : 'bg-red-500/5 text-red-500 border-red-500/20'
+                        ? 'bg-green-500/5 text-green-500 border-green-500/20'
+                        : 'bg-red-500/5 text-red-500 border-red-500/20'
                         }`}
                 >
                     <pre className="font-mono text-sm whitespace-pre-wrap">
