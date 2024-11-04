@@ -14,9 +14,7 @@ export const AdvancedSettings = ({ bytecodeHash, moveVersion, onChange }: Advanc
                 <select
                     value={moveVersion === 'Move 2' ? '7' : bytecodeHash}
                     onChange={(e) => {
-                        if (moveVersion === 'Move 1') {
-                            onChange('bytecodeHash', e.target.value);
-                        }
+                        onChange('bytecodeHash', e.target.value);
                     }}
                     className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
                     disabled={moveVersion === 'Move 2'}
