@@ -1,30 +1,27 @@
-import { useState, useEffect } from 'react';
-import { EnvironmentSelector } from '../../components/deployer/EnvironmentSelector';
-import { AccountInfo } from '../../components/deployer/AccountInfo';
-import { NetworkConfig } from '../../components/deployer/NetworkConfig';
-import { GasSettings } from '../../components/deployer/GasSettings';
-import { ContractDeployer } from '../../components/deployer/ContractDeployer';
-import { DeployedContracts } from '../../components/deployer/DeployedContracts';
-import { HardhatAccount } from '../../types/account';
-import { DeployerSettings, NetworkType } from '../../types/deployer';
-import { ConstructorParam } from '../../types/constructor';
+import { useState, useEffect } from 'react'
+import { EnvironmentSelector } from '../../components/deployer/EnvironmentSelector'
+import { AccountInfo } from '../../components/deployer/AccountInfo'
+import { NetworkSettings } from '../../components/deployer/NetworkSettings'
+import { ContractDeployer } from '../../components/deployer/ContractDeployer'
+import { DeployedContracts } from '../../components/deployer/DeployedContracts'
+import { HardhatAccount } from '../../types/account'
+import { DeploymentState } from '../../types/deployment'
 
 const DeployerPage = () => {
-    const [settings, setSettings] = useState<DeployerSettings>({
+    const [settings, setSettings] = useState<DeploymentState>({
         environment: 'local',
         network: {
-            rpcUrl: '',
-            privateKey: ''
+            name: 'hardhat',
+            url: 'http://127.0.0.1:8545',
+            accounts: [],
+            chainId: 1337
         },
-        gasLimit: 3000000,
-        value: '0',
         selectedContract: '',
         constructorParams: [],
         deployedContracts: []
     });
 
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
-    const [selectedAccount, setSelectedAccount] = useState<string>('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -33,9 +30,31 @@ const DeployerPage = () => {
             switch (message.type) {
                 case 'accounts':
                     setAccounts(message.accounts);
+                    if (message.accounts.length > 0) {
+                        setSettings(prev => ({
+                            ...prev,
+                            network: {
+                                ...prev.network,
+                                accounts: [message.accounts[0].privateKey]
+                            }
+                        }));
+                    }
                     break;
                 case 'deployStatus':
                     setLoading(false);
+                    if (message.success) {
+                        const address = message.message.match(/Contract deployed to: (.+)/)?.[1];
+                        if (address) {
+                            setSettings(prev => ({
+                                ...prev,
+                                deployedContracts: [...prev.deployedContracts, {
+                                    address,
+                                    name: prev.selectedContract,
+                                    network: prev.environment === 'local' ? 'hardhat' : prev.network.name
+                                }]
+                            }));
+                        }
+                    }
                     break;
             }
         };
@@ -46,64 +65,21 @@ const DeployerPage = () => {
 
     useEffect(() => {
         if (settings.environment === 'local') {
-            const storedAccounts = localStorage.getItem('hardhat_accounts');
-            if (!storedAccounts) {
-                window.vscode.postMessage({ command: 'solidity.startLocalNode' });
-            } else {
-                setAccounts(JSON.parse(storedAccounts));
-            }
-            // Clear network config when switching to local
-            setSettings(prev => ({
-                ...prev,
-                network: { rpcUrl: '', privateKey: '' }
-            }));
+            window.vscode.postMessage({ command: 'solidity.startLocalNode' });
         } else {
-            setSelectedAccount('');
+            window.vscode.postMessage({ command: 'solidity.stopLocalNode' });
         }
     }, [settings.environment]);
-
-    useEffect(() => {
-        if (settings.environment === 'local' && selectedAccount) {
-            const account = accounts.find(acc => acc.address === selectedAccount);
-            if (account) {
-                setSettings(prev => ({
-                    ...prev,
-                    network: {
-                        rpcUrl: 'http://127.0.0.1:8545',
-                        privateKey: account.privateKey || ''
-                    }
-                }));
-            }
-        }
-    }, [settings.environment, selectedAccount, accounts]);
-
-    const handleEnvironmentChange = (environment: NetworkType) => {
-        setSettings(prev => ({ ...prev, environment }));
-    };
-
-    const handleNetworkChange = (network: { rpcUrl: string; privateKey: string }) => {
-        setSettings(prev => ({ ...prev, network }));
-    };
-
-    const handleConstructorParamsChange = (contract: string, params: ConstructorParam[]) => {
-        setSettings(prev => ({
-            ...prev,
-            selectedContract: contract,
-            constructorParams: params
-        }));
-    };
 
     const handleDeploy = () => {
         setLoading(true);
         window.vscode.postMessage({
             command: 'solidity.deploy',
             settings: {
-                environment: settings.environment,
-                network: settings.network,
-                gasLimit: settings.gasLimit,
-                value: settings.value,
                 selectedContract: settings.selectedContract,
-                constructorParams: settings.constructorParams.map(param => param.value)
+                constructorParams: settings.constructorParams,
+                environment: settings.environment,
+                network: settings.network
             }
         });
     };
@@ -112,53 +88,65 @@ const DeployerPage = () => {
         <div className="h-[calc(100vh-64px)] flex flex-col">
             <div className="flex-1 overflow-auto bg-background-light">
                 <div className="min-h-full w-full border border-border">
-                    <div className="p-8">
-                        <div className="flex justify-between items-center mb-8">
-                            <h3 className="text-text text-2xl font-medium">
-                                Deploy & Run Transactions
-                            </h3>
-                        </div>
+                    <div className="p-8 space-y-6">
+                        <EnvironmentSelector
+                            environment={settings.environment}
+                            onChange={(env) => setSettings({
+                                ...settings,
+                                environment: env,
+                                network: env === 'local' ? {
+                                    name: 'hardhat',
+                                    url: 'http://127.0.0.1:8545',
+                                    accounts: settings.network.accounts,
+                                    chainId: 1337
+                                } : {
+                                    name: '',
+                                    url: '',
+                                    accounts: [],
+                                    chainId: 1
+                                }
+                            })}
+                        />
 
-                        <div className="space-y-6">
-                            <EnvironmentSelector
-                                environment={settings.environment}
-                                onChange={handleEnvironmentChange}
+                        {settings.environment === 'local' ? (
+                            <AccountInfo
+                                accounts={accounts}
+                                selectedPrivateKey={settings.network.accounts[0]}
+                                onAccountSelect={(account) => setSettings({
+                                    ...settings,
+                                    network: {
+                                        ...settings.network,
+                                        accounts: [account.privateKey]
+                                    }
+                                })}
                             />
-
-                            {settings.environment === 'local' ? (
-                                <AccountInfo
-                                    account={selectedAccount}
-                                    accounts={accounts}
-                                    onAccountChange={setSelectedAccount}
-                                />
-                            ) : (
-                                <NetworkConfig
-                                    network={settings.network}
-                                    onChange={handleNetworkChange}
-                                />
-                            )}
-
-                            <GasSettings
-                                gasLimit={settings.gasLimit}
-                                value={settings.value}
-                                onChange={(key, value) => setSettings(prev => ({
-                                    ...prev,
-                                    [key]: value
-                                }))}
+                        ) : (
+                            <NetworkSettings
+                                network={settings.network}
+                                onChange={(network) => setSettings({
+                                    ...settings,
+                                    network
+                                })}
                             />
+                        )}
 
-                            <ContractDeployer
-                                selectedContract={settings.selectedContract}
-                                constructorParams={settings.constructorParams}
-                                onChange={handleConstructorParamsChange}
-                                onDeploy={handleDeploy}
-                                disabled={loading || !settings.network.privateKey || !settings.network.rpcUrl}
-                            />
+                        <ContractDeployer
+                            selectedContract={settings.selectedContract}
+                            constructorParams={settings.constructorParams}
+                            onChange={(contract, params) => setSettings({
+                                ...settings,
+                                selectedContract: contract,
+                                constructorParams: params
+                            })}
+                            onDeploy={handleDeploy}
+                            disabled={loading || !settings.selectedContract || 
+                                (settings.environment === 'imported' && 
+                                (!settings.network.url || !settings.network.accounts.length))}
+                        />
 
-                            <DeployedContracts
-                                contracts={settings.deployedContracts}
-                            />
-                        </div>
+                        <DeployedContracts
+                            contracts={settings.deployedContracts}
+                        />
                     </div>
                 </div>
             </div>

@@ -1,74 +1,27 @@
-import { HardhatAccount } from '../../types/account';
-import { useEffect } from 'react';
+import { AccountInfoProps } from '../../types/account';
 
-interface AccountInfoProps {
-    account: string;
-    accounts: HardhatAccount[];
-    onAccountChange: (account: string) => void;
-}
-
-const STORAGE_KEY = 'hardhat_accounts';
-
-const shortenAddress = (address: string) => {
-    if (!address) return '';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-};
-
-export const AccountInfo = ({ account, accounts, onAccountChange }: AccountInfoProps) => {
-    useEffect(() => {
-        // If we receive new accounts from hardhat node, store them
-        if (accounts.length > 0) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
-        }
-    }, [accounts]);
-
-    // Get accounts from storage if none provided
-    const displayAccounts = accounts.length > 0 
-        ? accounts 
-        : JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
+export const AccountInfo = ({ accounts, selectedPrivateKey, onAccountSelect }: AccountInfoProps) => {
     return (
-        <div className="space-y-4">
-            <div>
-                <label className="block text-text-muted text-sm mb-2">
-                    Account ({displayAccounts.length} accounts available)
-                </label>
-                <div className="flex items-center gap-4">
-                    <select
-                        className="flex-1 bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
-                        value={account}
-                        onChange={(e) => onAccountChange(e.target.value)}
-                        title={account}
+        <div className="p-4 bg-background rounded-lg border border-border">
+            <h4 className="text-lg font-medium mb-4">Local Accounts</h4>
+            <div className="space-y-2">
+                {accounts.map((account) => (
+                    <div 
+                        key={account.address}
+                        className={`p-3 border rounded-md cursor-pointer ${
+                            account.privateKey === selectedPrivateKey ? 'border-primary' : 'border-border'
+                        }`}
+                        onClick={() => onAccountSelect(account)}
                     >
-                        <option value="">Select an account...</option>
-                        {displayAccounts.map((acc: HardhatAccount, index: number) => (
-                            <option 
-                                key={acc.address} 
-                                value={acc.address}
-                                title={`${acc.address} (${acc.balance})`}
-                            >
-                                ({index}) {shortenAddress(acc.address)} ({acc.balance})
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            {account && (
-                <div>
-                    <label className="block text-text-muted text-sm mb-2">
-                        Balance
-                    </label>
-                    <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
                         <div className="flex justify-between items-center">
-                            <span title={account} className="truncate">
-                                {shortenAddress(account)}
-                            </span>
-                            <span>{displayAccounts.find((acc: HardhatAccount) => acc.address === account)?.balance || '0'}</span>
+                            <div className="truncate">
+                                <p className="font-medium">Address: {account.address}</p>
+                                <p className="text-sm">Balance: {account.balance}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                ))}
+            </div>
         </div>
     );
 }; 

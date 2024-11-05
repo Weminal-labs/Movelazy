@@ -1,40 +1,23 @@
 import * as vscode from 'vscode';
 import { execAsync } from '../../utils/execAsync';
-import { WorkspaceService, CompilerSettings } from './workspace';
+import { WorkspaceService } from './workspace';
+import { DeploymentSettings } from './types';
 
 export class DeployService {
     constructor(private context: vscode.ExtensionContext) { }
 
-    async deploy(webview: vscode.Webview, settings: CompilerSettings & {
-        selectedContract: string;
-        constructorParams: any[];
-        network: {
-            rpcUrl: string;
-            privateKey: string;
-        };
-        environment: string;
-    }) {
+    async deploy(webview: vscode.Webview, settings: DeploymentSettings) {
         const workspacePath = new WorkspaceService(this.context).getWorkspacePath();
+        const networkName = settings.environment === 'local' ? 'hardhat' : settings.network.name;
 
         try {
-            // Update hardhat config with network settings
-            await this.context.workspaceState.update('compiler.settings', {
-                ...settings,
-                networks: {
-                    [settings.environment]: {
-                        url: settings.network.rpcUrl,
-                        accounts: [settings.network.privateKey]
-                    }
-                }
-            });
-
             // Create deploy script
             const scriptContent = `
 const hre = require("hardhat");
 
 async function main() {
     const Contract = await hre.ethers.getContractFactory("${settings.selectedContract}");
-    const contract = await Contract.deploy(${settings.constructorParams.join(', ')});
+    const contract = await Contract.deploy(${settings.constructorParams.map(p => p.value).join(', ')});
     await contract.deployed();
     console.log("Contract deployed to:", contract.address);
 }
@@ -46,7 +29,7 @@ main().catch((error) => {
 
             // Execute deployment
             const { stdout, stderr } = await execAsync(
-                `npx hardhat run --network ${settings.environment} deploy.js`,
+                `npx hardhat run --network ${networkName} deploy.js`,
                 { cwd: workspacePath }
             );
 
