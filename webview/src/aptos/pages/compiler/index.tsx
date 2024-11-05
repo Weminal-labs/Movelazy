@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { BasicSettings } from './components/BasicSettings';
-import { OptimizerSettings } from './components/OptimizerSettings';
-import { AdvancedSettings } from './components/AdvancedSettings';
+import { BasicSettings } from '../../components/compiler/BasicSettings';
+import { OptimizerSettings } from '../../components/compiler/OptimizerSettings';
+import { AdvancedSettings } from '../../components/compiler/AdvancedSettings';
 import { CompilerSettings } from '../../../sol/types/settings';
-import PackageDirInput from './components/PackageDir';
-import NamedAddressesInput from './components/NameAddress';
+import PackageDirInput from '../../components/compiler/PackageDir';
+import NamedAddressesInput from '../../components/compiler/NameAddress';
 
 
 const CompilerPage = () => {
@@ -33,7 +33,6 @@ const CompilerPage = () => {
     useEffect(() => {
         const messageHandler = (event: MessageEvent) => {
             const message = event.data;
-            console.log("check messageasfasfasf", message);
 
             if (message.type === 'compileStatus') {
                 setCompiling(false);
