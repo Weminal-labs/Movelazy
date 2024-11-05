@@ -3,7 +3,6 @@ import * as path from 'path';
 import { SolidityService } from './services/solidity';
 import { AptosService } from './services/aptos';
 
-
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
     public static readonly viewType = 'MovelazyView';
@@ -27,11 +26,12 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webviewView.webview.onDidReceiveMessage(async message => {
+        webviewView.webview.onDidReceiveMessage(async (message) => {
             try {
                 switch (message.command) {
                     case 'solidity.compile':
-                        await this.solidityService.updateConfig(message.settings);
+                        console.log('Received compiler settings:', message.settings);
+                        await this.solidityService.updateCompilerConfig(message.settings);
                         await this.solidityService.compile(webviewView.webview);
                         break;
                     case 'solidity.getSettings':
@@ -40,9 +40,6 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                             type: 'settings',
                             settings
                         });
-                        break;
-                    case 'solidity.updateConfig':
-                        await this.solidityService.updateConfig(message.settings);
                         break;
                     case 'solidity.initWorkspace':
                         webviewView.webview.postMessage({

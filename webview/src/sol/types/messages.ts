@@ -1,9 +1,8 @@
-import { CompilerSettings } from './settings';
+import { CompilerConfig } from './settings';
 
 export type CompilerMessage = {
     command: 'solidity.compile'
     | 'solidity.getSettings'
-    | 'solidity.updateConfig'
     | 'solidity.initWorkspace'
     | 'solidity.checkWorkspace'
     | 'solidity.clean'
@@ -16,12 +15,12 @@ export type CompilerMessage = {
     | 'solidity.getAccountBalance'
     | 'solidity.getAccountPrivateKey'
     | 'solidity.getAccountNonce';
-    settings?: CompilerSettings;
+    settings?: CompilerConfig;
 };
 
 export type VSCodeMessage = {
     type: 'settings' | 'compileStatus' | 'workspaceStatus' | 'error';
-    settings?: CompilerSettings;
+    settings?: CompilerConfig;
     success?: boolean;
     message?: string;
     initialized?: boolean;

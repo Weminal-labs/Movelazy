@@ -2,45 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { execAsync } from '../../utils/execAsync';
-
-
-export interface HardhatConfig {
-    version: string;
-    evmVersion: string;
-    optimizer: {
-        enabled: boolean;
-        runs: number;
-    };
-    metadata: {
-        bytecodeHash: string;
-    };
-    viaIR: boolean;
-    debug: {
-        debugInfo: string[];
-    };
-    networks: {
-        hardhat: {
-            chainId: 1337;
-        };
-        network?: {
-            url: string;
-            accounts: string[];
-            chainId: number;
-        };
-    };
-    namedAccounts: {
-        deployer: {
-            default: number;
-        };
-    }
-}
+import { CompilerConfig, DefaultConfig } from './types';
 
 export class WorkspaceService {
     private readonly stateKey = 'compiler.settings';
 
     constructor(private context: vscode.ExtensionContext) { }
 
-    public async saveSettings(settings: any) {
+    public async saveSettings(settings: CompilerConfig) {
         await this.context.workspaceState.update(this.stateKey, settings);
     }
 
@@ -53,8 +22,8 @@ export class WorkspaceService {
     }
 
 
-    public getSettings(): HardhatConfig {
-        const defaultSettings: HardhatConfig = {
+    public getSettings(): DefaultConfig {
+        const defaultSettings: DefaultConfig = {
             version: '0.8.20',
             evmVersion: 'london',
             optimizer: {
@@ -69,9 +38,6 @@ export class WorkspaceService {
                 debugInfo: ['location', 'snippet']
             },
             networks: {
-                hardhat: {
-                    chainId: 1337
-                }
             },
             namedAccounts: {
                 deployer: {
@@ -133,44 +99,45 @@ export class WorkspaceService {
             if (!fs.existsSync(hardhatConfigPath)) {
                 const defaultSettings = this.getSettings();
                 const configContent = `
-                    require("dotenv").config();
-                    import { HardhatUserConfig } from "hardhat/config";
-                    import "@nomicfoundation/hardhat-toolbox";
-                    import "hardhat-deploy";
-                    const config: HardhatUserConfig = {
-                        solidity: {
-                            version: "${defaultSettings.version}",
-                            settings: {
-                                optimizer: {
-                                    enabled: ${defaultSettings.optimizer.enabled},
-                                    runs: ${defaultSettings.optimizer.runs}
-                                },
-                                evmVersion: "${defaultSettings.evmVersion}",
-                                viaIR: ${defaultSettings.viaIR},
-                                metadata: {
-                                    bytecodeHash: "${defaultSettings.metadata.bytecodeHash}"
-                                }
-                            }
-                        },
-                        paths: {
-                        sources: "./contracts",
-                        tests: "./test",
-                        cache: "./cache",
-                        artifacts: "./artifacts"
-                    },
-                    namedAccounts: {
-                        deployer: {
-                            default: 0
-                        }
-                    },
-                    networks: {
-                        hardhat: {
-                            chainId: 1337
-                        }
-                    }
-                };
+require("dotenv").config();
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-deploy";
 
-                export default config;
+const config: HardhatUserConfig = {
+    solidity: {
+        version: "0.8.20",
+        settings: {
+            optimizer: {
+                enabled: false,
+                runs: 200
+            },
+            evmVersion: "london",
+            viaIR: false,
+            metadata: {
+                bytecodeHash: "ipfs"
+            }
+        }
+    },
+        paths: {
+        sources: "./contracts",
+        tests: "./test",
+        cache: "./cache",
+        artifacts: "./artifacts"
+    },
+    namedAccounts: {
+        deployer: {
+            default: 0
+        }
+    },
+    networks: {
+        hardhat: {
+            chainId: 1337
+        }
+    }
+};
+
+export default config;
                 `;
                 await fs.promises.writeFile(hardhatConfigPath, configContent);
             }
@@ -179,59 +146,6 @@ export class WorkspaceService {
         } catch (error) {
             throw new Error(`Failed to initialize workspace: ${(error as Error).message}`);
         }
-    }
-
-    public async updateHardhatConfig(settings: HardhatConfig) {
-        const workspacePath = this.getWorkspacePath();
-        const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
-
-        const configContent = `
-        require("dotenv").config();
-        import { HardhatUserConfig } from "hardhat/config";
-        import "@nomicfoundation/hardhat-toolbox";
-        import "hardhat-deploy";
-
-        const config: HardhatUserConfig = {
-            solidity: {
-                version: "${settings.version}",
-                settings: {
-                    optimizer: {
-                        enabled: ${settings.optimizer.enabled},
-                        runs: ${settings.optimizer.runs}
-                    },
-                    evmVersion: "${settings.evmVersion}",
-                    viaIR: ${settings.viaIR},
-                    metadata: {
-                        bytecodeHash: "${settings.metadata.bytecodeHash}"
-                    }
-                }
-            },
-                paths: {
-                sources: "./contracts",
-                tests: "./test",
-                cache: "./cache",
-                artifacts: "./artifacts"
-            },
-            namedAccounts: {
-                deployer: {
-                    default: 0
-                }
-            },
-            networks: {
-                hardhat: {
-                    chainId: 1337
-                }${settings.networks?.network ? `,
-                network: {
-                    url: "${settings.networks.network.url}",
-                    accounts: ${JSON.stringify(settings.networks.network.accounts)},
-                    chainId: ${settings.networks.network.chainId}
-                }` : ''}
-            }
-        };
-
-        export default config;`;
-
-        await fs.promises.writeFile(hardhatConfigPath, configContent);
     }
 
     public async getContractFiles(): Promise<string[]> {
