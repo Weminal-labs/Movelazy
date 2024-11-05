@@ -45,12 +45,9 @@ const DeployerPage = () => {
     }, []);
 
     useEffect(() => {
-        if (settings.environment === 'local') {
-            window.vscode.postMessage({ command: 'solidity.startLocalNode' });
-        } else {
-            window.vscode.postMessage({ command: 'solidity.stopLocalNode' });
-        }
-    }, [settings.environment]);
+        // Request accounts only once when component mounts
+        window.vscode.postMessage({ command: 'solidity.startLocalNode' });
+    }, []); // Empty dependency array means this runs once on mount
 
     return (
         <div className="h-[calc(100vh-64px)] flex flex-col">
