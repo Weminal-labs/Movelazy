@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { SolidityService } from './services/solidity';
 import { AptosService } from './services/aptos';
+import { AptosTesterService } from './services/aptos/tester';
 
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
@@ -120,6 +121,9 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'aptos.clean':
                         await this.aptosService.clean(webviewView.webview);
+                        break;
+                    case 'aptos.tester':
+                        await this.aptosService.test(webviewView.webview, message.flags.enabled, message.flags.testName);
                         break;
                 }
             } catch (error) {
