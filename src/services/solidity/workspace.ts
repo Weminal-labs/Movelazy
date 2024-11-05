@@ -95,7 +95,7 @@ export class WorkspaceService {
 
             // Install Hardhat if not installed
             if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'))) {
-                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox hardhat-deploy dotenv typescript ts-node', {
+                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox hardhat-deploy dotenv typescript ts-node ethers', {
                     cwd: workspacePath
                 });
             }
@@ -152,7 +152,6 @@ const config: HardhatUserConfig = {
     },
     networks: {
         hardhat: {
-            name: 'hardhat',
             chainId: 1337
         },
         ${defaultSettings.networks ? Object.entries(defaultSettings.networks)
@@ -215,7 +214,6 @@ const config: HardhatUserConfig = {
     },
     networks: {
         hardhat: {
-            name: 'hardhat',
             chainId: 1337
         },
         ${settings.networks ? Object.entries(settings.networks)
