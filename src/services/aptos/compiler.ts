@@ -1,34 +1,3 @@
-// // src/services/aptos.ts
-// import { AptosClient } from 'aptos'; // Giả sử bạn đã cài đặt aptos SDK
-// import { exec } from 'child_process';
-// import { promisify } from 'util';
-
-// const execAsync = promisify(exec);
-
-// export class AptosService {
-//     private client!: AptosClient;
-
-//     constructor() {
-//         this.client = new AptosClient('http://127.0.0.1:8080'); // Địa chỉ RPC của Aptos
-//     }
-
-//     async publish(profileName: string, packageDir: string, namedAddresses: string) {
-//         const command = `aptos move publish --profile ${profileName} --package-dir ${packageDir} --named-addresses ${namedAddresses}`;
-
-//         try {
-//             const { stdout, stderr } = await execAsync(command);
-//             if (stderr) {
-//                 console.error('Error publishing:', stderr);
-//                 throw new Error(stderr);
-//             }
-//             console.log('Publish output:', stdout);
-//             return stdout; // Trả về kết quả xuất bản
-//         } catch (error) {
-//             console.error('Failed to publish:', error);
-//             throw error;
-//         }
-//     }
-// }
 
 import * as vscode from 'vscode';
 import { exec } from 'child_process';

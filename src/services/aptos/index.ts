@@ -1,14 +1,17 @@
 import { AptosCompilerService } from './compiler';
+import { AptosTesterService } from './tester';
 import { WorkspaceService } from './workspace';
 import * as vscode from 'vscode';
 
 export class AptosService {
     private compiler: AptosCompilerService;
+    private tester: AptosTesterService;
     private workspace: WorkspaceService;
 
     constructor(context: vscode.ExtensionContext) {
         this.workspace = new WorkspaceService(context);
         this.compiler = new AptosCompilerService();
+        this.tester = new AptosTesterService();
     }
 
     async compile(webview: vscode.Webview) {
@@ -18,9 +21,18 @@ export class AptosService {
         const moveVersion = settings.moveVersion;
         const optimizer = settings.optimizer.enabled;
         const optimizerlevel = settings.optimizer.level;
-        const bytecodeHash = settings.metadata?.bytecodeHash;
+        const bytecodeHash = settings.metadata.bytecodeHash;
         console.log("check>>", settings);
         return this.compiler.compile(webview, packageDir, namedAddresses, moveVersion, optimizer, optimizerlevel, bytecodeHash);
+    }
+
+    async test(webview: vscode.Webview, enabled: boolean, testName: string) {
+        const settings = this.workspace.getSettings();
+        const moveVersion = settings.moveVersion;
+        const optimizer = settings.optimizer.enabled;
+        const optimizerlevel = settings.optimizer.level;
+        const bytecodeHash = settings.metadata.bytecodeHash;
+        return this.tester.tester(webview, enabled, testName, moveVersion, optimizer, optimizerlevel, bytecodeHash);
     }
 
     async initWorkspace() {
