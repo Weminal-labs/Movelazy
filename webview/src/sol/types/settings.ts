@@ -18,3 +18,8 @@ export interface CompilerSettings {
     packageDir?: string,
     nameAddresses?: string,
 }
+
+export interface Flags {
+    enabled: boolean;
+    testName: string;
+}
