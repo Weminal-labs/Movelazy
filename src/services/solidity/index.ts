@@ -3,6 +3,7 @@ import { WorkspaceService } from './workspace';
 import { AccountService } from './account';
 import { DeployService } from './deploy';
 import * as vscode from 'vscode';
+import { CompilerConfig, DefaultConfig } from './types';
 
 export class SolidityService {
     private compiler: CompilerService;
@@ -25,8 +26,9 @@ export class SolidityService {
         return this.workspace.initializeWorkspace();
     }
 
-    async updateConfig(settings: any) {
-        await this.workspace.updateHardhatConfig(settings);
+    async updateCompilerConfig(settings: CompilerConfig) {
+        console.log('Updating compiler config with:', settings);
+        await this.compiler.updateCompilerConfig(settings);
         await this.workspace.saveSettings(settings);
     }
 
@@ -48,9 +50,5 @@ export class SolidityService {
 
     async stopLocalNode() {
         return this.account.stopLocalNode();
-    }
-
-    async runDeploy(webview: vscode.Webview, settings: any) {
-        return this.deploy.deploy(webview, settings);
     }
 } 

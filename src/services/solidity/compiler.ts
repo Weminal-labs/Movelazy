@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import path from 'path';
+import fs from 'fs';
+import { CompilerConfig } from './types';
 
 const execAsync = promisify(exec);
 
@@ -46,7 +49,51 @@ export class CompilerService {
             });
         }
     }
+    async updateCompilerConfig(settings: CompilerConfig) {
+        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        if (!workspacePath) {
+            return;
+        }
+        const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
 
+        const configContent = `
+        require("dotenv").config();
+        import { HardhatUserConfig } from "hardhat/config";
+        import "@nomicfoundation/hardhat-toolbox";
+        import "hardhat-deploy";
+
+        const config: HardhatUserConfig = {
+            solidity: {
+                version: "${settings.version}",
+                settings: {
+                    optimizer: {
+                        enabled: ${settings.settings.optimizer.enabled},
+                        runs: ${settings.settings.optimizer.runs}
+                    },
+                    evmVersion: "${settings.settings.evmVersion}",
+                    viaIR: ${settings.settings.viaIR},
+                    metadata: {
+                        bytecodeHash: "${settings.settings.metadata.bytecodeHash}"
+                    }
+                }
+            },
+                paths: {
+                sources: "./contracts",
+                tests: "./test",
+                cache: "./cache",
+                artifacts: "./artifacts"
+            },
+            namedAccounts: {
+                deployer: {
+                    default: 0
+                }
+            },
+        };
+
+        export default config;`;
+
+        await fs.promises.writeFile(hardhatConfigPath, configContent);
+    }
     async clean(webview: vscode.Webview) {
         const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
         if (!workspacePath) {

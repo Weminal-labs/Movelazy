@@ -1,7 +1,28 @@
 export interface NetworkConfig {
-    url?: string;
-    accounts?: string[];
-    chainId?: number;
+    networkName: string;
+    url: string;
+    accounts: string[];
+    chainId: number;
+}
+
+export interface CompilerConfig {
+    version: string;
+    settings: {
+        optimizer: {
+            enabled: boolean;
+            runs: number;
+        };
+        evmVersion: string;
+        viaIR: boolean;
+        metadata: {
+            bytecodeHash: "ipfs" | "bzzr1";
+        };
+        outputSelection: {
+            "*": {
+                "*": string[];
+            };
+        };
+    };
 }
 
 export interface HardhatConfig {
@@ -18,12 +39,21 @@ export interface HardhatConfig {
     debug: {
         debugInfo: string[];
     };
-    networks?: {
-        [key: string]: NetworkConfig;
+    networks: {
+        hardhat: {
+            chainId: 1337;
+        };
+        network?: NetworkConfig;
     };
-    namedAccounts?: {
+    namedAccounts: {
         deployer: {
             default: number;
         };
+    };
+    paths: {
+        sources: string;
+        tests: string;
+        cache: string;
+        artifacts: string;
     };
 }

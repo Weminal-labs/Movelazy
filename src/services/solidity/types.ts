@@ -6,16 +6,49 @@ export interface NetworkConfig {
     accounts?: string[];
     chainId?: number;
 }
-
-export interface ConstructorParam {
-    name: string;
-    type: string;
-    value: string;
+export interface DefaultConfig {
+    version: string;
+    evmVersion: string;
+    optimizer: {
+        enabled: boolean;
+        runs: number;
+    };
+    metadata: {
+        bytecodeHash: string;
+    };
+    viaIR: boolean;
+    debug: {
+        debugInfo: string[];
+    };
+    networks: {
+        network?: {
+            url: string;
+            accounts: string[];
+            chainId: number;
+        };
+    };
+    namedAccounts: {
+        deployer: {
+            default: number;
+        };
+    }
 }
-
-export interface DeploymentSettings {
-    selectedContract: string;
-    constructorParams: ConstructorParam[];
-    environment: NetworkEnvironment;
-    network: NetworkConfig;
-} 
+export interface CompilerConfig {
+    version: string;
+    settings: {
+        optimizer: {
+            enabled: boolean;
+            runs: number;
+        };
+        evmVersion: string;
+        viaIR: boolean;
+        metadata: {
+            bytecodeHash: "ipfs" | "bzzr1";
+        };
+        outputSelection: {
+            "*": {
+                "*": string[];
+            };
+        };
+    };
+}

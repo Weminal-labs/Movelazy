@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { EnvironmentSelector } from '../../components/deployer/EnvironmentSelector'
 import { AccountInfo } from '../../components/deployer/AccountInfo'
 import { NetworkSettings } from '../../components/deployer/NetworkSettings'
-import { ContractDeployer } from '../../components/deployer/ContractDeployer'
-import { DeployedContracts } from '../../components/deployer/DeployedContracts'
 import { HardhatAccount } from '../../types/account'
 import { DeploymentState } from '../../types/deployment'
 
@@ -22,7 +20,6 @@ const DeployerPage = () => {
     });
 
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -40,22 +37,6 @@ const DeployerPage = () => {
                         }));
                     }
                     break;
-                case 'deployStatus':
-                    setLoading(false);
-                    if (message.success) {
-                        const address = message.message.match(/Contract deployed to: (.+)/)?.[1];
-                        if (address) {
-                            setSettings(prev => ({
-                                ...prev,
-                                deployedContracts: [...prev.deployedContracts, {
-                                    address,
-                                    name: prev.selectedContract,
-                                    network: prev.environment === 'local' ? 'hardhat' : prev.network.name
-                                }]
-                            }));
-                        }
-                    }
-                    break;
             }
         };
 
@@ -70,19 +51,6 @@ const DeployerPage = () => {
             window.vscode.postMessage({ command: 'solidity.stopLocalNode' });
         }
     }, [settings.environment]);
-
-    const handleDeploy = () => {
-        setLoading(true);
-        window.vscode.postMessage({
-            command: 'solidity.deploy',
-            settings: {
-                selectedContract: settings.selectedContract,
-                constructorParams: settings.constructorParams,
-                environment: settings.environment,
-                network: settings.network
-            }
-        });
-    };
 
     return (
         <div className="h-[calc(100vh-64px)] flex flex-col">
@@ -129,24 +97,6 @@ const DeployerPage = () => {
                                 })}
                             />
                         )}
-
-                        <ContractDeployer
-                            selectedContract={settings.selectedContract}
-                            constructorParams={settings.constructorParams}
-                            onChange={(contract, params) => setSettings({
-                                ...settings,
-                                selectedContract: contract,
-                                constructorParams: params
-                            })}
-                            onDeploy={handleDeploy}
-                            disabled={loading || !settings.selectedContract || 
-                                (settings.environment === 'imported' && 
-                                (!settings.network.url || !settings.network.accounts.length))}
-                        />
-
-                        <DeployedContracts
-                            contracts={settings.deployedContracts}
-                        />
                     </div>
                 </div>
             </div>

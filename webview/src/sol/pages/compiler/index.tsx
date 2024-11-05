@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { BasicSettings } from '../../components/compiler/BasicSettings'
 import { OptimizerSettings } from '../../components/compiler/OptimizerSettings'
 import { AdvancedSettings } from '../../components/compiler/AdvancedSettings'
-import { DebugSettings } from '../../components/compiler/DebugSettings'
-import { HardhatConfig } from '../../types/settings'
+import { CompilerConfig } from '../../types/settings'
 import { VSCodeApi } from '../../types/vscode';
 
 declare global {
@@ -13,28 +12,22 @@ declare global {
 }
 
 const CompilerPage = () => {
-    const [settings, setSettings] = useState<HardhatConfig>({
+    const [settings, setSettings] = useState<CompilerConfig>({
         version: '0.8.20',
-        evmVersion: 'london',
-        optimizer: {
-            enabled: false,
-            runs: 200
-        },
-        metadata: {
-            bytecodeHash: 'ipfs'
-        },
-        viaIR: false,
-        debug: {
-            debugInfo: ['location', 'snippet']
-        },
-        networks: {
-            hardhat: {
-                chainId: 1337
-            }
-        },
-        namedAccounts: {
-            deployer: {
-                default: 0
+        settings: {
+            optimizer: {
+                enabled: false,
+                runs: 200
+            },
+            evmVersion: 'london',
+            viaIR: false,
+            metadata: {
+                bytecodeHash: 'ipfs'
+            },
+            outputSelection: {
+                "*": {
+                    "*": ["abi", "evm.bytecode"]
+                }
             }
         }
     });
@@ -81,6 +74,7 @@ const CompilerPage = () => {
         setCompiling(true);
         setCompileStatus({ type: null, message: '' });
 
+        console.log(settings);
         try {
             window.vscode.postMessage({
                 command: 'solidity.compile',
@@ -112,6 +106,40 @@ const CompilerPage = () => {
         }
     };
 
+    const handleBasicSettingsChange = (key: string, value: string | boolean) => {
+        if (key === 'version') {
+            setSettings({ ...settings, version: value as string });
+        } else if (key === 'evmVersion') {
+            setSettings({
+                ...settings,
+                settings: { ...settings.settings, evmVersion: value as string }
+            });
+        }
+    };
+
+    const handleOptimizerSettingsChange = (enabled: boolean, runs?: number) => {
+        setSettings({
+            ...settings,
+            settings: {
+                ...settings.settings,
+                optimizer: { enabled, runs: runs || settings.settings.optimizer.runs }
+            }
+        });
+    };
+
+    const handleAdvancedSettingsChange = (key: string, value: string | boolean) => {
+        setSettings({
+            ...settings,
+            settings: {
+                ...settings.settings,
+                [key]: value,
+                ...(key === 'bytecodeHash' ? {
+                    metadata: { ...settings.settings.metadata, bytecodeHash: value as "ipfs" | "bzzr1" }
+                } : {})
+            }
+        });
+    };
+
     return (
         <div className="flex flex-col w-full h-[calc(100vh-64px)]">
             <div className="flex-1 bg-background-light border border-border overflow-y-auto">
@@ -122,9 +150,8 @@ const CompilerPage = () => {
                             <button
                                 onClick={handleClean}
                                 disabled={cleaning || compiling}
-                                className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${
-                                    (cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${(cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                             >
                                 {cleaning ? (
                                     <div className="flex items-center gap-2">
@@ -136,9 +163,8 @@ const CompilerPage = () => {
                             <button
                                 onClick={handleCompile}
                                 disabled={cleaning || compiling}
-                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${
-                                    (cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${(cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                             >
                                 {compiling ? (
                                     <div className="flex items-center gap-2">
@@ -153,37 +179,18 @@ const CompilerPage = () => {
                     <div className="space-y-6">
                         <BasicSettings
                             version={settings.version}
-                            evmVersion={settings.evmVersion}
-                            onChange={(key, value) => setSettings({ ...settings, [key]: value })}
+                            evmVersion={settings.settings.evmVersion}
+                            onChange={handleBasicSettingsChange}
                         />
                         <OptimizerSettings
-                            enabled={settings.optimizer.enabled}
-                            runs={settings.optimizer.runs}
-                            onChange={(enabled, runs) => setSettings({
-                                ...settings,
-                                optimizer: { enabled, runs: runs || settings.optimizer.runs }
-                            })}
+                            enabled={settings.settings.optimizer.enabled}
+                            runs={settings.settings.optimizer.runs}
+                            onChange={handleOptimizerSettingsChange}
                         />
                         <AdvancedSettings
-                            bytecodeHash={settings.metadata.bytecodeHash}
-                            viaIR={settings.viaIR}
-                            onChange={(key, value) => {
-                                if (key === 'bytecodeHash' && typeof value === 'string') {
-                                    setSettings({
-                                        ...settings,
-                                        metadata: { ...settings.metadata, bytecodeHash: value }
-                                    })
-                                } else {
-                                    setSettings({ ...settings, [key]: value })
-                                }
-                            }}
-                        />
-                        <DebugSettings
-                            debugInfo={settings.debug.debugInfo}
-                            onChange={(debugInfo) => setSettings({
-                                ...settings,
-                                debug: { ...settings.debug, debugInfo }
-                            })}
+                            bytecodeHash={settings.settings.metadata.bytecodeHash}
+                            viaIR={settings.settings.viaIR}
+                            onChange={handleAdvancedSettingsChange}
                         />
                     </div>
                 </div>
@@ -193,8 +200,8 @@ const CompilerPage = () => {
             {compileStatus.type && (
                 <div
                     className={`p-4 border-t border-border transition-all ${compileStatus.type === 'success'
-                            ? 'bg-green-500/5 text-green-500 border-green-500/20'
-                            : 'bg-red-500/5 text-red-500 border-red-500/20'
+                        ? 'bg-green-500/5 text-green-500 border-green-500/20'
+                        : 'bg-red-500/5 text-red-500 border-red-500/20'
                         }`}
                 >
                     <pre className="font-mono text-sm whitespace-pre-wrap">
