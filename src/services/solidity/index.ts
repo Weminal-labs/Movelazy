@@ -51,4 +51,8 @@ export class SolidityService {
     async stopLocalNode() {
         return this.account.stopLocalNode();
     }
+
+    getAccounts() {
+        return this.account.getAccounts();
+    }
 } 
