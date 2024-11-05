@@ -3,12 +3,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execAsync } from '../../utils/execAsync';
 
-export interface NetworkConfig {
-    name: string;
-    url?: string;
-    accounts?: string[];
-    chainId?: number;
-}
 
 export interface HardhatConfig {
     version: string;
@@ -24,14 +18,21 @@ export interface HardhatConfig {
     debug: {
         debugInfo: string[];
     };
-    networks?: {
-        [key: string]: NetworkConfig;
+    networks: {
+        hardhat: {
+            chainId: 1337;
+        };
+        network?: {
+            url: string;
+            accounts: string[];
+            chainId: number;
+        };
     };
-    namedAccounts?: {
+    namedAccounts: {
         deployer: {
             default: number;
         };
-    };
+    }
 }
 
 export class WorkspaceService {
@@ -53,7 +54,7 @@ export class WorkspaceService {
 
 
     public getSettings(): HardhatConfig {
-        return this.context.workspaceState.get(this.stateKey) || {
+        const defaultSettings: HardhatConfig = {
             version: '0.8.20',
             evmVersion: 'london',
             optimizer: {
@@ -69,7 +70,6 @@ export class WorkspaceService {
             },
             networks: {
                 hardhat: {
-                    name: 'hardhat',
                     chainId: 1337
                 }
             },
@@ -79,6 +79,8 @@ export class WorkspaceService {
                 }
             }
         };
+
+        return this.context.workspaceState.get(this.stateKey) || defaultSettings;
     }
 
     public async initializeWorkspace() {
@@ -120,60 +122,57 @@ export class WorkspaceService {
                     JSON.stringify(tsconfigContent, null, 2)
                 );
             }
+            // Create contracts directory if it doesn't exist
+            const contractsDir = path.join(workspacePath, 'contracts');
+            if (!fs.existsSync(contractsDir)) {
+                await fs.promises.mkdir(contractsDir);
+            }
 
             // Create hardhat.config.ts with default settings
             const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
             if (!fs.existsSync(hardhatConfigPath)) {
                 const defaultSettings = this.getSettings();
                 const configContent = `
-require("dotenv").config();
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
-import "hardhat-deploy";
-const config: HardhatUserConfig = {
-    solidity: {
-        version: "${defaultSettings.version}",
-        settings: {
-            optimizer: {
-                enabled: ${defaultSettings.optimizer.enabled},
-                runs: ${defaultSettings.optimizer.runs}
-            },
-            evmVersion: "${defaultSettings.evmVersion}",
-            viaIR: ${defaultSettings.viaIR},
-            metadata: {
-                bytecodeHash: "${defaultSettings.metadata.bytecodeHash}"
-            }
-        }
-    },
-    namedAccounts: {
-        deployer: {
-            default: 0
-        }
-    },
-    networks: {
-        hardhat: {
-            chainId: 1337
-        },
-        ${defaultSettings.networks ? Object.entries(defaultSettings.networks)
-                        .filter(([name]) => name !== 'hardhat')
-                        .map(([name, config]) => `
-        ${name}: {
-            url: "${config.url}",
-            accounts: ${JSON.stringify(config.accounts || [])},
-            chainId: ${config.chainId || 1337}
-        }`).join(',') : ''}
-    }
-};
+                    require("dotenv").config();
+                    import { HardhatUserConfig } from "hardhat/config";
+                    import "@nomicfoundation/hardhat-toolbox";
+                    import "hardhat-deploy";
+                    const config: HardhatUserConfig = {
+                        solidity: {
+                            version: "${defaultSettings.version}",
+                            settings: {
+                                optimizer: {
+                                    enabled: ${defaultSettings.optimizer.enabled},
+                                    runs: ${defaultSettings.optimizer.runs}
+                                },
+                                evmVersion: "${defaultSettings.evmVersion}",
+                                viaIR: ${defaultSettings.viaIR},
+                                metadata: {
+                                    bytecodeHash: "${defaultSettings.metadata.bytecodeHash}"
+                                }
+                            }
+                        },
+                        paths: {
+                        sources: "./contracts",
+                        tests: "./test",
+                        cache: "./cache",
+                        artifacts: "./artifacts"
+                    },
+                    namedAccounts: {
+                        deployer: {
+                            default: 0
+                        }
+                    },
+                    networks: {
+                        hardhat: {
+                            chainId: 1337
+                        }
+                    }
+                };
 
-export default config;
+                export default config;
                 `;
                 await fs.promises.writeFile(hardhatConfigPath, configContent);
-            }
-
-            // Create contracts directory if it doesn't exist
-            const contractsDir = path.join(workspacePath, 'contracts');
-            if (!fs.existsSync(contractsDir)) {
-                await fs.promises.mkdir(contractsDir);
             }
 
             return true;
@@ -187,48 +186,50 @@ export default config;
         const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
 
         const configContent = `
-require("dotenv").config();
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
-import "hardhat-deploy";
+        require("dotenv").config();
+        import { HardhatUserConfig } from "hardhat/config";
+        import "@nomicfoundation/hardhat-toolbox";
+        import "hardhat-deploy";
 
-const config: HardhatUserConfig = {
-    solidity: {
-        version: "${settings.version}",
-        settings: {
-            optimizer: {
-                enabled: ${settings.optimizer.enabled},
-                runs: ${settings.optimizer.runs}
+        const config: HardhatUserConfig = {
+            solidity: {
+                version: "${settings.version}",
+                settings: {
+                    optimizer: {
+                        enabled: ${settings.optimizer.enabled},
+                        runs: ${settings.optimizer.runs}
+                    },
+                    evmVersion: "${settings.evmVersion}",
+                    viaIR: ${settings.viaIR},
+                    metadata: {
+                        bytecodeHash: "${settings.metadata.bytecodeHash}"
+                    }
+                }
             },
-            evmVersion: "${settings.evmVersion}",
-            viaIR: ${settings.viaIR},
-            metadata: {
-                bytecodeHash: "${settings.metadata.bytecodeHash}"
+                paths: {
+                sources: "./contracts",
+                tests: "./test",
+                cache: "./cache",
+                artifacts: "./artifacts"
+            },
+            namedAccounts: {
+                deployer: {
+                    default: 0
+                }
+            },
+            networks: {
+                hardhat: {
+                    chainId: 1337
+                }${settings.networks?.network ? `,
+                network: {
+                    url: "${settings.networks.network.url}",
+                    accounts: ${JSON.stringify(settings.networks.network.accounts)},
+                    chainId: ${settings.networks.network.chainId}
+                }` : ''}
             }
-        }
-    },
-    namedAccounts: {
-        deployer: {
-            default: 0
-        }
-    },
-    networks: {
-        hardhat: {
-            chainId: 1337
-        },
-        ${settings.networks ? Object.entries(settings.networks)
-                .filter(([name]) => name !== 'hardhat')
-                .map(([name, config]) => `
-        ${config.name}: {
-            name: "${config.name}",
-            url: "${config.url}",
-            accounts: ${JSON.stringify(config.accounts || [])},
-            chainId: ${config.chainId || 1337}
-        }`).join(',') : ''}
-    }
-};
+        };
 
-export default config;`;
+        export default config;`;
 
         await fs.promises.writeFile(hardhatConfigPath, configContent);
     }
