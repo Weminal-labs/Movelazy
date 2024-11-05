@@ -3,13 +3,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execAsync } from '../../utils/execAsync';
 
-export interface HardhatNetworkConfig {
+export interface NetworkConfig {
+    name: string;
     url?: string;
     accounts?: string[];
     chainId?: number;
 }
 
-export interface CompilerSettings {
+export interface HardhatConfig {
     version: string;
     evmVersion: string;
     optimizer: {
@@ -24,7 +25,12 @@ export interface CompilerSettings {
         debugInfo: string[];
     };
     networks?: {
-        [key: string]: HardhatNetworkConfig;
+        [key: string]: NetworkConfig;
+    };
+    namedAccounts?: {
+        deployer: {
+            default: number;
+        };
     };
 }
 
@@ -44,9 +50,9 @@ export class WorkspaceService {
         }
         return workspaceFolders[0].uri.fsPath;
     }
-    
 
-    public getSettings(): any {
+
+    public getSettings(): HardhatConfig {
         return this.context.workspaceState.get(this.stateKey) || {
             version: '0.8.20',
             evmVersion: 'london',
@@ -60,6 +66,17 @@ export class WorkspaceService {
             viaIR: false,
             debug: {
                 debugInfo: ['location', 'snippet']
+            },
+            networks: {
+                hardhat: {
+                    name: 'hardhat',
+                    chainId: 1337
+                }
+            },
+            namedAccounts: {
+                deployer: {
+                    default: 0
+                }
             }
         };
     }
@@ -78,7 +95,7 @@ export class WorkspaceService {
 
             // Install Hardhat if not installed
             if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'))) {
-                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox typescript ts-node', {
+                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox hardhat-deploy dotenv typescript ts-node ethers', {
                     cwd: workspacePath
                 });
             }
@@ -99,7 +116,7 @@ export class WorkspaceService {
                     }
                 };
                 await fs.promises.writeFile(
-                    tsconfigPath, 
+                    tsconfigPath,
                     JSON.stringify(tsconfigContent, null, 2)
                 );
             }
@@ -109,24 +126,43 @@ export class WorkspaceService {
             if (!fs.existsSync(hardhatConfigPath)) {
                 const defaultSettings = this.getSettings();
                 const configContent = `
+require("dotenv").config();
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-
+import "hardhat-deploy";
 const config: HardhatUserConfig = {
-  solidity: {
-    version: "${defaultSettings.version}",
-    settings: {
-      optimizer: {
-        enabled: ${defaultSettings.optimizer.enabled},
-        runs: ${defaultSettings.optimizer.runs}
-      },
-      evmVersion: "${defaultSettings.evmVersion}",
-      viaIR: ${defaultSettings.viaIR},
-      metadata: {
-        bytecodeHash: "${defaultSettings.metadata.bytecodeHash}"
-      }
+    solidity: {
+        version: "${defaultSettings.version}",
+        settings: {
+            optimizer: {
+                enabled: ${defaultSettings.optimizer.enabled},
+                runs: ${defaultSettings.optimizer.runs}
+            },
+            evmVersion: "${defaultSettings.evmVersion}",
+            viaIR: ${defaultSettings.viaIR},
+            metadata: {
+                bytecodeHash: "${defaultSettings.metadata.bytecodeHash}"
+            }
+        }
+    },
+    namedAccounts: {
+        deployer: {
+            default: 0
+        }
+    },
+    networks: {
+        hardhat: {
+            chainId: 1337
+        },
+        ${defaultSettings.networks ? Object.entries(defaultSettings.networks)
+                        .filter(([name]) => name !== 'hardhat')
+                        .map(([name, config]) => `
+        ${name}: {
+            url: "${config.url}",
+            accounts: ${JSON.stringify(config.accounts || [])},
+            chainId: ${config.chainId || 1337}
+        }`).join(',') : ''}
     }
-  }
 };
 
 export default config;
@@ -146,13 +182,15 @@ export default config;
         }
     }
 
-    public async updateHardhatConfig(settings: CompilerSettings) {
+    public async updateHardhatConfig(settings: HardhatConfig) {
         const workspacePath = this.getWorkspacePath();
         const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
 
         const configContent = `
+require("dotenv").config();
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-deploy";
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -169,13 +207,23 @@ const config: HardhatUserConfig = {
             }
         }
     },
+    namedAccounts: {
+        deployer: {
+            default: 0
+        }
+    },
     networks: {
-        hardhat: {},
-        ${settings.networks ? Object.entries(settings.networks).map(([name, config]) => `
-        ${name}: {
+        hardhat: {
+            chainId: 1337
+        },
+        ${settings.networks ? Object.entries(settings.networks)
+                .filter(([name]) => name !== 'hardhat')
+                .map(([name, config]) => `
+        ${config.name}: {
+            name: "${config.name}",
             url: "${config.url}",
             accounts: ${JSON.stringify(config.accounts || [])},
-            chainId: ${config.chainId || 'undefined'}
+            chainId: ${config.chainId || 1337}
         }`).join(',') : ''}
     }
 };
@@ -199,7 +247,7 @@ export default config;`;
 
     public async isHardhatWorkspace(): Promise<boolean> {
         const workspacePath = this.getWorkspacePath();
-        
+
         try {
             // Check 1: npx hardhat --version
             try {
@@ -228,7 +276,7 @@ export default config;`;
 
             const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, 'utf8'));
             const hasHardhatDep = !!(packageJson.dependencies?.hardhat || packageJson.devDependencies?.hardhat);
-            
+
             return hasHardhatDep;
         } catch {
             return false;

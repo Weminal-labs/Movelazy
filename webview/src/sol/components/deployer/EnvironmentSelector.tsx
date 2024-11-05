@@ -1,19 +1,26 @@
 import { ChangeEvent } from 'react';
 
 interface EnvironmentSelectorProps {
-    environment: 'local' | 'testnet' | 'mainnet';
-    onChange: (environment: 'local' | 'testnet' | 'mainnet') => void;
+    environment: 'local' | 'imported';
+    onChange: (environment: 'local' | 'imported') => void;
 }
 
 export const EnvironmentSelector = ({ environment, onChange }: EnvironmentSelectorProps) => {
     const environments = [
-        { value: 'local', label: 'Hardhat Network (Local)', description: 'Deploy to local development network' },
-        { value: 'testnet', label: 'TestNet', description: 'Deploy to public test networks' },
-        { value: 'mainnet', label: 'MainNet', description: 'Deploy to production networks' }
+        { 
+            value: 'local', 
+            label: 'Hardhat Network (Local)', 
+            description: 'Deploy to local development network with chainId 1337' 
+        },
+        { 
+            value: 'imported', 
+            label: 'Import Network', 
+            description: 'Deploy to custom networks like testnet or mainnet' 
+        }
     ] as const;
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
-        onChange(e.target.value as 'local' | 'testnet' | 'mainnet');
+        onChange(e.target.value as 'local' | 'imported');
     };
 
     return (
