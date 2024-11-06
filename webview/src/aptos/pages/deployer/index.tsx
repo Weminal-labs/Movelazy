@@ -45,7 +45,6 @@ const DeployerPage = () => {
                         <div className="space-y-6">
                             <AccountInfo
                                 account={settings.account}
-                                balance={settings.balance}
                             />
 
                             <GasSettings
