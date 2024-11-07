@@ -197,4 +197,36 @@ export default config;
             return false;
         }
     }
+
+    public async getCompiledContracts(): Promise<Array<{name: string, abi: any, bytecode: string}>> {
+        const workspacePath = this.getWorkspacePath();
+        const artifactsPath = path.join(workspacePath, 'artifacts', 'contracts');
+        const contracts = [];
+
+        if (!fs.existsSync(artifactsPath)) {
+            return [];
+        }
+
+        const files = await fs.promises.readdir(artifactsPath, { withFileTypes: true });
+        
+        for (const file of files) {
+            if (file.isDirectory()) {
+                const contractFiles = await fs.promises.readdir(path.join(artifactsPath, file.name));
+                const jsonFile = contractFiles.find(f => f.endsWith('.json') && !f.endsWith('.dbg.json'));
+                
+                if (jsonFile) {
+                    const contractPath = path.join(artifactsPath, file.name, jsonFile);
+                    const contractData = JSON.parse(await fs.promises.readFile(contractPath, 'utf8'));
+                    
+                    contracts.push({
+                        name: path.parse(jsonFile).name,
+                        abi: contractData.abi,
+                        bytecode: contractData.bytecode
+                    });
+                }
+            }
+        }
+
+        return contracts;
+    }
 }
