@@ -26,6 +26,7 @@ const DeployerPage = () => {
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
             const message = event.data;
+            console.log('Deployer received message:', message); // Debug log
             switch (message.type) {
                 case 'accounts':
                     setAccounts(message.accounts);
@@ -40,6 +41,7 @@ const DeployerPage = () => {
                     }
                     break;
                 case 'compiledContracts':
+                    console.log('Setting contract names:', message.contracts); // Debug log
                     setContractNames(message.contracts);
                     break;
             }
