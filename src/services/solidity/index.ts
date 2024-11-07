@@ -1,7 +1,6 @@
 import { CompilerService } from './compiler';
 import { WorkspaceService } from './workspace';
 import { AccountService } from './account';
-import { DeployService } from './deploy';
 import * as vscode from 'vscode';
 import { CompilerConfig, DefaultConfig } from './types';
 
@@ -9,13 +8,11 @@ export class SolidityService {
     private compiler: CompilerService;
     private workspace: WorkspaceService;
     private account: AccountService;
-    private deploy: DeployService;
 
     constructor(context: vscode.ExtensionContext) {
         this.workspace = new WorkspaceService(context);
         this.compiler = new CompilerService();
         this.account = new AccountService(context);
-        this.deploy = new DeployService(context);
     }
 
     async compile(webview: vscode.Webview) {
