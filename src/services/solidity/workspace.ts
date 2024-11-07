@@ -198,35 +198,28 @@ export default config;
         }
     }
 
-    public async getCompiledContracts(): Promise<Array<{name: string, abi: any, bytecode: string}>> {
+    public async getCompiledContracts(): Promise<string[]> {
         const workspacePath = this.getWorkspacePath();
         const artifactsPath = path.join(workspacePath, 'artifacts', 'contracts');
-        const contracts = [];
+        const contractNames: string[] = [];
 
         if (!fs.existsSync(artifactsPath)) {
             return [];
         }
 
         const files = await fs.promises.readdir(artifactsPath, { withFileTypes: true });
-        
+
         for (const file of files) {
             if (file.isDirectory()) {
                 const contractFiles = await fs.promises.readdir(path.join(artifactsPath, file.name));
-                const jsonFile = contractFiles.find(f => f.endsWith('.json') && !f.endsWith('.dbg.json'));
-                
-                if (jsonFile) {
-                    const contractPath = path.join(artifactsPath, file.name, jsonFile);
-                    const contractData = JSON.parse(await fs.promises.readFile(contractPath, 'utf8'));
-                    
-                    contracts.push({
-                        name: path.parse(jsonFile).name,
-                        abi: contractData.abi,
-                        bytecode: contractData.bytecode
-                    });
+                const jsonFiles = contractFiles.filter(f => f.endsWith('.json') && !f.endsWith('.dbg.json'));
+
+                for (const jsonFile of jsonFiles) {
+                    contractNames.push(path.parse(jsonFile).name);
                 }
             }
         }
 
-        return contracts;
+        return contractNames;
     }
 }
