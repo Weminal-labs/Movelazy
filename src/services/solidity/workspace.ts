@@ -207,19 +207,25 @@ export default config;
             return [];
         }
 
-        const files = await fs.promises.readdir(artifactsPath, { withFileTypes: true });
-
-        for (const file of files) {
-            if (file.isDirectory()) {
-                const contractFiles = await fs.promises.readdir(path.join(artifactsPath, file.name));
-                const jsonFiles = contractFiles.filter(f => f.endsWith('.json') && !f.endsWith('.dbg.json'));
-
-                for (const jsonFile of jsonFiles) {
-                    contractNames.push(path.parse(jsonFile).name);
+        // Read all .sol directories
+        const solDirs = await fs.promises.readdir(artifactsPath);
+        
+        for (const solDir of solDirs) {
+            const solPath = path.join(artifactsPath, solDir);
+            const stat = await fs.promises.stat(solPath);
+            
+            if (stat.isDirectory()) {
+                const files = await fs.promises.readdir(solPath);
+                // Filter for .json files that aren't .dbg.json
+                const contractFiles = files.filter(f => f.endsWith('.json') && !f.endsWith('.dbg.json'));
+                
+                for (const file of contractFiles) {
+                    contractNames.push(path.parse(file).name);
                 }
             }
         }
 
+        console.log('Found contracts:', contractNames); // Debug log
         return contractNames;
     }
 }
