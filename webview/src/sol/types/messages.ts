@@ -14,7 +14,8 @@ export type CompilerMessage = {
     | 'solidity.setAccount'
     | 'solidity.getAccountBalance'
     | 'solidity.getAccountPrivateKey'
-    | 'solidity.getAccountNonce';
+    | 'solidity.getAccountNonce'
+    | 'solidity.getCompiledContracts';
     settings?: CompilerConfig;
 };
 
