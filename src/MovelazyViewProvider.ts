@@ -78,6 +78,13 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                     case 'solidity.stopLocalNode':
                         await this.solidityService.stopLocalNode();
                         break;
+                    case 'solidity.getCompiledContracts':
+                        const contracts = await this.solidityService.callCompiledContracts(webviewView.webview);
+                        webviewView.webview.postMessage({
+                            type: 'compiledContracts',
+                            contracts: contracts
+                        });
+                        break;
                 }
             } catch (error) {
                 webviewView.webview.postMessage({

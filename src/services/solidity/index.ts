@@ -2,7 +2,7 @@ import { CompilerService } from './compiler';
 import { WorkspaceService } from './workspace';
 import { AccountService } from './account';
 import * as vscode from 'vscode';
-import { CompilerConfig, DefaultConfig } from './types';
+import { CompilerConfig } from './types';
 
 export class SolidityService {
     private compiler: CompilerService;
@@ -29,6 +29,17 @@ export class SolidityService {
         await this.workspace.saveSettings(settings);
     }
 
+    async callCompiledContracts(webview: vscode.Webview) {
+        try {
+            console.log('Calling compiled contracts');
+            const contracts = await this.workspace.getCompiledContracts();
+            return contracts;
+        } catch (error) {
+            console.error('Error getting compiled contracts:', error);
+            throw error;
+        }
+    }
+
     getSettings() {
         return this.workspace.getSettings();
     }
@@ -51,9 +62,5 @@ export class SolidityService {
 
     getAccounts() {
         return this.account.getAccounts();
-    }
-
-    async getCompiledContracts() {
-        return this.workspace.getCompiledContracts();
     }
 } 
