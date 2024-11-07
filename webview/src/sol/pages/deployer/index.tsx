@@ -5,7 +5,6 @@ import { NetworkSettings } from '../../components/deployer/NetworkSettings'
 import { HardhatAccount } from '../../types/account'
 import { DeploymentState } from '../../types/deployment'
 import { Select } from '../../components/ui/select'
-import { ContractData } from '../../types/abi'
 
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeploymentState>({
@@ -22,7 +21,7 @@ const DeployerPage = () => {
     });
 
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
-    const [contracts, setContracts] = useState<ContractData[]>([]);
+    const [contractNames, setContractNames] = useState<string[]>([]);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -40,8 +39,8 @@ const DeployerPage = () => {
                         }));
                     }
                     break;
-                case 'contracts':
-                    setContracts(message.contracts);
+                case 'compiledContracts':
+                    setContractNames(message.contracts);
                     break;
             }
         };
@@ -102,7 +101,7 @@ const DeployerPage = () => {
                         )}
 
                         <div className="space-y-4">
-                            <h3 className="text-lg font-medium text-text">Select Contract</h3>
+                            <h3 className="text-lg font-medium text-text">Select Compiled Contract</h3>
                             <Select
                                 value={settings.selectedContract}
                                 onChange={(e) => setSettings({
@@ -111,12 +110,17 @@ const DeployerPage = () => {
                                 })}
                             >
                                 <option value="">Select a contract</option>
-                                {contracts.map(contract => (
-                                    <option key={contract.name} value={contract.name}>
-                                        {contract.name}
+                                {contractNames.map(name => (
+                                    <option key={name} value={name}>
+                                        {name}
                                     </option>
                                 ))}
                             </Select>
+                            {settings.selectedContract && (
+                                <p className="text-sm text-text-light">
+                                    Selected contract: {settings.selectedContract}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
