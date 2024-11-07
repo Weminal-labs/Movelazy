@@ -32,4 +32,10 @@ export interface DeployedContract {
     address: string
     abi: AbiItem[]
     name: string
+}
+
+export interface ContractData {
+    name: string
+    abi: AbiFunction[]
+    bytecode: string
 } 

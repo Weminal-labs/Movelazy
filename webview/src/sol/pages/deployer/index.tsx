@@ -5,6 +5,7 @@ import { NetworkSettings } from '../../components/deployer/NetworkSettings'
 import { HardhatAccount } from '../../types/account'
 import { DeploymentState } from '../../types/deployment'
 import { Select } from '../../components/ui/select'
+import { ContractData } from '../../types/abi'
 
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeploymentState>({
@@ -21,7 +22,7 @@ const DeployerPage = () => {
     });
 
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
-    const [contracts, setContracts] = useState<Array<{name: string, abi: any, bytecode: string}>>([]);
+    const [contracts, setContracts] = useState<ContractData[]>([]);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
