@@ -52,4 +52,8 @@ export class SolidityService {
     getAccounts() {
         return this.account.getAccounts();
     }
+
+    async getCompiledContracts() {
+        return this.workspace.getCompiledContracts();
+    }
 } 
