@@ -4,6 +4,7 @@ import { AccountInfo } from '../../components/deployer/AccountInfo'
 import { NetworkSettings } from '../../components/deployer/NetworkSettings'
 import { HardhatAccount } from '../../types/account'
 import { DeploymentState } from '../../types/deployment'
+import { Select } from '../../components/ui/select'
 
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeploymentState>({
@@ -20,6 +21,7 @@ const DeployerPage = () => {
     });
 
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
+    const [contracts, setContracts] = useState<Array<{name: string, abi: any, bytecode: string}>>([]);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -37,6 +39,9 @@ const DeployerPage = () => {
                         }));
                     }
                     break;
+                case 'contracts':
+                    setContracts(message.contracts);
+                    break;
             }
         };
 
@@ -45,9 +50,9 @@ const DeployerPage = () => {
     }, []);
 
     useEffect(() => {
-        // Request accounts only once when component mounts
         window.vscode.postMessage({ command: 'solidity.startLocalNode' });
-    }, []); // Empty dependency array means this runs once on mount
+        window.vscode.postMessage({ command: 'solidity.getCompiledContracts' });
+    }, []);
 
     return (
         <div className="h-[calc(100vh-64px)] flex flex-col">
@@ -94,6 +99,24 @@ const DeployerPage = () => {
                                 })}
                             />
                         )}
+
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium text-text">Select Contract</h3>
+                            <Select
+                                value={settings.selectedContract}
+                                onChange={(e) => setSettings({
+                                    ...settings,
+                                    selectedContract: e.target.value
+                                })}
+                            >
+                                <option value="">Select a contract</option>
+                                {contracts.map(contract => (
+                                    <option key={contract.name} value={contract.name}>
+                                        {contract.name}
+                                    </option>
+                                ))}
+                            </Select>
+                        </div>
                     </div>
                 </div>
             </div>
