@@ -1,5 +1,5 @@
 import React from 'react';
-import { Network } from '../../type/network';
+import { Network } from '../../types/network';
 
 interface NetworkSelectorProps {
     network: string;
