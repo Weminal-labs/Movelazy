@@ -4,7 +4,7 @@ import { Select } from '../ui/select';
 interface AccountInfoProps {
     accounts: HardhatAccount[];
     selectedPrivateKey: string;
-    onAccountSelect: (account: HardhatAccount) => void;
+    onAccountSelect: (account: HardhatAccount, index: number) => void;
 }
 
 export const AccountInfo = ({ accounts, selectedPrivateKey, onAccountSelect }: AccountInfoProps) => {
@@ -22,7 +22,7 @@ export const AccountInfo = ({ accounts, selectedPrivateKey, onAccountSelect }: A
                         value={selectedPrivateKey}
                         onChange={(e) => {
                             const account = accounts.find(acc => acc.privateKey === e.target.value);
-                            if (account) onAccountSelect(account);
+                            if (account) onAccountSelect(account, accounts.indexOf(account));
                         }}
                     >
                         {accounts.map((account, index) => (
