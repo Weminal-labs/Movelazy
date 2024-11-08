@@ -2,19 +2,23 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { SolidityService } from './services/solidity';
 import { AptosService } from './services/aptos';
-
+import { WorkspaceService } from './services/solidity/workspace';
+import { DeployerService } from './services/solidity/deployer';
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
     public static readonly viewType = 'MovelazyView';
     private readonly solidityService: SolidityService;
     private readonly aptosService: AptosService;
-
+    private workspace: WorkspaceService;
+    private deployerService: DeployerService;
     constructor(
         private readonly context: vscode.ExtensionContext
     ) {
+        this.workspace = new WorkspaceService(context);
         this.solidityService = new SolidityService(context);
         this.aptosService = new AptosService(context);
+        this.deployerService = new DeployerService();
     }
 
     public resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext, token: vscode.CancellationToken) {
@@ -27,23 +31,36 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webviewView.webview.onDidReceiveMessage(async message => {
+        webviewView.webview.onDidReceiveMessage(async (message) => {
             try {
                 switch (message.command) {
                     case 'solidity.compile':
+                        await this.solidityService.updateCompilerConfig(message.settings);
                         await this.solidityService.compile(webviewView.webview);
                         break;
-                    case 'getSettings':
+                    case 'solidity.deploy':
+                        console.log('handling deploy');
+                        try {
+                            const result = await this.deployerService.deploy(message.settings);
+                            webviewView.webview.postMessage({
+                                type: 'deploySuccess',
+                                result: result
+                            });
+                        } catch (error) {
+                            webviewView.webview.postMessage({
+                                type: 'error',
+                                message: (error as Error).message
+                            });
+                        }
+                        break;
+                    case 'solidity.getSettings':
                         const settings = this.solidityService.getSettings();
                         webviewView.webview.postMessage({
                             type: 'settings',
                             settings
                         });
                         break;
-                    case 'updateConfig':
-                        await this.solidityService.updateConfig(message.settings);
-                        break;
-                    case 'initWorkspace':
+                    case 'solidity.initWorkspace':
                         webviewView.webview.postMessage({
                             type: 'workspaceStatus',
                             loading: true
@@ -60,6 +77,37 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                                 type: 'workspaceStatus',
                                 error: (error as Error).message,
                                 loading: false
+                            });
+                        }
+                        break;
+                    case 'solidity.checkWorkspace':
+                        const isHardhatWorkspace = await this.solidityService.checkWorkspace();
+                        webviewView.webview.postMessage({
+                            type: 'workspaceStatus',
+                            initialized: isHardhatWorkspace,
+                            loading: false
+                        });
+                        break;
+                    case 'solidity.clean':
+                        await this.solidityService.clean(webviewView.webview);
+                        break;
+                    case 'solidity.startLocalNode':
+                        await this.solidityService.startLocalNode(webviewView.webview);
+                        break;
+                    case 'solidity.stopLocalNode':
+                        await this.solidityService.stopLocalNode();
+                        break;
+                    case 'solidity.getCompiledContracts':
+                        try {
+                            const contracts = await this.workspace.getCompiledContracts();
+                            webviewView.webview.postMessage({
+                                type: 'compiledContracts',
+                                contracts: contracts
+                            });
+                        } catch (error) {
+                            webviewView.webview.postMessage({
+                                type: 'error',
+                                message: (error as Error).message
                             });
                         }
                         break;
@@ -94,6 +142,17 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             </head>
             <body>
                 <div id="root"></div>
+                <script>
+                    (function() {
+                        try {
+                            const vscode = acquireVsCodeApi();
+                            window.vscode = vscode;
+                            console.log('VSCode API initialized successfully');
+                        } catch (error) {
+                            console.error('Failed to initialize VSCode API:', error);
+                        }
+                    })();
+                </script>
                 <script type="module" src="${scriptUri}"></script>
             </body>
             </html>`;

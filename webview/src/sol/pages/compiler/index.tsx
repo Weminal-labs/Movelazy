@@ -1,34 +1,34 @@
 import { useState, useEffect } from 'react'
-import { BasicSettings } from './components/BasicSettings'
-import { OptimizerSettings } from './components/OptimizerSettings'
-import { AdvancedSettings } from './components/AdvancedSettings'
-import { DebugSettings } from './components/DebugSettings'
-import { CompilerSettings } from './types/settings'
-import { VSCodeApi } from './types/messages'
+import { BasicSettings } from '../../components/compiler/BasicSettings'
+import { OptimizerSettings } from '../../components/compiler/OptimizerSettings'
+import { AdvancedSettings } from '../../components/compiler/AdvancedSettings'
+import { CompilerConfig } from '../../types/settings'
+import { VSCodeApi } from '../../types/vscode';
 
-// Declare vscode API
 declare global {
     interface Window {
-        vscode?: VSCodeApi;
+        vscode: VSCodeApi;
     }
 }
 
-const vscode = window.vscode;
-
 const CompilerPage = () => {
-    const [settings, setSettings] = useState<CompilerSettings>({
+    const [settings, setSettings] = useState<CompilerConfig>({
         version: '0.8.20',
-        evmVersion: 'london',
-        optimizer: {
-            enabled: false,
-            runs: 200
-        },
-        metadata: {
-            bytecodeHash: 'ipfs'
-        },
-        viaIR: false,
-        debug: {
-            debugInfo: ['location', 'snippet']
+        settings: {
+            optimizer: {
+                enabled: false,
+                runs: 200
+            },
+            evmVersion: 'london',
+            viaIR: false,
+            metadata: {
+                bytecodeHash: 'ipfs'
+            },
+            outputSelection: {
+                "*": {
+                    "*": ["abi", "evm.bytecode"]
+                }
+            }
         }
     });
 
@@ -38,195 +38,177 @@ const CompilerPage = () => {
         message: string;
     }>({ type: null, message: '' });
 
-    const [workspaceStatus, setWorkspaceStatus] = useState<{
-        initialized: boolean;
-        loading: boolean;
-        error: string | null;
-    }>({
-        initialized: false,
-        loading: false,
-        error: null
-    });
-
-    // Load saved settings from workspace
-    useEffect(() => {
-        if (!vscode) {
-            setWorkspaceStatus({
-                initialized: false,
-                loading: false,
-                error: 'VSCode API not available'
-            });
-            return;
-        }
-
-        vscode.postMessage({
-            command: 'getSettings'
-        });
-
-        window.addEventListener('message', event => {
-            const message = event.data;
-            switch (message.type) {
-                case 'settings':
-                    setSettings(message.settings);
-                    break;
-                case 'workspaceStatus':
-                    setWorkspaceStatus({
-                        initialized: message.initialized,
-                        loading: message.loading,
-                        error: message.error
-                    });
-                    break;
-            }
-        });
-    }, []);
+    const [cleaning, setCleaning] = useState(false);
 
     useEffect(() => {
-        if (!vscode) {
-            setCompileStatus({
-                type: 'error',
-                message: 'VSCode API not available'
-            });
-            return;
-        }
-
-        // Lắng nghe message từ extension
-        window.addEventListener('message', event => {
+        const messageHandler = (event: MessageEvent) => {
             const message = event.data;
-            switch (message.type) {
-                case 'compileStatus':
-                    setCompiling(false);
-                    setCompileStatus({
-                        type: message.success ? 'success' : 'error',
-                        message: message.message
-                    });
-                    break;
+
+            if (message.type === 'compileStatus') {
+                setCompiling(false);
+                setCompileStatus({
+                    type: message.success ? 'success' : 'error',
+                    message: message.message
+                });
+            } else if (message.type === 'cleanStatus') {
+                setCleaning(false);
+                setCompileStatus({
+                    type: message.success ? 'success' : 'error',
+                    message: message.message
+                });
             }
-        });
+
+            // Clear status after 5 seconds
+            if (message.type === 'compileStatus' || message.type === 'cleanStatus') {
+                setTimeout(() => {
+                    setCompileStatus({ type: null, message: '' });
+                }, 5000);
+            }
+        };
+
+        window.addEventListener('message', messageHandler);
+        return () => window.removeEventListener('message', messageHandler);
     }, []);
 
     const handleCompile = async () => {
-        if (!vscode) {
-            setCompileStatus({
-                type: 'error',
-                message: 'VSCode API not available'
-            });
-            return;
-        }
-
         setCompiling(true);
         setCompileStatus({ type: null, message: '' });
-        
-        vscode.postMessage({
-            command: 'updateConfig',
-            settings: settings
+        try {
+            window.vscode.postMessage({
+                command: 'solidity.compile',
+                settings: settings
+            });
+        } catch {
+            setCompiling(false);
+            setCompileStatus({
+                type: 'error',
+                message: 'Failed to start compilation'
+            });
+        }
+    };
+
+    const handleClean = async () => {
+        setCleaning(true);
+        setCompileStatus({ type: null, message: '' });
+
+        try {
+            window.vscode.postMessage({
+                command: 'solidity.clean'
+            });
+        } catch {
+            setCleaning(false);
+            setCompileStatus({
+                type: 'error',
+                message: 'Failed to clean artifacts'
+            });
+        }
+    };
+
+    const handleBasicSettingsChange = (key: string, value: string | boolean) => {
+        if (key === 'version') {
+            setSettings({ ...settings, version: value as string });
+        } else if (key === 'evmVersion') {
+            setSettings({
+                ...settings,
+                settings: { ...settings.settings, evmVersion: value as string }
+            });
+        }
+    };
+
+    const handleOptimizerSettingsChange = (enabled: boolean, runs?: number) => {
+        setSettings({
+            ...settings,
+            settings: {
+                ...settings.settings,
+                optimizer: { enabled, runs: runs || settings.settings.optimizer.runs }
+            }
         });
-        
-        vscode.postMessage({
-            command: 'compile'
+    };
+
+    const handleAdvancedSettingsChange = (key: string, value: string | boolean) => {
+        setSettings({
+            ...settings,
+            settings: {
+                ...settings.settings,
+                [key]: value,
+                ...(key === 'bytecodeHash' ? {
+                    metadata: { ...settings.settings.metadata, bytecodeHash: value as "ipfs" | "bzzr1" }
+                } : {})
+            }
         });
     };
 
     return (
-        <div className="flex items-center justify-center w-full h-[calc(100vh-64px)]">
-            <div className="w-full h-full bg-background-light border border-border">
+        <div className="flex flex-col w-full h-[calc(100vh-64px)]">
+            <div className="flex-1 bg-background-light border border-border overflow-y-auto">
                 <div className="p-8">
-                    {workspaceStatus.loading ? (
-                        <div className="flex flex-col items-center justify-center h-full">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-                            <p className="mt-4 text-text-muted">Initializing workspace...</p>
-                        </div>
-                    ) : workspaceStatus.error ? (
-                        <div className="text-center text-red-500">
-                            <p>{workspaceStatus.error}</p>
-                            <button 
-                                onClick={() => {
-                                    if (vscode) {
-                                        vscode.postMessage({ command: 'initWorkspace' });
-                                    } else {
-                                        setWorkspaceStatus({
-                                            initialized: false,
-                                            loading: false,
-                                            error: 'VSCode API not available'
-                                        });
-                                    }
-                                }}
-                                className="mt-4 px-4 py-2 bg-primary text-white rounded"
+                    <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handleClean}
+                                disabled={cleaning || compiling}
+                                className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${(cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                             >
-                                Retry
+                                {cleaning ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Cleaning...
+                                    </div>
+                                ) : 'Clean'}
+                            </button>
+                            <button
+                                onClick={handleCompile}
+                                disabled={cleaning || compiling}
+                                className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${(cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                            >
+                                {compiling ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Compiling...
+                                    </div>
+                                ) : 'Compile'}
                             </button>
                         </div>
-                    ) : (
-                        <div className="flex justify-between items-center mb-8">
-                            <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
-                            <div className="flex items-center gap-4">
-                                {compileStatus.type && (
-                                    <span className={`text-sm ${
-                                        compileStatus.type === 'success' ? 'text-green-500' : 'text-red-500'
-                                    }`}>
-                                        {compileStatus.message}
-                                    </span>
-                                )}
-                                <button 
-                                    onClick={handleCompile}
-                                    disabled={compiling}
-                                    className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${
-                                        compiling ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
-                                >
-                                    {compiling ? 'Compiling...' : 'Compile'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    </div>
 
                     <div className="space-y-6">
                         <BasicSettings
                             version={settings.version}
-                            evmVersion={settings.evmVersion}
-                            onChange={(key, value) => setSettings({ ...settings, [key]: value })}
+                            evmVersion={settings.settings.evmVersion}
+                            onChange={handleBasicSettingsChange}
                         />
-
                         <OptimizerSettings
-                            enabled={settings.optimizer.enabled}
-                            runs={settings.optimizer.runs}
-                            onChange={(enabled, runs) => setSettings({
-                                ...settings,
-                                optimizer: {
-                                    enabled,
-                                    runs: runs || settings.optimizer.runs
-                                }
-                            })}
+                            enabled={settings.settings.optimizer.enabled}
+                            runs={settings.settings.optimizer.runs}
+                            onChange={handleOptimizerSettingsChange}
                         />
-
                         <AdvancedSettings
-                            bytecodeHash={settings.metadata.bytecodeHash}
-                            viaIR={settings.viaIR}
-                            onChange={(key, value) => {
-                                if (key === 'bytecodeHash') {
-                                    if (typeof value === 'string') {
-                                        setSettings({
-                                            ...settings,
-                                            metadata: { ...settings.metadata, bytecodeHash: value }
-                                        })
-                                    }
-                                } else {
-                                    setSettings({ ...settings, [key]: value })
-                                }
-                            }}
-                        />
-
-                        <DebugSettings
-                            debugInfo={settings.debug.debugInfo}
-                            onChange={(debugInfo) => setSettings({
-                                ...settings,
-                                debug: { ...settings.debug, debugInfo }
-                            })}
+                            bytecodeHash={settings.settings.metadata.bytecodeHash}
+                            viaIR={settings.settings.viaIR}
+                            onChange={handleAdvancedSettingsChange}
                         />
                     </div>
                 </div>
             </div>
+
+            {/* Compilation Status Bar */}
+            {compileStatus.type && (
+                <div
+                    className={`p-4 border-t border-border transition-all ${compileStatus.type === 'success'
+                        ? 'bg-green-500/5 text-green-500 border-green-500/20'
+                        : 'bg-red-500/5 text-red-500 border-red-500/20'
+                        }`}
+                >
+                    <pre className="font-mono text-sm whitespace-pre-wrap">
+                        {compileStatus.message}
+                    </pre>
+                </div>
+            )}
         </div>
-    )
-}
+    );
+};
 
 export default CompilerPage
