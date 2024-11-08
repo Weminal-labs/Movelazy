@@ -22,8 +22,8 @@ export class AptosService {
         const optimizer = settings.optimizer.enabled;
         const optimizerlevel = settings.optimizer.level;
         const bytecodeHash = settings.metadata.bytecodeHash;
-        console.log("check>>", settings);
-        return this.compiler.compile(webview, packageDir, namedAddresses, moveVersion, optimizer, optimizerlevel, bytecodeHash);
+        const network = settings.network;
+        return this.compiler.compile(webview, packageDir, namedAddresses, moveVersion, optimizer, optimizerlevel, bytecodeHash, network);
     }
 
     async test(webview: vscode.Webview, enabled: boolean, testName: string) {
@@ -32,7 +32,9 @@ export class AptosService {
         const optimizer = settings.optimizer.enabled;
         const optimizerlevel = settings.optimizer.level;
         const bytecodeHash = settings.metadata.bytecodeHash;
-        return this.tester.tester(webview, enabled, testName, moveVersion, optimizer, optimizerlevel, bytecodeHash);
+        const namedAddresses = settings.nameAddresses;
+        console.log("checksettings", settings);
+        return this.tester.tester(webview, enabled, testName, moveVersion, namedAddresses, optimizer, optimizerlevel, bytecodeHash);
     }
 
     async initWorkspace() {
