@@ -20,24 +20,9 @@ export interface CompilerSettings {
 }
 
 export interface DeployerSettings {
-    version: string;
-    evmVersion?: string;
-    moveVersion?: string;
-    optimizer: {
-        enabled: boolean;
-        runs?: number;
-        level?: string;
-    };
-    metadata?: {
-        bytecodeHash: string;
-    };
-    viaIR?: boolean;
-    debug?: {
-        debugInfo: string[];
-    };
-
-    packageDir: string;
-    namedAddresses: string;
+    nameAddresses: string;
+    account?: string; 
+    balance?: number;
 }
 
 export interface Flags {

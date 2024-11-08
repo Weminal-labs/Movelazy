@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { DeployerSettings } from '../../../sol/types/settings';
-import NamedAddressesInput from '../../components/compiler/NameAddress';
+import { DeployerSettings } from '../../../aptos/types/settings';
+import NamedAddressesInput from '../../components/deployer/NamedAddresses';
+import { AccountInfo } from '../../components/deployer/AccountInfo';
 
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeployerSettings>({
         nameAddresses: "",
+        account: '',
+        balance: 0,
     });
 
     const [deploying, setDeploying] = useState(false);
@@ -72,19 +75,29 @@ const DeployerPage = () => {
             <div className="flex-1 bg-background-light border border-border overflow-y-auto">
                 <div className="p-8">
                     <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-text text-2xl font-medium">Deploy Settings</h3>
-                        <button
-                            onClick={handleDeploy}
-                            disabled={deploying}
-                            className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${deploying ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            {deploying ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    Deploying...
-                                </div>
-                            ) : 'Deploy'}
-                        </button>
+                    <h3 className="text-text text-2xl font-medium">Deploy Settings</h3>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handleDeploy}
+                                disabled={deploying}
+                                className={`px-8 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors ${deploying ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {deploying ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Deploying...
+                                    </div>
+                                ) : 'Deploy'}
+                            </button>
+                            <a
+                                href="https://mizu.testnet.porto.movementnetwork.xyz/" 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                            >
+                                Faucet
+                            </a>
+                        </div>
                     </div>
                     <div className="space-y-6">
                         <NamedAddressesInput
@@ -94,6 +107,10 @@ const DeployerPage = () => {
                                 setSettings({ ...settings, nameAddresses: value });
                             }}
                         />
+                        <AccountInfo
+                                account={settings.account || ''}
+                                balance={settings.balance?.toString() || ''}
+                            />
                     </div>
             </div>
             {deployStatus.type && (
