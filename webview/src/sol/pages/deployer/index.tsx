@@ -7,6 +7,13 @@ import { DeploymentState, DeployMessage, NetworkConfig } from '../../types/deplo
 import { Select } from '../../components/ui/select'
 import { Button } from '../../components/ui/deployButton'
 
+// Add interface for deployment result
+interface DeploymentResult {
+    success: boolean;
+    address: string;
+    output: string;
+}
+
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeploymentState>({
         environment: 'local',
@@ -22,6 +29,9 @@ const DeployerPage = () => {
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
     const [contractNames, setContractNames] = useState<string[]>([]);
     const [selectedAccountIndex, setSelectedAccountIndex] = useState<number | null>(null);
+
+    // Add state for deployment result
+    const [deploymentResult, setDeploymentResult] = useState<DeploymentResult | null>(null);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -52,6 +62,26 @@ const DeployerPage = () => {
     useEffect(() => {
         window.vscode.postMessage({ command: 'solidity.startLocalNode' });
         window.vscode.postMessage({ command: 'solidity.getCompiledContracts' });
+    }, []);
+
+    useEffect(() => {
+        const messageHandler = (event: MessageEvent) => {
+            const message = event.data;
+            switch (message.type) {
+                case 'deploySuccess':
+                    setDeploymentResult(message.result);
+                    break;
+                case 'error':
+                    setDeploymentResult({
+                        success: false,
+                        address: '',
+                        output: message.message
+                    });
+                    break;
+            }
+        };
+        window.addEventListener('message', messageHandler);
+        return () => window.removeEventListener('message', messageHandler);
     }, []);
 
     const handleDeploy = () => {
@@ -161,6 +191,31 @@ const DeployerPage = () => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Add deployment result display */}
+                        {deploymentResult && (
+                            <div className="mt-4 p-4 bg-background rounded-md border border-border">
+                                <h3 className="text-lg font-medium text-text mb-2">Deployment Result</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm">
+                                        <span className="font-medium">Status:</span>{' '}
+                                        <span className={deploymentResult.success ? 'text-green-500' : 'text-red-500'}>
+                                            {deploymentResult.success ? 'Success' : 'Failed'}
+                                        </span>
+                                    </p>
+                                    <p className="text-sm">
+                                        <span className="font-medium">Contract Address:</span>{' '}
+                                        <code className="bg-background-light px-2 py-1 rounded">{deploymentResult.address}</code>
+                                    </p>
+                                    <div className="text-sm">
+                                        <span className="font-medium">Output:</span>
+                                        <pre className="mt-1 bg-background-light p-2 rounded overflow-x-auto">
+                                            {deploymentResult.output}
+                                        </pre>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
