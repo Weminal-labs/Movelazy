@@ -1,7 +1,8 @@
 import { SolidityMessage } from './messages';
+import { AptosMessage } from '../../aptos/types/messages';
 
 export interface VSCodeApi {
-    postMessage(message: SolidityMessage): void;
+    postMessage(message: SolidityMessage | AptosMessage): void;
 }
 
 // declare global {
