@@ -14,6 +14,15 @@ interface DeploymentResult {
     output: string;
 }
 
+const isNetworkConfigValid = (network: NetworkConfig): boolean => {
+    return Boolean(
+        network.name &&
+        network.url &&
+        network.accounts &&
+        network.chainId
+    );
+};
+
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeploymentState>({
         environment: 'local',
@@ -105,6 +114,11 @@ const DeployerPage = () => {
         });
     };
 
+    const canDeploy = settings.selectedContract && (
+        settings.environment === 'local' ||
+        (settings.environment === 'imported' && isNetworkConfigValid(settings.network))
+    );
+
     return (
         <div className="h-[calc(100vh-64px)] flex flex-col">
             <div className="flex-1 overflow-auto bg-background-light">
@@ -179,14 +193,18 @@ const DeployerPage = () => {
                             <div className="mt-6">
                                 <Button
                                     onClick={handleDeploy}
-                                    disabled={!settings.selectedContract}
+                                    disabled={!canDeploy}
                                     className="w-full"
                                 >
                                     Deploy Contract
                                 </Button>
-                                {!settings.selectedContract && (
+                                {!settings.selectedContract ? (
                                     <p className="text-sm text-red-500 mt-2">
                                         Please select a contract to deploy
+                                    </p>
+                                ) : (settings.environment === 'imported' && !isNetworkConfigValid(settings.network)) && (
+                                    <p className="text-sm text-red-500 mt-2">
+                                        Please fill in all network settings
                                     </p>
                                 )}
                             </div>
