@@ -73,8 +73,6 @@ const CompilerPage = () => {
     const handleCompile = async () => {
         setCompiling(true);
         setCompileStatus({ type: null, message: '' });
-
-        console.log(settings);
         try {
             window.vscode.postMessage({
                 command: 'solidity.compile',

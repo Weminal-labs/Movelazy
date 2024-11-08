@@ -225,7 +225,6 @@ export default config;
             }
         }
 
-        console.log('Found contracts:', contractNames); // Debug log
         return contractNames;
     }
 }

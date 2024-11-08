@@ -24,7 +24,6 @@ export class SolidityService {
     }
 
     async updateCompilerConfig(settings: CompilerConfig) {
-        console.log('Updating compiler config with:', settings);
         await this.compiler.updateCompilerConfig(settings);
         await this.workspace.saveSettings(settings);
     }

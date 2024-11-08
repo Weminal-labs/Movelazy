@@ -33,7 +33,6 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             try {
                 switch (message.command) {
                     case 'solidity.compile':
-                        console.log('Received compiler settings:', message.settings);
                         await this.solidityService.updateCompilerConfig(message.settings);
                         await this.solidityService.compile(webviewView.webview);
                         break;

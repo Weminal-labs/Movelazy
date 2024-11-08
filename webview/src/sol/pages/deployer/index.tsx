@@ -26,7 +26,6 @@ const DeployerPage = () => {
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
             const message = event.data;
-            console.log('Deployer received message:', message); // Debug log
             switch (message.type) {
                 case 'accounts':
                     setAccounts(message.accounts);
@@ -41,7 +40,6 @@ const DeployerPage = () => {
                     }
                     break;
                 case 'compiledContracts':
-                    console.log('Setting contract names:', message.contracts); // Debug log
                     setContractNames(message.contracts);
                     break;
             }
@@ -71,7 +69,6 @@ const DeployerPage = () => {
                 contractName: settings.selectedContract
             };
 
-        console.log('Sending deploy message:', deployMessage);
         window.vscode.postMessage({
             command: 'solidity.deploy',
             settings: deployMessage
@@ -105,7 +102,7 @@ const DeployerPage = () => {
                         {settings.environment === 'local' ? (
                             <AccountInfo
                                 accounts={accounts}
-                                selectedPrivateKey={settings.network.accounts[0]}
+                                selectedPrivateKey={settings.network.accounts}
                                 onAccountSelect={(account: HardhatAccount, index: number) => {
                                     setSelectedAccountIndex(index);
                                     setSettings({
