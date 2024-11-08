@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { DeployerSettings } from '../../../sol/types/settings';
+import { DeployerSettings } from '../../types/settings';
 import NamedAddressesInput from '../../components/compiler/NameAddress';
+import AccountAddress from '../../components/deployer/AccountInfo';
 
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeployerSettings>({
         nameAddresses: "",
     });
 
+    const [accountAddress, setAccountAddress] = useState<string | null>(null);
     const [deploying, setDeploying] = useState(false);
     const [deployStatus, setDeployStatus] = useState<{
         type: 'success' | 'error' | null;
@@ -29,11 +31,24 @@ const DeployerPage = () => {
                     stderr: message.stderr
                 });
             }
+            if (message.type === 'accountAddress') {
+                console.log("Received account addressasdfasf:", message.address);
+                setAccountAddress(message.address);
+                console.log("Updated account address:", message.address);
+            }
         };
 
+
+
         window.addEventListener('message', messageHandler);
+        if (window.vscode) {
+            window.vscode.postMessage({
+                command: 'aptos.accountAddress',
+            });
+        }
         return () => window.removeEventListener('message', messageHandler);
     }, []);
+
 
     const handleDeploy = async () => {
         if (!settings.nameAddresses) {
@@ -69,7 +84,7 @@ const DeployerPage = () => {
 
     return (
         <div className="flex flex-col w-full h-[calc(100vh-64px)]">
-            <div className="flex-1 bg-background-light border border-border overflow-y-auto">
+            <div className="flex-1 bg-background-light border border-border">
                 <div className="p-8">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-text text-2xl font-medium">Deploy Settings</h3>
@@ -87,37 +102,40 @@ const DeployerPage = () => {
                         </button>
                     </div>
                     <div className="space-y-6">
+                        <AccountAddress
+                            namedAddresses={accountAddress || ''}
+                        />
                         <NamedAddressesInput
                             namedAddresses={settings.nameAddresses || ''}
                             onChange={(value) => {
-                                console.log("NamedAddressesInput changed:", value);
                                 setSettings({ ...settings, nameAddresses: value });
                             }}
                         />
+
                     </div>
+                </div>
+                {deployStatus.type && (
+                    <div
+                        className={`p-4 border-t border-border transition-all ${deployStatus.type === 'success'
+                            ? 'bg-green-500/5 text-green-500 border-green-500/20'
+                            : 'bg-red-500/5 text-red-500 border-red-500/20'
+                            }`}
+                    >
+                        <pre className="font-mono text-sm whitespace-pre-wrap">
+                            {deployStatus.message}
+                        </pre>
+                    </div>
+                )}
+                {deployStatus.stdout && (
+                    <div className="mb-4">
+                        <h4 className="block text-text-muted text-sm mb-2">Deployment Result:</h4>
+                        <pre className="font-mono text-sm whitespace-pre-wrap ">
+                            {deployStatus.stdout}
+                        </pre>
+                    </div>
+                )}
             </div>
-            {deployStatus.type && (
-                <div
-                    className={`p-4 border-t border-border transition-all ${deployStatus.type === 'success'
-                        ? 'bg-green-500/5 text-green-500 border-green-500/20'
-                        : 'bg-red-500/5 text-red-500 border-red-500/20'
-                        }`}
-                >
-                    <pre className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary">
-                        {deployStatus.message}
-                    </pre>
-                </div>
-            )}
-            {deployStatus.stdout && (
-                <div className="mb-4">
-                    <h4 className="block text-text-muted text-sm mb-2">Deployment Result:</h4>
-                    <pre className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary ">
-                        {deployStatus.stdout}
-                    </pre>
-                </div>
-            )}
         </div>
-      </div>
     );
 };
 
