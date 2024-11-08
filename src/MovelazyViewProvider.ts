@@ -41,9 +41,10 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                     case 'solidity.deploy':
                         console.log('handling deploy');
                         try {
-                            await this.deployerService.deploy(message.settings);
+                            const result = await this.deployerService.deploy(message.settings);
                             webviewView.webview.postMessage({
-                                type: 'deploySuccess'
+                                type: 'deploySuccess',
+                                result: result
                             });
                         } catch (error) {
                             webviewView.webview.postMessage({
