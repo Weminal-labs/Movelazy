@@ -3,8 +3,9 @@ import { EnvironmentSelector } from '../../components/deployer/EnvironmentSelect
 import { AccountInfo } from '../../components/deployer/AccountInfo'
 import { NetworkSettings } from '../../components/deployer/NetworkSettings'
 import { HardhatAccount } from '../../types/account'
-import { DeploymentState } from '../../types/deployment'
+import { DeploymentState, DeployMessage, NetworkConfig } from '../../types/deployment'
 import { Select } from '../../components/ui/select'
+import { Button } from '../../components/ui/deployButton'
 
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeploymentState>({
@@ -22,6 +23,7 @@ const DeployerPage = () => {
 
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
     const [contractNames, setContractNames] = useState<string[]>([]);
+    const [selectedAccountIndex, setSelectedAccountIndex] = useState<number | null>(null);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -56,6 +58,28 @@ const DeployerPage = () => {
         window.vscode.postMessage({ command: 'solidity.getCompiledContracts' });
     }, []);
 
+    const handleDeploy = () => {
+        const deployMessage: DeployMessage = settings.environment === 'local'
+            ? {
+                isHardhat: true,
+                accountNumber: selectedAccountIndex ? selectedAccountIndex : 0,
+                NetworkConfig: null,
+                contractName: settings.selectedContract
+            }
+            : {
+                isHardhat: false,
+                accountNumber: null,
+                NetworkConfig: settings.network,
+                contractName: settings.selectedContract
+            };
+
+        console.log('Sending deploy message:', deployMessage);
+        window.vscode.postMessage({
+            command: 'solidity.deploy',
+            settings: deployMessage
+        });
+    };
+
     return (
         <div className="h-[calc(100vh-64px)] flex flex-col">
             <div className="flex-1 overflow-auto bg-background-light">
@@ -84,18 +108,21 @@ const DeployerPage = () => {
                             <AccountInfo
                                 accounts={accounts}
                                 selectedPrivateKey={settings.network.accounts[0]}
-                                onAccountSelect={(account) => setSettings({
-                                    ...settings,
-                                    network: {
-                                        ...settings.network,
-                                        accounts: [account.privateKey]
-                                    }
-                                })}
+                                onAccountSelect={(account: HardhatAccount, index: number) => {
+                                    setSelectedAccountIndex(index);
+                                    setSettings({
+                                        ...settings,
+                                        network: {
+                                            ...settings.network,
+                                            accounts: [account.privateKey]
+                                        }
+                                    });
+                                }}
                             />
                         ) : (
                             <NetworkSettings
                                 network={settings.network}
-                                onChange={(network) => setSettings({
+                                onChange={(network: NetworkConfig) => setSettings({
                                     ...settings,
                                     network
                                 })}
@@ -123,6 +150,21 @@ const DeployerPage = () => {
                                     Selected contract: {settings.selectedContract}
                                 </p>
                             )}
+
+                            <div className="mt-6">
+                                <Button
+                                    onClick={handleDeploy}
+                                    disabled={!settings.selectedContract}
+                                    className="w-full"
+                                >
+                                    Deploy Contract
+                                </Button>
+                                {!settings.selectedContract && (
+                                    <p className="text-sm text-red-500 mt-2">
+                                        Please select a contract to deploy
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

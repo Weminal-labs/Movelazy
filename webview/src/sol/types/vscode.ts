@@ -1,7 +1,7 @@
-import { CompilerMessage } from './messages';
+import { SolidityMessage } from './messages';
 
 export interface VSCodeApi {
-    postMessage(message: CompilerMessage): void;
+    postMessage(message: SolidityMessage): void;
 }
 
 declare global {
