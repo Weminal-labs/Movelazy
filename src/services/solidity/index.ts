@@ -2,8 +2,7 @@ import { CompilerService } from './compiler';
 import { WorkspaceService } from './workspace';
 import { AccountService } from './account';
 import * as vscode from 'vscode';
-import { CompilerConfig } from './types';
-
+import { CompilerConfig, DeployMessage } from './types';
 export class SolidityService {
     private compiler: CompilerService;
     private workspace: WorkspaceService;
@@ -27,9 +26,6 @@ export class SolidityService {
         await this.compiler.updateCompilerConfig(settings);
         await this.workspace.saveSettings(settings);
     }
-
-
-
 
     /*
     I don't know why I couldn't call this function, it thrown  getCompiledContracts() is not a function.

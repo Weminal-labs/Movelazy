@@ -3,6 +3,7 @@ import * as path from 'path';
 import { SolidityService } from './services/solidity';
 import { AptosService } from './services/aptos';
 import { WorkspaceService } from './services/solidity/workspace';
+import { DeployerService } from './services/solidity/deployer';
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
@@ -10,13 +11,14 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
     private readonly solidityService: SolidityService;
     private readonly aptosService: AptosService;
     private workspace: WorkspaceService;
-
+    private deployerService: DeployerService;
     constructor(
         private readonly context: vscode.ExtensionContext
     ) {
         this.workspace = new WorkspaceService(context);
         this.solidityService = new SolidityService(context);
         this.aptosService = new AptosService(context);
+        this.deployerService = new DeployerService();
     }
 
     public resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext, token: vscode.CancellationToken) {
@@ -35,6 +37,20 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                     case 'solidity.compile':
                         await this.solidityService.updateCompilerConfig(message.settings);
                         await this.solidityService.compile(webviewView.webview);
+                        break;
+                    case 'solidity.deploy':
+                        console.log('handling deploy');
+                        try {
+                            await this.deployerService.deploy(message.settings);
+                            webviewView.webview.postMessage({
+                                type: 'deploySuccess'
+                            });
+                        } catch (error) {
+                            webviewView.webview.postMessage({
+                                type: 'error',
+                                message: (error as Error).message
+                            });
+                        }
                         break;
                     case 'solidity.getSettings':
                         const settings = this.solidityService.getSettings();
