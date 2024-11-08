@@ -17,8 +17,6 @@ const DeployerPage = () => {
             chainId: 1337
         },
         selectedContract: '',
-        constructorParams: [],
-        deployedContracts: []
     });
 
     const [accounts, setAccounts] = useState<HardhatAccount[]>([]);
