@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { BasicSettings } from '../../components/compiler/BasicSettings';
 import { OptimizerSettings } from '../../components/compiler/OptimizerSettings';
 import { AdvancedSettings } from '../../components/compiler/AdvancedSettings';
-import { CompilerSettings } from '../../../sol/types/settings';
+import { CompilerSettings } from '../../types/settings';
 import PackageDirInput from '../../components/compiler/PackageDir';
 import NamedAddressesInput from '../../components/compiler/NameAddress';
 import NetworkSelector from '../../components/compiler/Network';
-import { Network } from '../../type/network';
+import { Network } from '../../types/network';
 
 const CompilerPage = () => {
     const [settings, setSettings] = useState<CompilerSettings>({
@@ -102,14 +102,14 @@ const CompilerPage = () => {
 
     return (
         <div className="flex flex-col w-full h-[calc(100vh-64px)]">
-            <div className="flex-1 bg-background-light border border-border overflow-y-auto">
+            <div className="flex-1 bg-background-light border border-border">
                 <div className="p-8">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
                         <div className="flex gap-4">
                             <button
                                 onClick={handleClean}
-                                disabled={cleaning || compiling }
+                                disabled={cleaning || compiling}
                                 className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${(cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {cleaning ? (
