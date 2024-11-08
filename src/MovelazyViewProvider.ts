@@ -2,16 +2,19 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { SolidityService } from './services/solidity';
 import { AptosService } from './services/aptos';
+import { WorkspaceService } from './services/solidity/workspace';
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
     public static readonly viewType = 'MovelazyView';
     private readonly solidityService: SolidityService;
     private readonly aptosService: AptosService;
+    private workspace: WorkspaceService;
 
     constructor(
         private readonly context: vscode.ExtensionContext
     ) {
+        this.workspace = new WorkspaceService(context);
         this.solidityService = new SolidityService(context);
         this.aptosService = new AptosService(context);
     }
@@ -79,11 +82,18 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                         await this.solidityService.stopLocalNode();
                         break;
                     case 'solidity.getCompiledContracts':
-                        const contracts = await this.solidityService.callCompiledContracts(webviewView.webview);
-                        webviewView.webview.postMessage({
-                            type: 'compiledContracts',
-                            contracts: contracts
-                        });
+                        try {
+                            const contracts = await this.workspace.getCompiledContracts();
+                            webviewView.webview.postMessage({
+                                type: 'compiledContracts',
+                                contracts: contracts
+                            });
+                        } catch (error) {
+                            webviewView.webview.postMessage({
+                                type: 'error',
+                                message: (error as Error).message
+                            });
+                        }
                         break;
                 }
             } catch (error) {
