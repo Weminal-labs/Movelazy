@@ -1,6 +1,6 @@
 import { DeployMessage, LocalDeployMessage, NetworkDeployMessage } from './types';
 
-export class Deployer {
+export class DeployerService {
     async deploy(message: DeployMessage) {
         if (message.isHardhat) {
             return this.deployLocal(message);
