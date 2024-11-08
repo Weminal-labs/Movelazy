@@ -17,6 +17,7 @@ export interface CompilerSettings {
 
     packageDir?: string,
     nameAddresses?: string,
+    network?: string
 }
 
 export interface Flags {

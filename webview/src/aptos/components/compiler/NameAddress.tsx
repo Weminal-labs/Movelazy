@@ -8,13 +8,13 @@ interface NamedAddressesInputProps {
 const NamedAddressesInput: React.FC<NamedAddressesInputProps> = ({ namedAddresses, onChange }) => {
     return (
         <div className="mb-4">
-            <label className="block text-text-muted text-sm mb-2">Named Addresses</label>
+            <label className="block text-text-muted text-sm mb-2">Name module</label>
             <input
                 type="text"
                 value={namedAddresses}
                 onChange={(e) => onChange(e.target.value)}
                 className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
-                placeholder=" Example: alice=0x1234"
+                placeholder="Example: moveview"
             />
         </div>
     );
