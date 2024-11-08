@@ -29,16 +29,23 @@ export class SolidityService {
         await this.workspace.saveSettings(settings);
     }
 
-    async callCompiledContracts(webview: vscode.Webview) {
-        try {
-            console.log('Calling compiled contracts');
-            const contracts = await this.workspace.getCompiledContracts();
-            return contracts;
-        } catch (error) {
-            console.error('Error getting compiled contracts:', error);
-            throw error;
-        }
-    }
+
+
+
+    /*
+    I don't know why I couldn't call this function, it thrown  getCompiledContracts() is not a function.
+     */
+    // public async getCompiledContracts(): Promise<string[]> {
+    //     try {
+    //         console.log('SolidityService: Getting compiled contracts');
+    //         const contracts = await this.workspace.getCompiledContracts();
+    //         console.log('SolidityService: Retrieved contracts:', contracts);
+    //         return contracts;
+    //     } catch (error) {
+    //         console.error('Error getting compiled contracts:', error);
+    //         throw error;
+    //     }
+    // }
 
     getSettings() {
         return this.workspace.getSettings();
