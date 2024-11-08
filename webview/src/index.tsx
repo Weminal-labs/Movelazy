@@ -8,7 +8,7 @@ import HomePage from './home'
 import SolPage from './sol'
 import CompilerPage from './sol/pages/compiler'
 import TesterPage from './sol/pages/tester'
-import DeployerPage from './sol/pages/deployer'
+// import DeployerPage from './sol/pages/deployer'
 import ProjectPageSol from './sol/pages/project'
 //------------------- Aptos imports --------------------- //
 import AptosPage from './aptos'
@@ -43,10 +43,10 @@ const router = createMemoryRouter([
             path: 'tester',
             element: <TesterPage />
           },
-          {
-            path: 'deployer',
-            element: <DeployerPage />
-          }
+          // {
+          //   path: 'deployer',
+          //   element: <DeployerPage />
+          // }
         ]
       },
       {

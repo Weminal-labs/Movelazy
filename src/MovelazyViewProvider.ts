@@ -108,7 +108,6 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                                 error: (error as Error).message,
                                 loading: false
                             });
-
                         }
                         break;
                     case 'aptos.checkWorkspace':
@@ -124,6 +123,9 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'aptos.tester':
                         await this.aptosService.test(webviewView.webview, message.flags.enabled, message.flags.testName);
+                        break;
+                    case 'aptos.deploy':
+                        await this.aptosService.deploy(webviewView.webview);
                         break;
                 }
             } catch (error) {
@@ -149,7 +151,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https:; script-src ${webview.cspSource} 'unsafe-inline'; style-src ${webview.cspSource} 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
+                            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https:; script-src ${webview.cspSource} 'unsafe-inline'; style-src ${webview.cspSource} 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src ${webview.cspSource} https://fullnode.devnet.aptoslabs.com;">
                 <title>MoveLazy</title>
                 <link href="${styleUri}" rel="stylesheet">
                 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">

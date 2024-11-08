@@ -1,4 +1,3 @@
-
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -22,7 +21,7 @@ export class AptosCompilerService {
             await execAsync('aptos --version', { cwd: workspacePath });
             console.log("check>>>>>>>", packageDir, "   ", namedAddresses);
             let command = `aptos move compile --package-dir ${packageDir} --named-addresses ${namedAddresses} `;
-
+            console.log("Command to execute:", command);
             if (moveVersion === 'Move 2') {
                 command += `--move-2`;
             } else {

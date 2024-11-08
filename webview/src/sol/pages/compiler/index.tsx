@@ -102,6 +102,20 @@ const CompilerPage = () => {
         }
     };
 
+    const handleDeploy = () => {
+        const config: DeployConfig = {
+            packageDir: '/path/to/package',
+            namedAddresses: 'hello_blockchain=default'
+        };
+
+        if (window.vscode) {
+            window.vscode.postMessage({
+                command: 'aptos.deploy',
+                config: config
+            });
+        }
+    };
+
     return (
         <div className="flex flex-col w-full h-[calc(100vh-64px)]">
             <div className="flex-1 bg-background-light border border-border overflow-y-auto">

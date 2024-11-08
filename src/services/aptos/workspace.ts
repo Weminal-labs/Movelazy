@@ -5,7 +5,7 @@ import { execAsync } from '../../utils/execAsync';
 
 export class WorkspaceService {
   private readonly stateKey = 'compiler.settings';
-
+  
   constructor(private context: vscode.ExtensionContext) { }
 
   private getWorkspacePath(): string {
@@ -17,11 +17,12 @@ export class WorkspaceService {
   }
 
   public async saveSettings(settings: any) {
+    console.log("Saving settings:", settings);
     await this.context.workspaceState.update(this.stateKey, settings);
   }
 
   public getSettings(): any {
-    return this.context.workspaceState.get(this.stateKey) || {
+    const settings = this.context.workspaceState.get(this.stateKey) || {
       version: '4.3.0',
       moveVersion: 'Move 1',
       optimizer: {
@@ -34,6 +35,8 @@ export class WorkspaceService {
       packageDir: "",
       nameAddresses: "",
     };
+    console.log("Retrieved settings:", settings);
+    return settings;
   }
 
   public async initializeWorkspace() {
@@ -126,6 +129,7 @@ export default config;
   }
 
   public async updateAptosConfig(settings: any) {
+    console.log("Updating Aptos config with settings:", settings);
     const workspacePath = this.getWorkspacePath();
     const aptosConfigPath = path.join(workspacePath, 'aptos.config.ts');
 
@@ -171,7 +175,7 @@ export default config;
 
   public getPackageDir(): string {
     const settings = this.getSettings();
-    return settings.packageDir || path.join(this.getWorkspacePath(), 'package');
+    return settings.packageDir || {};
   }
 
   public getNamedAddresses(): string {
