@@ -2,13 +2,18 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { execAsync } from '../../utils/execAsync';
+import { CompilerConfig, DefaultConfig } from './types';
 
 export class WorkspaceService {
     private readonly stateKey = 'compiler.settings';
 
     constructor(private context: vscode.ExtensionContext) { }
 
-    private getWorkspacePath(): string {
+    public async saveSettings(settings: CompilerConfig) {
+        await this.context.workspaceState.update(this.stateKey, settings);
+    }
+
+    public getWorkspacePath(): string {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) {
             throw new Error('No workspace folder found');
@@ -16,12 +21,9 @@ export class WorkspaceService {
         return workspaceFolders[0].uri.fsPath;
     }
 
-    public async saveSettings(settings: any) {
-        await this.context.workspaceState.update(this.stateKey, settings);
-    }
 
-    public getSettings(): any {
-        return this.context.workspaceState.get(this.stateKey) || {
+    public getSettings(): DefaultConfig {
+        const defaultSettings: DefaultConfig = {
             version: '0.8.20',
             evmVersion: 'london',
             optimizer: {
@@ -34,8 +36,17 @@ export class WorkspaceService {
             viaIR: false,
             debug: {
                 debugInfo: ['location', 'snippet']
+            },
+            networks: {
+            },
+            namedAccounts: {
+                deployer: {
+                    default: 0
+                }
             }
         };
+
+        return this.context.workspaceState.get(this.stateKey) || defaultSettings;
     }
 
     public async initializeWorkspace() {
@@ -52,7 +63,7 @@ export class WorkspaceService {
 
             // Install Hardhat if not installed
             if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'))) {
-                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox typescript ts-node', {
+                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox hardhat-deploy dotenv typescript ts-node ethers', {
                     cwd: workspacePath
                 });
             }
@@ -77,30 +88,43 @@ export class WorkspaceService {
                     JSON.stringify(tsconfigContent, null, 2)
                 );
             }
+            // Create contracts directory if it doesn't exist
+            const contractsDir = path.join(workspacePath, 'contracts');
+            if (!fs.existsSync(contractsDir)) {
+                await fs.promises.mkdir(contractsDir);
+            }
 
             // Create hardhat.config.ts with default settings
             const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
             if (!fs.existsSync(hardhatConfigPath)) {
                 const defaultSettings = this.getSettings();
                 const configContent = `
+require("dotenv").config();
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-deploy";
 
 const config: HardhatUserConfig = {
-  solidity: {
-    version: "${defaultSettings.version}",
-    settings: {
-      optimizer: {
-        enabled: ${defaultSettings.optimizer.enabled},
-        runs: ${defaultSettings.optimizer.runs}
-      },
-      evmVersion: "${defaultSettings.evmVersion}",
-      viaIR: ${defaultSettings.viaIR},
-      metadata: {
-        bytecodeHash: "${defaultSettings.metadata.bytecodeHash}"
-      }
-    }
-  }
+    solidity: {
+        version: "0.8.20",
+        settings: {
+            optimizer: {
+                enabled: false,
+                runs: 200
+            },
+            evmVersion: "london",
+            viaIR: false,
+            metadata: {
+                bytecodeHash: "ipfs"
+            }
+        }
+    },
+        paths: {
+        sources: "./contracts",
+        tests: "./test",
+        cache: "./cache",
+        artifacts: "./artifacts"
+    },
 };
 
 export default config;
@@ -108,61 +132,10 @@ export default config;
                 await fs.promises.writeFile(hardhatConfigPath, configContent);
             }
 
-            // Create contracts directory if it doesn't exist
-            const contractsDir = path.join(workspacePath, 'contracts');
-            if (!fs.existsSync(contractsDir)) {
-                await fs.promises.mkdir(contractsDir);
-            }
-
             return true;
         } catch (error) {
             throw new Error(`Failed to initialize workspace: ${(error as Error).message}`);
         }
-    }
-
-    public async updateHardhatConfig(settings: any) {
-        const workspacePath = this.getWorkspacePath();
-        const hardhatConfigPath = path.join(workspacePath, 'hardhat.config.ts');
-
-        // Nếu file không tồn tại, tạo mới
-        if (!fs.existsSync(hardhatConfigPath)) {
-            // Kiểm tra và cài đặt hardhat nếu cần
-            try {
-                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox', {
-                    cwd: workspacePath
-                });
-            } catch (error) {
-                throw new Error('Failed to install Hardhat. Please check your npm installation.');
-            }
-        }
-
-        // Tạo nội dung config mới
-        const configContent = `
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
-
-const config: HardhatUserConfig = {
-  solidity: {
-    version: "${settings.version}",
-    settings: {
-      optimizer: {
-        enabled: ${settings.optimizer.enabled},
-        runs: ${settings.optimizer.runs}
-      },
-      evmVersion: "${settings.evmVersion}",
-      viaIR: ${settings.viaIR},
-      metadata: {
-        bytecodeHash: "${settings.metadata.bytecodeHash}"
-      }
-    }
-  }
-};
-
-export default config;
-        `;
-
-        // Ghi file
-        await fs.promises.writeFile(hardhatConfigPath, configContent);
     }
 
     public async getContractFiles(): Promise<string[]> {
@@ -213,5 +186,35 @@ export default config;
         } catch {
             return false;
         }
+    }
+
+    public async getCompiledContracts(): Promise<string[]> {
+        const workspacePath = this.getWorkspacePath();
+        const artifactsPath = path.join(workspacePath, 'artifacts', 'contracts');
+        const contractNames: string[] = [];
+
+        if (!fs.existsSync(artifactsPath)) {
+            return [];
+        }
+
+        // Read all .sol directories
+        const solDirs = await fs.promises.readdir(artifactsPath);
+
+        for (const solDir of solDirs) {
+            const solPath = path.join(artifactsPath, solDir);
+            const stat = await fs.promises.stat(solPath);
+
+            if (stat.isDirectory()) {
+                const files = await fs.promises.readdir(solPath);
+                // Filter for .json files that aren't .dbg.json
+                const contractFiles = files.filter(f => f.endsWith('.json') && !f.endsWith('.dbg.json'));
+
+                for (const file of contractFiles) {
+                    contractNames.push(path.parse(file).name);
+                }
+            }
+        }
+
+        return contractNames;
     }
 }

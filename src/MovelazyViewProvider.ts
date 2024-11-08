@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { SolidityService } from './services/solidity';
 import { AptosService } from './services/aptos';
+import { WorkspaceService } from './services/solidity/workspace';
+import { DeployerService } from './services/solidity/deployer';
 import { AptosTesterService } from './services/aptos/tester';
 
 
@@ -10,12 +12,15 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'MovelazyView';
     private readonly solidityService: SolidityService;
     private readonly aptosService: AptosService;
-
+    private workspace: WorkspaceService;
+    private deployerService: DeployerService;
     constructor(
         private readonly context: vscode.ExtensionContext
     ) {
+        this.workspace = new WorkspaceService(context);
         this.solidityService = new SolidityService(context);
         this.aptosService = new AptosService(context);
+        this.deployerService = new DeployerService();
     }
 
     public resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext, token: vscode.CancellationToken) {
@@ -28,12 +33,27 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webviewView.webview.onDidReceiveMessage(async message => {
+        webviewView.webview.onDidReceiveMessage(async (message) => {
             try {
                 switch (message.command) {
                     case 'solidity.compile':
-                        await this.solidityService.updateConfig(message.settings);
+                        await this.solidityService.updateCompilerConfig(message.settings);
                         await this.solidityService.compile(webviewView.webview);
+                        break;
+                    case 'solidity.deploy':
+                        console.log('handling deploy');
+                        try {
+                            const result = await this.deployerService.deploy(message.settings);
+                            webviewView.webview.postMessage({
+                                type: 'deploySuccess',
+                                result: result
+                            });
+                        } catch (error) {
+                            webviewView.webview.postMessage({
+                                type: 'error',
+                                message: (error as Error).message
+                            });
+                        }
                         break;
                     case 'solidity.getSettings':
                         const settings = this.solidityService.getSettings();
@@ -41,9 +61,6 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                             type: 'settings',
                             settings
                         });
-                        break;
-                    case 'solidity.updateConfig':
-                        await this.solidityService.updateConfig(message.settings);
                         break;
                     case 'solidity.initWorkspace':
                         webviewView.webview.postMessage({
@@ -75,6 +92,26 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'solidity.clean':
                         await this.solidityService.clean(webviewView.webview);
+                        break;
+                    case 'solidity.startLocalNode':
+                        await this.solidityService.startLocalNode(webviewView.webview);
+                        break;
+                    case 'solidity.stopLocalNode':
+                        await this.solidityService.stopLocalNode();
+                        break;
+                    case 'solidity.getCompiledContracts':
+                        try {
+                            const contracts = await this.workspace.getCompiledContracts();
+                            webviewView.webview.postMessage({
+                                type: 'compiledContracts',
+                                contracts: contracts
+                            });
+                        } catch (error) {
+                            webviewView.webview.postMessage({
+                                type: 'error',
+                                message: (error as Error).message
+                            });
+                        }
                         break;
                     case 'aptos.compile':
                         await this.aptosService.updateConfig(message.settings);

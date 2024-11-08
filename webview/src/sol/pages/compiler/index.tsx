@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { BasicSettings } from '../../components/compiler/BasicSettings'
 import { OptimizerSettings } from '../../components/compiler/OptimizerSettings'
 import { AdvancedSettings } from '../../components/compiler/AdvancedSettings'
-import { DebugSettings } from '../../components/compiler/DebugSettings'
-import { CompilerSettings } from '../../types/settings'
+import { CompilerConfig } from '../../types/settings'
 import { VSCodeApi } from '../../types/vscode';
 
 declare global {
@@ -13,19 +12,23 @@ declare global {
 }
 
 const CompilerPage = () => {
-    const [settings, setSettings] = useState<CompilerSettings>({
+    const [settings, setSettings] = useState<CompilerConfig>({
         version: '0.8.20',
-        evmVersion: 'london',
-        optimizer: {
-            enabled: false,
-            runs: 200
-        },
-        metadata: {
-            bytecodeHash: 'ipfs'
-        },
-        viaIR: false,
-        debug: {
-            debugInfo: ['location', 'snippet']
+        settings: {
+            optimizer: {
+                enabled: false,
+                runs: 200
+            },
+            evmVersion: 'london',
+            viaIR: false,
+            metadata: {
+                bytecodeHash: 'ipfs'
+            },
+            outputSelection: {
+                "*": {
+                    "*": ["abi", "evm.bytecode"]
+                }
+            }
         }
     });
 
@@ -70,7 +73,6 @@ const CompilerPage = () => {
     const handleCompile = async () => {
         setCompiling(true);
         setCompileStatus({ type: null, message: '' });
-
         try {
             window.vscode.postMessage({
                 command: 'solidity.compile',
@@ -102,18 +104,38 @@ const CompilerPage = () => {
         }
     };
 
-    const handleDeploy = () => {
-        const config: DeployConfig = {
-            packageDir: '/path/to/package',
-            namedAddresses: 'hello_blockchain=default'
-        };
-
-        if (window.vscode) {
-            window.vscode.postMessage({
-                command: 'aptos.deploy',
-                config: config
+    const handleBasicSettingsChange = (key: string, value: string | boolean) => {
+        if (key === 'version') {
+            setSettings({ ...settings, version: value as string });
+        } else if (key === 'evmVersion') {
+            setSettings({
+                ...settings,
+                settings: { ...settings.settings, evmVersion: value as string }
             });
         }
+    };
+
+    const handleOptimizerSettingsChange = (enabled: boolean, runs?: number) => {
+        setSettings({
+            ...settings,
+            settings: {
+                ...settings.settings,
+                optimizer: { enabled, runs: runs || settings.settings.optimizer.runs }
+            }
+        });
+    };
+
+    const handleAdvancedSettingsChange = (key: string, value: string | boolean) => {
+        setSettings({
+            ...settings,
+            settings: {
+                ...settings.settings,
+                [key]: value,
+                ...(key === 'bytecodeHash' ? {
+                    metadata: { ...settings.settings.metadata, bytecodeHash: value as "ipfs" | "bzzr1" }
+                } : {})
+            }
+        });
     };
 
     return (
@@ -155,37 +177,18 @@ const CompilerPage = () => {
                     <div className="space-y-6">
                         <BasicSettings
                             version={settings.version}
-                            evmVersion={settings.evmVersion}
-                            onChange={(key, value) => setSettings({ ...settings, [key]: value })}
+                            evmVersion={settings.settings.evmVersion}
+                            onChange={handleBasicSettingsChange}
                         />
                         <OptimizerSettings
-                            enabled={settings.optimizer.enabled}
-                            runs={settings.optimizer.runs}
-                            onChange={(enabled, runs) => setSettings({
-                                ...settings,
-                                optimizer: { enabled, runs: runs || settings.optimizer.runs }
-                            })}
+                            enabled={settings.settings.optimizer.enabled}
+                            runs={settings.settings.optimizer.runs}
+                            onChange={handleOptimizerSettingsChange}
                         />
                         <AdvancedSettings
-                            bytecodeHash={settings.metadata?.bytecodeHash ?? ''}
-                            viaIR={settings.viaIR}
-                            onChange={(key, value) => {
-                                if (key === 'bytecodeHash' && typeof value === 'string') {
-                                    setSettings({
-                                        ...settings,
-                                        metadata: { ...settings.metadata, bytecodeHash: value }
-                                    })
-                                } else {
-                                    setSettings({ ...settings, [key]: value })
-                                }
-                            }}
-                        />
-                        <DebugSettings
-                            debugInfo={settings.debug?.debugInfo ?? []}
-                            onChange={(debugInfo) => setSettings({
-                                ...settings,
-                                debug: { ...settings.debug, debugInfo }
-                            })}
+                            bytecodeHash={settings.settings.metadata.bytecodeHash}
+                            viaIR={settings.settings.viaIR}
+                            onChange={handleAdvancedSettingsChange}
                         />
                     </div>
                 </div>
