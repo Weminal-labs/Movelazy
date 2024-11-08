@@ -1,4 +1,4 @@
-import { DeployedContract, AbiFunction, AbiItem } from '../../../types/abi'
+import { DeployedContract, AbiFunction, AbiItem } from '../../types/abi'
 
 interface DeployedContractsProps {
     contracts: DeployedContract[]
