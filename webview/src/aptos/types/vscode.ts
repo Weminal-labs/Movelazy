@@ -9,3 +9,9 @@ declare global {
         vscode: VSCodeApi;
     }
 }
+
+
+// Example function to log VSCode API usage
+export function logPostMessage(message: CompilerMessage) {
+    console.log("Posting message to VSCode:", message);
+}

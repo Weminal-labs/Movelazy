@@ -8,11 +8,25 @@ interface AccountInfoProps {
 export const AccountInfo = ({ account }: AccountInfoProps) => {
   const [currentAccount, setCurrentAccount] = useState(account);
   const [balance, setBalance] = useState<string | null>(null);
+  const [publicKey, setPublicKey] = useState<string | null>(null);
+  const [privateKey, setPrivateKey] = useState<string | null>(null);
 
   const handleConnect = () => {
     const newAccount = new AptosAccount();
     setCurrentAccount(newAccount.address().hex());
+    setPublicKey(newAccount.pubKey().hex());
+    setPrivateKey(newAccount.toPrivateKeyObject().privateKeyHex);
     console.log('New account created:', newAccount);
+  };
+
+  const handleCopyPrivateKey = () => {
+    if (privateKey) {
+      navigator.clipboard.writeText(privateKey).then(() => {
+        alert('Private key copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy private key:', err);
+      });
+    }
   };
 
   useEffect(() => {
@@ -67,6 +81,27 @@ export const AccountInfo = ({ account }: AccountInfoProps) => {
         <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
           {balance !== null ? balance : 'Loading...'}
         </div>
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-2">
+          Public Key
+        </label>
+        <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
+          {publicKey || 'No public key available'}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-text-muted text-sm mb-2">
+          Private Key
+        </label>
+        <button 
+          className="w-full bg-background-dark text-text p-4 rounded-lg border border-border"
+          onClick={handleCopyPrivateKey}
+        >
+          Copy Private Key
+        </button>
       </div>
     </div>
   );

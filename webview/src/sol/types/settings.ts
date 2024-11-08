@@ -23,3 +23,7 @@ export interface Flags {
     enabled: boolean;
     testName: string;
 }
+
+export interface DeployerSettings {
+    nameAddresses: string;
+}
