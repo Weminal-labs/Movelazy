@@ -5,6 +5,8 @@ import { AdvancedSettings } from '../../components/compiler/AdvancedSettings';
 import { CompilerSettings } from '../../../sol/types/settings';
 import PackageDirInput from '../../components/compiler/PackageDir';
 import NamedAddressesInput from '../../components/compiler/NameAddress';
+import NetworkSelector from '../../components/compiler/Network';
+import { Network } from '../../type/network';
 
 
 const CompilerPage = () => {
@@ -20,6 +22,7 @@ const CompilerPage = () => {
         },
         packageDir: "",
         nameAddresses: "",
+        network: Network.PORTO
     });
 
     const [compiling, setCompiling] = useState(false);
@@ -136,6 +139,11 @@ const CompilerPage = () => {
                             packageDir={settings.packageDir || ''}
                             onChange={(value) => setSettings({ ...settings, packageDir: value })}
                         />
+
+                        <NetworkSelector
+                            network={settings.network || ''}
+                            onChange={(value) => setSettings({ ...settings, network: value })}
+                        />
                         <NamedAddressesInput
                             namedAddresses={settings.nameAddresses || ''}
                             onChange={(value) => setSettings({ ...settings, nameAddresses: value })}
@@ -169,6 +177,7 @@ const CompilerPage = () => {
                                 }
                             }}
                         />
+
                     </div>
                 </div>
             </div>

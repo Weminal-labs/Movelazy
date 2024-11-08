@@ -15,7 +15,6 @@ const ProjectPageAptos = () => {
     useEffect(() => {
         const messageHandler = (event: MessageEvent) => {
             const message = event.data;
-            console.log("check aptos", message);
 
             switch (message.type) {
                 case 'workspaceStatus':

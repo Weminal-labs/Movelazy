@@ -8,7 +8,7 @@ interface PackageDirInputProps {
 const PackageDirInput: React.FC<PackageDirInputProps> = ({ packageDir, onChange }) => {
     return (
         <div className="mb-4">
-            <label className="block text-text-muted text-sm mb-2">Package Directory</label>
+            <label className="block text-text-muted text-sm mb-2">Package Directory (Defaults to current directory)</label>
             <input
                 type="text"
                 value={packageDir}
