@@ -1,4 +1,3 @@
-import { ConstructorParam } from './contract';
 
 export interface NetworkConfig {
     name: string;
@@ -11,8 +10,6 @@ export interface DeploymentState {
     environment: 'local' | 'imported';
     network: NetworkConfig;
     selectedContract: string;
-    constructorParams: ConstructorParam[];
-    deployedContracts: string[];
 }
 
 export interface LocalDeployMessage {
