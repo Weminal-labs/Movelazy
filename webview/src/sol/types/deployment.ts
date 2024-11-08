@@ -2,8 +2,8 @@
 export interface NetworkConfig {
     name: string;
     url: string;
-    accounts: string[];
-    chainId: number;
+    accounts: string;
+    chainId: string;
 }
 
 export interface DeploymentState {

@@ -13,8 +13,8 @@ const DeployerPage = () => {
         network: {
             name: 'hardhat',
             url: 'http://127.0.0.1:8545',
-            accounts: [],
-            chainId: 1337
+            accounts: '',
+            chainId: '1337'
         },
         selectedContract: '',
     });
@@ -35,7 +35,7 @@ const DeployerPage = () => {
                             ...prev,
                             network: {
                                 ...prev.network,
-                                accounts: [message.accounts[0].privateKey]
+                                accounts: message.accounts[0].privateKey
                             }
                         }));
                     }
@@ -92,12 +92,12 @@ const DeployerPage = () => {
                                     name: 'hardhat',
                                     url: 'http://127.0.0.1:8545',
                                     accounts: settings.network.accounts,
-                                    chainId: 1337
+                                    chainId: '1337'
                                 } : {
                                     name: '',
                                     url: '',
-                                    accounts: [],
-                                    chainId: 1
+                                    accounts: '',
+                                    chainId: '1337'
                                 }
                             })}
                         />
@@ -112,7 +112,7 @@ const DeployerPage = () => {
                                         ...settings,
                                         network: {
                                             ...settings.network,
-                                            accounts: [account.privateKey]
+                                            accounts: account.privateKey
                                         }
                                     });
                                 }}
