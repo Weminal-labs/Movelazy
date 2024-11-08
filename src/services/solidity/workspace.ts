@@ -73,7 +73,7 @@ export class WorkspaceService {
                     }
                 };
                 await fs.promises.writeFile(
-                    tsconfigPath, 
+                    tsconfigPath,
                     JSON.stringify(tsconfigContent, null, 2)
                 );
             }
@@ -179,7 +179,7 @@ export default config;
 
     public async isHardhatWorkspace(): Promise<boolean> {
         const workspacePath = this.getWorkspacePath();
-        
+
         try {
             // Check 1: npx hardhat --version
             try {
@@ -208,7 +208,7 @@ export default config;
 
             const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, 'utf8'));
             const hasHardhatDep = !!(packageJson.dependencies?.hardhat || packageJson.devDependencies?.hardhat);
-            
+
             return hasHardhatDep;
         } catch {
             return false;
