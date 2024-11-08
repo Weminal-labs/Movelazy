@@ -3,11 +3,12 @@ import { AptosAccount } from 'aptos';
 
 interface AccountInfoProps {
   account: string;
+  balance: string;
 }
 
-export const AccountInfo = ({ account }: AccountInfoProps) => {
+export const AccountInfo = ({ account, balance }: AccountInfoProps) => {
   const [currentAccount, setCurrentAccount] = useState(account);
-  const [balance, setBalance] = useState<string | null>(null);
+  const [currentBalance, setCurrentBalance] = useState<string | null>(balance);
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
 
@@ -36,13 +37,13 @@ export const AccountInfo = ({ account }: AccountInfoProps) => {
         const data = await response.json();
         const accountResource = data.find((resource: any) => resource.type === '0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>');
         if (accountResource) {
-          setBalance(accountResource.data.coin.value);
+          setCurrentBalance(accountResource.data.coin.value);
         } else {
-          setBalance('0');
+          setCurrentBalance('0');
         }
       } catch (error) {
         console.error('Error fetching balance:', error);
-        setBalance('Error');
+        setCurrentBalance('Error');
       }
     };
 
@@ -66,7 +67,7 @@ export const AccountInfo = ({ account }: AccountInfoProps) => {
             <option value="">{currentAccount || 'No account loaded...'}</option>
           </select>
           <button 
-            className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors"
+            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
             onClick={handleConnect}
           >
             Connect
@@ -79,7 +80,7 @@ export const AccountInfo = ({ account }: AccountInfoProps) => {
           Balance
         </label>
         <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
-          {balance !== null ? balance : 'Loading...'}
+          {currentBalance !== null ? currentBalance : 'Loading...'}
         </div>
       </div>
 
@@ -105,4 +106,4 @@ export const AccountInfo = ({ account }: AccountInfoProps) => {
       </div>
     </div>
   );
-} 
+}; 
