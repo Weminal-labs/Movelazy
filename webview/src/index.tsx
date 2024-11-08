@@ -8,13 +8,13 @@ import HomePage from './home'
 import SolPage from './sol'
 import CompilerPage from './sol/pages/compiler'
 import TesterPage from './sol/pages/tester'
-import DeployerPage from './sol/pages/deployer'
+// import DeployerPage from './sol/pages/deployer'
 import ProjectPageSol from './sol/pages/project'
 //------------------- Aptos imports --------------------- //
 import AptosPage from './aptos'
 import CompilerAptosPage from './aptos/pages/compiler'
 import TesterAptosPage from './aptos/pages/tester'
-// import DeployerAptosPage from './aptos/pages/deployer'
+import DeployerAptosPage from './aptos/pages/deployer'
 import ProjectPageAptos from './aptos/pages/project'
 
 // Router configuration
@@ -43,10 +43,10 @@ const router = createMemoryRouter([
             path: 'tester',
             element: <TesterPage />
           },
-          {
-            path: 'deployer',
-            element: <DeployerPage />
-          }
+          // {
+          //   path: 'deployer',
+          //   element: <DeployerPage />
+          // }
         ]
       },
       {
@@ -65,6 +65,10 @@ const router = createMemoryRouter([
             path: 'tester',
             element: <TesterAptosPage />
           },
+          {
+            path: 'deployer',
+            element: <DeployerAptosPage />
+          }
         ]
       }
     ]

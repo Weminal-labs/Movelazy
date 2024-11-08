@@ -8,7 +8,6 @@ import NamedAddressesInput from '../../components/compiler/NameAddress';
 import NetworkSelector from '../../components/compiler/Network';
 import { Network } from '../../type/network';
 
-
 const CompilerPage = () => {
     const [settings, setSettings] = useState<CompilerSettings>({
         version: '4.3.0',
@@ -52,7 +51,7 @@ const CompilerPage = () => {
             }
 
             // Clear status after 5 seconds
-            if (message.type === 'compileStatus' || message.type === 'cleanStatus') {
+            if (message.type === 'compileStatus' || message.type === 'deployStatus' || message.type === 'cleanStatus') {
                 setTimeout(() => {
                     setCompileStatus({ type: null, message: '' });
                 }, 5000);
@@ -110,7 +109,7 @@ const CompilerPage = () => {
                         <div className="flex gap-4">
                             <button
                                 onClick={handleClean}
-                                disabled={cleaning || compiling}
+                                disabled={cleaning || compiling }
                                 className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${(cleaning || compiling) ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {cleaning ? (
