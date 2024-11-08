@@ -33,11 +33,13 @@ export class WorkspaceService {
       },
       packageDir: "",
       nameAddresses: "",
+      network: 'https://aptos.testnet.porto.movementlabs.xyz/v1'
     };
   }
 
   public async initializeWorkspace() {
     const workspacePath = this.getWorkspacePath();
+    console.log("initialize workspace", workspacePath);
 
     try {
       // Check if npm is installed
@@ -67,6 +69,7 @@ export class WorkspaceService {
           shell: '/bin/bash'
         });
       }
+
 
       // Install Aptos dependencies if not installed
       if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'aptos'))) {
@@ -118,6 +121,8 @@ export default config;
       if (!fs.existsSync(contractsDir)) {
         await fs.promises.mkdir(contractsDir);
       }
+
+
 
       return true;
     } catch (error) {
