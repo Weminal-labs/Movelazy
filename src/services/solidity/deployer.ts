@@ -17,7 +17,7 @@ export class DeployerService {
     }
 
     private async deployLocal(message: LocalDeployMessage) {
-        const { contractName } = message;
+        const { contractName, accountNumber } = message;
         // Get the workspace root directory where hardhat.config.js should be located
         const workspaceRoot = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
@@ -27,6 +27,44 @@ export class DeployerService {
 
         const scriptPath = path.join(workspaceRoot, 'scripts', 'deploy.js');
 
+
+        const configPath = path.join(workspaceRoot, 'hardhat.config.ts');
+        let configContent = `require("dotenv").config();
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-deploy";
+
+const config: HardhatUserConfig = {
+    solidity: {
+    version: "0.8.20",
+    settings: {
+        optimizer: {
+            enabled: false,
+            runs: 200
+        },
+        evmVersion: "london",
+        viaIR: false,
+            metadata: {
+                bytecodeHash: "ipfs"
+            }
+        }
+    },
+    paths: {
+        sources: "./contracts",
+        tests: "./test",
+        cache: "./cache",
+        artifacts: "./artifacts"
+    },
+    namedAccounts: {
+        deployer: {
+            default: ${accountNumber}
+        }
+    }
+};
+
+export default config;`;
+
+        fs.writeFileSync(configPath, configContent);
         // Deploy script template
         const deployScript = `
 async function main() {

@@ -125,16 +125,6 @@ const config: HardhatUserConfig = {
         cache: "./cache",
         artifacts: "./artifacts"
     },
-    namedAccounts: {
-        deployer: {
-            default: 0
-        }
-    },
-    networks: {
-        hardhat: {
-            chainId: 1337
-        }
-    }
 };
 
 export default config;
@@ -209,16 +199,16 @@ export default config;
 
         // Read all .sol directories
         const solDirs = await fs.promises.readdir(artifactsPath);
-        
+
         for (const solDir of solDirs) {
             const solPath = path.join(artifactsPath, solDir);
             const stat = await fs.promises.stat(solPath);
-            
+
             if (stat.isDirectory()) {
                 const files = await fs.promises.readdir(solPath);
                 // Filter for .json files that aren't .dbg.json
                 const contractFiles = files.filter(f => f.endsWith('.json') && !f.endsWith('.dbg.json'));
-                
+
                 for (const file of contractFiles) {
                     contractNames.push(path.parse(file).name);
                 }
