@@ -1,11 +1,11 @@
-import { CompilerMessage } from './messages';
+// import { CompilerMessage } from './messages';
 
-export interface VSCodeApi {
-    postMessage(message: CompilerMessage): void;
-}
+// export interface VSCodeApi {
+//     postMessage(message: CompilerMessage): void;
+// }
 
-declare global {
-    interface Window {
-        vscode: VSCodeApi;
-    }
-}
+// declare global {
+//     interface Window {
+//         vscode: VSCodeApi;
+//     }
+// }

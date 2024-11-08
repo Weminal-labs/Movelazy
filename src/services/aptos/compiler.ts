@@ -1,4 +1,3 @@
-
 import * as vscode from 'vscode';
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
