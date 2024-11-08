@@ -1,20 +1,29 @@
-import { ConstructorParam } from './contract';
 
-export interface NetworkSettings {
+export interface NetworkConfig {
     name: string;
     url: string;
-    accounts: string[];
-    chainId: number;
+    accounts: string;
+    chainId: string;
 }
 
 export interface DeploymentState {
     environment: 'local' | 'imported';
-    network: NetworkSettings;
+    network: NetworkConfig;
     selectedContract: string;
-    constructorParams: ConstructorParam[];
-    deployedContracts: {
-        address: string;
-        name: string;
-        network: string;
-    }[];
 }
+
+export interface LocalDeployMessage {
+    isHardhat: true;
+    accountNumber: number;
+    NetworkConfig: null;
+    contractName: string;
+}
+
+export interface NetworkDeployMessage {
+    isHardhat: false;
+    accountNumber: null;
+    NetworkConfig: NetworkConfig;
+    contractName: string;
+}
+
+export type DeployMessage = LocalDeployMessage | NetworkDeployMessage;

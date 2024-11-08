@@ -1,21 +1,17 @@
 import { CompilerService } from './compiler';
 import { WorkspaceService } from './workspace';
 import { AccountService } from './account';
-import { DeployService } from './deploy';
 import * as vscode from 'vscode';
-import { CompilerConfig, DefaultConfig } from './types';
-
+import { CompilerConfig, DeployMessage } from './types';
 export class SolidityService {
     private compiler: CompilerService;
     private workspace: WorkspaceService;
     private account: AccountService;
-    private deploy: DeployService;
 
     constructor(context: vscode.ExtensionContext) {
         this.workspace = new WorkspaceService(context);
         this.compiler = new CompilerService();
         this.account = new AccountService(context);
-        this.deploy = new DeployService(context);
     }
 
     async compile(webview: vscode.Webview) {
@@ -27,10 +23,24 @@ export class SolidityService {
     }
 
     async updateCompilerConfig(settings: CompilerConfig) {
-        console.log('Updating compiler config with:', settings);
         await this.compiler.updateCompilerConfig(settings);
         await this.workspace.saveSettings(settings);
     }
+
+    /*
+    I don't know why I couldn't call this function, it thrown  getCompiledContracts() is not a function.
+     */
+    // public async getCompiledContracts(): Promise<string[]> {
+    //     try {
+    //         console.log('SolidityService: Getting compiled contracts');
+    //         const contracts = await this.workspace.getCompiledContracts();
+    //         console.log('SolidityService: Retrieved contracts:', contracts);
+    //         return contracts;
+    //     } catch (error) {
+    //         console.error('Error getting compiled contracts:', error);
+    //         throw error;
+    //     }
+    // }
 
     getSettings() {
         return this.workspace.getSettings();

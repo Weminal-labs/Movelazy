@@ -1,6 +1,7 @@
+import { DeployMessage } from './deployment';
 import { CompilerConfig } from './settings';
 
-export type CompilerMessage = {
+export type SolidityMessage = {
     command: 'solidity.compile'
     | 'solidity.getSettings'
     | 'solidity.initWorkspace'
@@ -14,8 +15,9 @@ export type CompilerMessage = {
     | 'solidity.setAccount'
     | 'solidity.getAccountBalance'
     | 'solidity.getAccountPrivateKey'
-    | 'solidity.getAccountNonce';
-    settings?: CompilerConfig;
+    | 'solidity.getAccountNonce'
+    | 'solidity.getCompiledContracts';
+    settings?: CompilerConfig | DeployMessage;
 };
 
 export type VSCodeMessage = {

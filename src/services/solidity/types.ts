@@ -3,8 +3,8 @@ export type NetworkEnvironment = 'local' | 'imported';
 export interface NetworkConfig {
     name: string;
     url?: string;
-    accounts?: string[];
-    chainId?: number;
+    accounts?: string;
+    chainId?: string;
 }
 export interface DefaultConfig {
     version: string;
@@ -52,3 +52,19 @@ export interface CompilerConfig {
         };
     };
 }
+
+export interface LocalDeployMessage {
+    isHardhat: true;
+    accountNumber: number;
+    NetworkConfig: null;
+    contractName: string;
+}
+
+export interface NetworkDeployMessage {
+    isHardhat: false;
+    accountNumber: null;
+    NetworkConfig: NetworkConfig;
+    contractName: string;
+}
+
+export type DeployMessage = LocalDeployMessage | NetworkDeployMessage;

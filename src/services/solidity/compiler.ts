@@ -83,11 +83,6 @@ export class CompilerService {
                 cache: "./cache",
                 artifacts: "./artifacts"
             },
-            namedAccounts: {
-                deployer: {
-                    default: 0
-                }
-            },
         };
 
         export default config;`;
