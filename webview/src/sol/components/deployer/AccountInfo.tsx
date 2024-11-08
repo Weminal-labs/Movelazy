@@ -8,7 +8,8 @@ interface AccountInfoProps {
 }
 
 export const AccountInfo = ({ accounts, selectedPrivateKey, onAccountSelect }: AccountInfoProps) => {
-    const selectedAccount = accounts.find(acc => acc.privateKey === selectedPrivateKey);
+    const selectedIndex = accounts.findIndex(acc => acc.privateKey === selectedPrivateKey);
+    const selectedAccount = selectedIndex >= 0 ? accounts[selectedIndex] : null;
 
     return (
         <div className="space-y-4">
@@ -19,14 +20,15 @@ export const AccountInfo = ({ accounts, selectedPrivateKey, onAccountSelect }: A
                         Select Account
                     </label>
                     <Select
-                        value={selectedPrivateKey}
+                        value={selectedIndex.toString()}
                         onChange={(e) => {
-                            const account = accounts.find(acc => acc.privateKey === e.target.value);
-                            if (account) onAccountSelect(account, accounts.indexOf(account));
+                            const index = parseInt(e.target.value);
+                            const account = accounts[index];
+                            if (account) onAccountSelect(account, index);
                         }}
                     >
                         {accounts.map((account, index) => (
-                            <option key={account.privateKey} value={account.privateKey}>
+                            <option key={index} value={index.toString()}>
                                 Account #{index}: {account.address} ({account.balance} ETH)
                             </option>
                         ))}
