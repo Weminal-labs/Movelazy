@@ -11,7 +11,7 @@ export const NetworkSettings = ({ network, onChange }: { network: NetworkConfig,
                         type="text"
                         value={network.name}
                         onChange={(e) => onChange({ ...network, name: e.target.value })}
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2 border rounded text-black"
                         placeholder="goerli"
                     />
                 </div>
@@ -21,7 +21,7 @@ export const NetworkSettings = ({ network, onChange }: { network: NetworkConfig,
                         type="text"
                         value={network.url}
                         onChange={(e) => onChange({ ...network, url: e.target.value })}
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2 border rounded text-black"
                         placeholder="https://goerli.infura.io/v3/YOUR-PROJECT-ID"
                     />
                 </div>
@@ -31,7 +31,7 @@ export const NetworkSettings = ({ network, onChange }: { network: NetworkConfig,
                         type="password"
                         value={network.accounts}
                         onChange={(e) => onChange({ ...network, accounts: e.target.value })}
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2 border rounded text-black"
                         placeholder="Your wallet private key"
                     />
                 </div>
@@ -41,7 +41,7 @@ export const NetworkSettings = ({ network, onChange }: { network: NetworkConfig,
                         type="string"
                         value={network.chainId}
                         onChange={(e) => onChange({ ...network, chainId: e.target.value })}
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2 border rounded text-black"
                         placeholder="5"
                     />
                 </div>
