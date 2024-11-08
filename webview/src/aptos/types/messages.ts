@@ -26,7 +26,9 @@ export type AptosMessage = {
     | 'aptos.checkWorkspace'
     | 'aptos.tester'
     | 'aptos.deploy'
-    | 'aptos.accountAddress';
+    | 'aptos.accountAddress'
+    | 'aptos.requestFaucet'
+    | 'aptos.balance';
     settings?: CompilerSettings | DeployerSettings;
     flags?: Flags;
 };
