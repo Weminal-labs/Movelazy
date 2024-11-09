@@ -28,13 +28,7 @@ export class AptosService {
         const network = settings.network;
         return this.compiler.compile(webview, packageDir, namedAddresses, moveVersion, optimizer, optimizerlevel, bytecodeHash, network);
     }
-    async deploy(webview: vscode.Webview) {
-        const settings = this.workspace.getSettings();
-        const { package: packageDir, nameAddresses: namedAddresses } = settings;
-        console.log("Named Addresses:", namedAddresses);
-        console.log("checkk>>>", packageDir, namedAddresses);
-        return this.deployer.deploy(webview, namedAddresses);
-    }
+
 
     async test(webview: vscode.Webview, enabled: boolean, testName: string) {
         const settings = this.workspace.getSettings();
@@ -66,6 +60,22 @@ export class AptosService {
 
     async clean(webview: vscode.Webview) {
         return this.compiler.clean(webview);
+    }
+
+    async deploy(webview: vscode.Webview) {
+        const settings = this.workspace.getSettings();
+        const { package: packageDir, nameAddresses: namedAddresses } = settings;
+        console.log("Named Addresses:", namedAddresses);
+        console.log("checkk>>>", packageDir, namedAddresses);
+        return this.deployer.deploy(webview, namedAddresses);
+    }
+
+    async getAccountAddress(webview: vscode.Webview) {
+        return this.deployer.getAccountAddress(webview);
+    }
+
+    async requestFaucet(webview: vscode.Webview) {
+        return this.deployer.requestFaucet(webview);
     }
 }
 

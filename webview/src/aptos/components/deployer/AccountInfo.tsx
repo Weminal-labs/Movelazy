@@ -1,108 +1,43 @@
-import { useState, useEffect } from 'react';
-import { AptosAccount } from 'aptos';
+import React from 'react';
 
-interface AccountInfoProps {
-  account: string;
-  balance: string;
+interface AccountProps {
+  namedAddresses: string;
+  onChange: (value: string) => void;
+  balance: number | null;
 }
 
-export const AccountInfo = ({ account, balance }: AccountInfoProps) => {
-  const [currentAccount, setCurrentAccount] = useState(account);
-  const [currentBalance, setCurrentBalance] = useState<string | null>(balance);
-  const [publicKey, setPublicKey] = useState<string | null>(null);
-  const [privateKey, setPrivateKey] = useState<string | null>(null);
-
-  const handleConnect = () => {
-    const newAccount = new AptosAccount();
-    setCurrentAccount(newAccount.address().hex());
-    setPublicKey(newAccount.pubKey().hex());
-    setPrivateKey(newAccount.toPrivateKeyObject().privateKeyHex);
-    console.log('New account created:', newAccount);
-  };
-
-  const handleCopyPrivateKey = () => {
-    if (privateKey) {
-      navigator.clipboard.writeText(privateKey).then(() => {
-        alert('Private key copied to clipboard!');
-      }).catch(err => {
-        console.error('Failed to copy private key:', err);
+const AccountAddress: React.FC<AccountProps> = ({ namedAddresses, onChange, balance }) => {
+  const handleFaucetClick = () => {
+    if (window.vscode) {
+      window.vscode.postMessage({
+        command: 'aptos.requestFaucet',
       });
     }
   };
-
-  useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const response = await fetch(`https://fullnode.devnet.aptoslabs.com/v1/accounts/${currentAccount}/resources`);
-        const data = await response.json();
-        const accountResource = data.find((resource: any) => resource.type === '0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>');
-        if (accountResource) {
-          setCurrentBalance(accountResource.data.coin.value);
-        } else {
-          setCurrentBalance('0');
-        }
-      } catch (error) {
-        console.error('Error fetching balance:', error);
-        setCurrentBalance('Error');
-      }
-    };
-
-    if (currentAccount) {
-      fetchBalance();
-    }
-  }, [currentAccount]);
-
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-text-muted text-sm mb-2">
-          Account
-        </label>
-        <div className="flex items-center gap-4">
-          <select 
-            className="flex-1 bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
-            value={currentAccount}
-            disabled
+    <div className="mb-4">
+      <div className='flex flex-row justify-between mb-2'>
+        <label className="block text-text-muted text-sm mb-2">Account address</label>
+        <div className='flex flex-row items-center'>
+
+          <button
+            onClick={handleFaucetClick}
+            className="mr-2 px-3 py-1 bg-[#df9331] hover:bg-[#916000] text-white text-sm"
           >
-            <option value="">{currentAccount || 'No account loaded...'}</option>
-          </select>
-          <button 
-            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
-            onClick={handleConnect}
-          >
-            Connect
+            Faucet
           </button>
+          <span> Balance: {balance}Move</span>
         </div>
-      </div>
 
-      <div>
-        <label className="block text-text-muted text-sm mb-2">
-          Balance
-        </label>
-        <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
-          {currentBalance !== null ? currentBalance : 'Loading...'}
-        </div>
       </div>
+      <div className="flex items-center">
+        <input
+          type="text"
+          value={`0x${namedAddresses}`}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
+        />
 
-      <div>
-        <label className="block text-text-muted text-sm mb-2">
-          Public Key
-        </label>
-        <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
-          {publicKey || 'No public key available'}
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-text-muted text-sm mb-2">
-          Private Key
-        </label>
-        <button 
-          className="w-full bg-background-dark text-text p-4 rounded-lg border border-border"
-          onClick={handleCopyPrivateKey}
-        >
-          Copy Private Key
-        </button>
       </div>
     </div>
   );
