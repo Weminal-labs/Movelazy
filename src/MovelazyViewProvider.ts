@@ -164,6 +164,21 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                     case 'aptos.deploy':
                         await this.aptosService.deploy(webviewView.webview);
                         break;
+                    case 'aptos.accountAddress':
+                        const accountAddress = await this.aptosService.getAccountAddress(webviewView.webview);
+                        webviewView.webview.postMessage({
+                            type: 'accountAddress',
+                            address: accountAddress
+                        });
+                        break;
+                    case 'aptos.requestFaucet':
+                        const balance = await this.aptosService.requestFaucet(webviewView.webview);
+                        webviewView.webview.postMessage({
+                            type: 'balance',
+                            balance: balance
+                        });
+                        break;
+
                 }
             } catch (error) {
                 webviewView.webview.postMessage({

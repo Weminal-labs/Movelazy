@@ -2,10 +2,80 @@ import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { spawn } from 'child_process';
-
+import path from 'path';
+import fs from 'fs';
+import yaml from 'js-yaml';
 const execAsync = promisify(exec);
 
 export class AptosDeployerService {
+
+    async getAccountAddress(webview: vscode.Webview) {
+        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        if (!workspacePath) {
+            console.error('Workspace path is undefined.');
+            return null;
+        }
+        let accountAddress: string | null = null;
+
+        const configFilePath = path.join(workspacePath, '.aptos', 'config.yaml'); // Path to the config file
+
+        if (fs.existsSync(configFilePath)) {
+            try {
+                const fileContents = fs.readFileSync(configFilePath, 'utf8');
+                const config: any = yaml.load(fileContents);
+
+                if (config && config.profiles && config.profiles.default && config.profiles.default.account) {
+                    accountAddress = config.profiles.default.account;
+
+                    return accountAddress;
+                } else {
+                    console.error('Account not found in config file.');
+                }
+            } catch (error) {
+                console.error('Error parsing config file:', error);
+            }
+        } else {
+            console.error(`Config file ${configFilePath} does not exist.`);
+        }
+        return Promise.reject('Failed to read account from config');
+    }
+    async requestFaucet(webview: vscode.Webview) {
+        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        if (!workspacePath) {
+            console.log("No workspace folder found.");
+            webview.postMessage({
+                type: 'deployStatus',
+                success: false,
+                message: 'No workspace folder found.'
+            });
+            return;
+        }
+
+        await execAsync(`aptos account fund-with-faucet`, { cwd: workspacePath });
+        const { stdout, stderr } = await execAsync(`aptos account balance`, { cwd: workspacePath });
+        if (stderr) {
+            console.error('Error getting account balance:', stderr);
+            return null;
+        }
+        const result = JSON.parse(stdout);
+        const balance = result.Result[0].balance;
+        return balance;
+    } catch(error: any) {
+        console.error('Error executing command:', error);
+        return null;
+    }
+
+    async getBalance(webview: vscode.Webview) {
+        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const { stdout, stderr } = await execAsync(`aptos account balance`, { cwd: workspacePath });
+        if (stderr) {
+            console.error('Error getting account balance:', stderr);
+            return null;
+        }
+        const result = JSON.parse(stdout);
+        const balance = result.Result[0].balance;
+        return balance;
+    }
     async deploy(webview: vscode.Webview, namedAddresses: string) {
         const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
         if (!workspacePath) {
@@ -30,6 +100,41 @@ export class AptosDeployerService {
             return;
         }
 
+        let accountAddress: string | null = null;
+        async function readAccountFromConfig(): Promise<void> {
+            if (!workspacePath) {
+                console.error('Workspace path is undefined.');
+                return;
+            }
+
+            const configFilePath = path.join(workspacePath, '.aptos', 'config.yaml'); // Path to the config file
+
+            if (fs.existsSync(configFilePath)) {
+                try {
+                    const fileContents = fs.readFileSync(configFilePath, 'utf8');
+                    const config: any = yaml.load(fileContents);
+
+                    if (config && config.profiles && config.profiles.default && config.profiles.default.account) {
+                        accountAddress = config.profiles.default.account;
+                        console.log('Account Address from config:', accountAddress);
+
+                        return; // Resolve when account is found and assigned
+                    } else {
+                        console.error('Account not found in config file.');
+                    }
+                } catch (error) {
+                    console.error('Error parsing config file:', error);
+                }
+            } else {
+                console.error(`Config file ${configFilePath} does not exist.`);
+            }
+            return Promise.reject('Failed to read account from config');
+        }
+
+
+        await readAccountFromConfig();
+
+
         try {
             // Kiểm tra xem Aptos CLI đã được cài đặt chưa
             console.log("Checking if Aptos CLI is installed...");
@@ -37,7 +142,7 @@ export class AptosDeployerService {
             console.log("check>>>>>>>", "   ", namedAddresses);
 
             // Triển khai module Move từ thư mục đúng
-            const command = `aptos move publish --named-addresses ${namedAddresses}`;
+            const command = `aptos move publish --named-addresses ${namedAddresses}=default`;
             console.log("Command to execute:", command);
 
             const publishProcess = spawn(command, { cwd: workspacePath, shell: true });

@@ -10,7 +10,8 @@ const DeployerPage = () => {
         balance: 0,
     });
 
-    const [accountAddress, setAccountAddress] = useState<string | null>(null);
+    const [accountAddress, setAccountAddress] = useState<string>("");
+    const [balance, setBalance] = useState<number | null>(0);
     const [deploying, setDeploying] = useState(false);
     const [deployStatus, setDeployStatus] = useState<{
         type: 'success' | 'error' | null;
@@ -33,24 +34,29 @@ const DeployerPage = () => {
                     stderr: message.stderr
                 });
             }
+
             if (message.type === 'accountAddress') {
                 console.log("Received account addressasdfasf:", message.address);
                 setAccountAddress(message.address);
                 console.log("Updated account address:", message.address);
             }
+
+            if (message.type === 'balance') { // Bắt sự kiện balance
+                console.log("Received balance:", message.balance);
+                setBalance(message.balance / 1e8); // Cập nhật balance
+            }
         };
 
 
-
         window.addEventListener('message', messageHandler);
-        if (window.vscode) {
-            window.vscode.postMessage({
-                command: 'aptos.accountAddress',
-            });
-        }
+        window.vscode.postMessage({
+            command: 'aptos.balance',
+        });
+        window.vscode.postMessage({
+            command: 'aptos.accountAddress',
+        });
         return () => window.removeEventListener('message', messageHandler);
     }, []);
-
 
     const handleDeploy = async () => {
         if (!settings.nameAddresses) {
@@ -113,9 +119,13 @@ const DeployerPage = () => {
                             </a>
                         </div>
                     </div>
-                    <div className="space-y-6">
+                    <div className="mt-2 space-y-6">
                         <AccountAddress
                             namedAddresses={accountAddress || ''}
+                            onChange={(value) => {
+                                setAccountAddress(value);
+                            }}
+                            balance={balance}
                         />
                         <NamedAddressesInput
                             namedAddresses={settings.nameAddresses || ''}

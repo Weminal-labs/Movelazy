@@ -23,7 +23,8 @@ export class AptosCompilerService {
             // Check if Aptos CLI is installed
             await execAsync('aptos --version', { cwd: workspacePath });
 
-            const input = 'skip\n\n';
+            const input = 'https://fund.testnet.porto.movementlabs.xyz/\n';
+
 
             async function runAptos() {
                 if (!workspacePath) {
@@ -43,86 +44,77 @@ export class AptosCompilerService {
                         if (code === 0) {
                             resolve();
                         } else {
-                            reject();
+                            reject(new Error(`Aptos process failed with exit code ${code}`)); // Added error message
                         }
                     });
 
                     if (shouldOverwrite) {
                         aptosProcess.stdin.write("yes\n");
                     }
-                    aptosProcess.stdin.write(input);
-                    aptosProcess.stdin.end();
+                    if (input) {
+                        aptosProcess.stdin.write(input); // Ensure input is valid
+                    } else {
+                        reject(new Error('Input is required but not provided.'));
+                        return;
+                    }
+
+                    aptosProcess.stdin.end(); // End the stdin stream properly
                 });
 
-                await aptosPromise;
+                await aptosPromise; // Wait for aptos process to finish
                 console.log('Aptos process completed successfully.');
             }
 
+
+
             runAptos()
-                .then(() => {
-                    console.log('Now you can run the next command.');
+                .then(async () => {
+                    try {
+                        console.log('Now you can run the next command.');
+                        // Continue with the next task
+                        let command = `aptos move compile --package-dir ${packageDir} --named-addresses ${namedAddresses}=default `;
+
+                        if (moveVersion === 'Move 2') {
+                            command += `--move-2`;
+                        } else {
+                            command += `${optimizer === true ? `--optimize ${optimizerlevel}` : ''}--bytecode-version ${bytecodeHash} `;
+                        }
+                        const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+                        const isInformational = stdout.includes('"Result"');
+
+                        if (stderr && !isInformational) {
+                            console.log("check error", "sadasfasf", stderr)
+                            webview.postMessage({
+                                type: 'compileStatus',
+                                success: false,
+                                message: stderr
+                            });
+                            return;
+                        }
+
+                        webview.postMessage({
+                            type: 'compileStatus',
+                            success: true,
+                            message: stderr + stdout || 'Compilation successful!'
+                        });
+                    } catch (error) {
+                        console.error('An error occurred while reading the config:', error);
+                        webview.postMessage({
+                            type: 'compileStatus',
+                            success: false,
+                            message: (error as Error).message
+                        });
+                    }
+
                 })
                 .catch((error) => {
                     console.error('An error occurred:', error);
+                    webview.postMessage({
+                        type: 'compileStatus',
+                        success: false,
+                        message: (error as Error).message
+                    });
                 });
-
-
-            let accountAddress: string | null = null;
-            function readAccountFromConfig() {
-                if (!workspacePath) {
-                    console.error('Workspace path is undefined.');
-                    return;
-                }
-                const configFilePath = path.join(workspacePath, '.aptos', 'config.yaml'); // Đường dẫn đến file config.yaml
-
-                if (fs.existsSync(configFilePath)) {
-                    try {
-                        const fileContents = fs.readFileSync(configFilePath, 'utf8');
-                        const config: any = yaml.load(fileContents);
-
-                        if (config && config.profiles && config.profiles.default && config.profiles.default.account) {
-                            accountAddress = config.profiles.default.account;
-                            console.log('Account Address from config:', accountAddress);
-                        } else {
-                            console.error('Account not found in config file.');
-                        }
-                    } catch (error) {
-                        console.error('Error parsing config file:', error);
-                    }
-                } else {
-                    console.error(`Config file ${configFilePath} does not exist.`);
-                }
-            }
-
-            readAccountFromConfig();
-
-            let command = `aptos move compile --package-dir ${packageDir} --named-addresses ${namedAddresses}=${accountAddress} `;
-
-            if (moveVersion === 'Move 2') {
-                command += `--move-2`;
-            } else {
-                command += `${optimizer === true ? `--optimize ${optimizerlevel}` : ''} --bytecode-version ${bytecodeHash} `;
-            }
-            const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
-
-            console.log("check>>> KQ", stdout, " checkeck", stderr);
-
-            const isInformational = stdout.includes('"Result"');
-
-            if (stderr && !isInformational) {
-                webview.postMessage({
-                    type: 'compileStatus',
-                    success: false,
-                    message: stderr
-                });
-                return;
-            }
-
-            webview.postMessage({
-                type: 'compileStatus',
-                success: true,
-                message: stderr + stdout || 'Compilation successful!'
-            });
 
         } catch (error) {
             webview.postMessage({
