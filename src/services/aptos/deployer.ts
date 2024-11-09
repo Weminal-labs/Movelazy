@@ -67,14 +67,21 @@ export class AptosDeployerService {
 
     async getBalance(webview: vscode.Webview) {
         const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-        const { stdout, stderr } = await execAsync(`aptos account balance`, { cwd: workspacePath });
-        if (stderr) {
-            console.error('Error getting account balance:', stderr);
+        try {
+            const { stdout, stderr } = await execAsync(`aptos account balance`, { cwd: workspacePath });
+            if (stderr) {
+                console.error('Error getting account balance:', stderr);
+                return null;
+            }
+            console.log('Balance command output:', stdout);
+            const result = JSON.parse(stdout);
+            const balance = result.Result[0].balance;
+            console.log('Parsed balance:', balance);
+            return balance;
+        } catch (error) {
+            console.error('Error executing balance command:', error);
             return null;
         }
-        const result = JSON.parse(stdout);
-        const balance = result.Result[0].balance;
-        return balance;
     }
     async deploy(webview: vscode.Webview, namedAddresses: string) {
         const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
@@ -142,7 +149,7 @@ export class AptosDeployerService {
             console.log("check>>>>>>>", "   ", namedAddresses);
 
             // Triển khai module Move từ thư mục đúng
-            const command = `aptos move publish --named-addresses ${namedAddresses}=default`;
+            const command = `aptos move publish --named-addresses ${namedAddresses}=default --gas-unit-price 1000 --max-gas 3000 --bytecode-version 6 --compiler-version 1`;
             console.log("Command to execute:", command);
 
             const publishProcess = spawn(command, { cwd: workspacePath, shell: true });
