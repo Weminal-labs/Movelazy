@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DeployerSettings } from '../../../aptos/types/settings';
 import NamedAddressesInput from '../../components/deployer/NamedAddresses';
-import { AccountInfo } from '../../components/deployer/AccountInfo';
+import AccountAddress from '../../components/deployer/AccountInfo';
 
 const DeployerPage = () => {
     const [settings, setSettings] = useState<DeployerSettings>({
@@ -36,25 +36,26 @@ const DeployerPage = () => {
             }
 
             if (message.type === 'accountAddress') {
-                console.log("Received account addressasdfasf:", message.address);
+                console.log("Received account address:", message.address);
                 setAccountAddress(message.address);
-                console.log("Updated account address:", message.address);
             }
 
-            if (message.type === 'balance') { // Bắt sự kiện balance
+            if (message.type === 'balance') {
                 console.log("Received balance:", message.balance);
                 setBalance(message.balance / 1e8); // Cập nhật balance
             }
         };
 
-
         window.addEventListener('message', messageHandler);
+
+        // Yêu cầu cập nhật balance và account address khi component mount
         window.vscode.postMessage({
             command: 'aptos.balance',
         });
         window.vscode.postMessage({
             command: 'aptos.accountAddress',
         });
+
         return () => window.removeEventListener('message', messageHandler);
     }, []);
 
@@ -109,14 +110,6 @@ const DeployerPage = () => {
                                     </div>
                                 ) : 'Deploy'}
                             </button>
-                            <a
-                                href="https://mizu.testnet.porto.movementnetwork.xyz/" 
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-                            >
-                                Faucet
-                            </a>
                         </div>
                     </div>
                     <div className="mt-2 space-y-6">
@@ -133,10 +126,6 @@ const DeployerPage = () => {
                                 setSettings({ ...settings, nameAddresses: value });
                             }}
                         />
-                        <AccountInfo
-                                account={settings.account || ''}
-                                balance={settings.balance?.toString() || ''}
-                            />
                     </div>
                 </div>
                 {deployStatus.type && (

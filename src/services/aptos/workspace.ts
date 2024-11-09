@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { execAsync } from '../../utils/execAsync';
+
+const execAsync = promisify(exec);
 
 export class WorkspaceService {
   private readonly stateKey = 'compiler.settings';
@@ -42,7 +46,7 @@ export class WorkspaceService {
 
   public async initializeWorkspace() {
     const workspacePath = this.getWorkspacePath();
-    console.log("initialize workspace", workspacePath);
+    console.log("Initializing workspace at", workspacePath);
 
     try {
       // Check if npm is installed
@@ -57,13 +61,10 @@ export class WorkspaceService {
       try {
         await execAsync('aptos --version');
       } catch {
-        // Aptos CLI is not installed, install it
         console.log('Aptos CLI not found. Installing...');
-        // Check if Python is installed before attempting to install Aptos CLI
         try {
           await execAsync('python3 --version', { cwd: workspacePath });
         } catch {
-          // Python3 is not installed, attempt to install it
           console.log('Python3 is not installed. Installing Python3...');
           await execAsync('sudo apt-get install python3 -y', { cwd: workspacePath, shell: '/bin/bash' });
         }
@@ -72,7 +73,6 @@ export class WorkspaceService {
           shell: '/bin/bash'
         });
       }
-
 
       // Install Aptos dependencies if not installed
       if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'aptos'))) {
@@ -102,30 +102,45 @@ export class WorkspaceService {
         );
       }
 
-      // Create aptos.config.ts with default settings
-      const aptosConfigPath = path.join(workspacePath, 'aptos.config.ts');
-      if (!fs.existsSync(aptosConfigPath)) {
-        const defaultSettings = this.getSettings();
-        const configContent = `
-import { AptosConfig } from "aptos";
+      // Run aptos move init
+      try {
+        const { stdout, stderr } = await execAsync('aptos move init --name hello_blockchain --template hello-blockchain', {
+          cwd: workspacePath,
+          shell: '/bin/bash'
+        });
 
-const config: AptosConfig = {
-  version: "${defaultSettings.version}",
-  // Add other Aptos-specific settings here
-};
-
-export default config;
-            `;
-        await fs.promises.writeFile(aptosConfigPath, configContent);
+        if (stderr) {
+          console.error(`Error during aptos move init: ${stderr}`);
+        } else {
+          console.log(`Aptos move init completed successfully: ${stdout}`);
+        }
+      } catch (error) {
+        console.error(`Failed to run aptos move init: ${(error as Error).message}`);
       }
 
-      // Create contracts directory if it doesn't exist
-      const contractsDir = path.join(workspacePath, 'contracts');
-      if (!fs.existsSync(contractsDir)) {
-        await fs.promises.mkdir(contractsDir);
-      }
+      // Run aptos init with predefined answers
+      await new Promise<void>((resolve, reject) => {
+        const aptosInit = exec('aptos init', { cwd: workspacePath, shell: '/bin/bash' });
 
+        aptosInit.stdout?.on('data', (data) => {
+          console.log(data.toString());
+          if (data.includes('Aptos already initialized for profile default')) {
+            aptosInit.stdin?.write('yes\n');
+          } else if (data.includes('Choose network from')) {
+            aptosInit.stdin?.write('testnet\n');
+          } else if (data.includes('Enter your private key as a hex literal')) {
+            aptosInit.stdin?.write('0x...\n'); // Replace '0x...' with your actual private key
+          }
+        });
 
+        aptosInit.on('close', (code) => {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error(`aptos init process exited with code ${code}`));
+          }
+        });
+      });
 
       return true;
     } catch (error) {
