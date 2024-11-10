@@ -4,6 +4,7 @@
   "icon": "media/icon.png",
   "publisher": "Movelazy",
   "description": "move with GUI",
+  "license": "MIT",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.93.0"
