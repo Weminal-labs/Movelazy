@@ -3,12 +3,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { execAsync } from '../../utils/execAsync';
 
-const execAsync = promisify(exec);
 
 export class WorkspaceService {
   private readonly stateKey = 'compiler.settings';
-  
+
   constructor(private context: vscode.ExtensionContext) { }
 
   private getWorkspacePath(): string {
@@ -102,45 +102,27 @@ export class WorkspaceService {
       }
 
       // Run aptos move init
-      try {
-        const { stdout, stderr } = await execAsync('aptos move init --name hello_blockchain --template hello-blockchain', {
-          cwd: workspacePath,
-          shell: '/bin/bash'
-        });
+      const moveTomlPath = path.join(workspacePath, 'Move.toml');
+      if (!fs.existsSync(moveTomlPath)) {
+        try {
+          const { stdout, stderr } = await execAsync('aptos move init --name hello_blockchain --template hello-blockchain', {
+            cwd: workspacePath,
+            shell: '/bin/bash'
+          });
 
-        if (stderr) {
-          console.error(`Error during aptos move init: ${stderr}`);
-        } else {
-          console.log(`Aptos move init completed successfully: ${stdout}`);
-        }
-      } catch (error) {
-        console.error(`Failed to run aptos move init: ${(error as Error).message}`);
-      }
-
-      // Run aptos init with predefined answers
-      await new Promise<void>((resolve, reject) => {
-        const aptosInit = exec('aptos init', { cwd: workspacePath, shell: '/bin/bash' });
-
-        aptosInit.stdout?.on('data', (data) => {
-          console.log(data.toString());
-          if (data.includes('Aptos already initialized for profile default')) {
-            aptosInit.stdin?.write('yes\n');
-          } else if (data.includes('Choose network from')) {
-            aptosInit.stdin?.write('testnet\n');
-          } else if (data.includes('Enter your private key as a hex literal')) {
-            aptosInit.stdin?.write('0x...\n'); // Replace '0x...' with your actual private key
-          }
-        });
-
-        aptosInit.on('close', (code) => {
-          if (code === 0) {
-            resolve();
+          if (stderr) {
+            console.error(`Error during aptos move init: ${stderr}`);
+            return false
           } else {
-            reject(new Error(`aptos init process exited with code ${code}`));
+            console.log(`Aptos move init completed successfully: ${stdout}`);
           }
-        });
-      });
-
+        } catch (error) {
+          console.error(`Failed to run aptos move init: ${(error as Error).message}`);
+          return false
+        }
+      } else {
+        console.log('move.toml already exists, skipping aptos move init.');
+      }
       return true;
     } catch (error) {
       throw new Error(`Failed to initialize workspace: ${(error as Error).message}`);
