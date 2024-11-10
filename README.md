@@ -29,7 +29,7 @@ I believe the team is young and needs time to grow with the product. That's why 
   If you want to develop Aptos platform, click on the "Aptos" option.
 
 * Step 4: Click the "Initialize Aptos Project" button**
-- When you click this button, Movelazy will do the following:
++ When you click this button, Movelazy will do the following:
 - Initialize a new npm project (if it doesn't exist yet).
 Install Aptos and the dependencies needed to develop on the Aptos platform.
 Create the initial project structure, prepare the development environment.
