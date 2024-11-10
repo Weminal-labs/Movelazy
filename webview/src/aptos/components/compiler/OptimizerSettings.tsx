@@ -1,10 +1,10 @@
 interface OptimizerSettingsProps {
     enabled: boolean
-    runs: number | undefined
-    onChange: (enabled: boolean, runs?: number) => void
+    level: string
+    onChange: (enabled: boolean, level?: string) => void
 }
 
-export const OptimizerSettings = ({ enabled, runs, onChange }: OptimizerSettingsProps) => {
+export const OptimizerSettings = ({ enabled, level, onChange }: OptimizerSettingsProps) => {
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -20,14 +20,16 @@ export const OptimizerSettings = ({ enabled, runs, onChange }: OptimizerSettings
             {enabled && (
                 <div>
                     <label className="block text-text-muted text-sm mb-2">
-                        Optimizer Runs
+                        Optimizer Level
                     </label>
-                    <input
-                        type="number"
-                        value={runs}
-                        onChange={(e) => onChange(enabled, parseInt(e.target.value))}
+                    <select
+                        value={level}
+                        onChange={(e) => onChange(enabled, e.target.value)}
                         className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
-                    />
+                    >
+                        <option>default</option>
+                        <option>extra</option>
+                    </select>
                 </div>
             )}
         </div>
