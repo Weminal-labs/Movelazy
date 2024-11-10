@@ -29,16 +29,16 @@ I believe the team is young and needs time to grow with the product. That's why 
   If you want to develop Aptos platform, click on the "Aptos" option.
 
 * Step 4: Click the "Initialize Aptos Project" button**
-+ When you click this button, Movelazy will do the following:
-- Initialize a new npm project (if it doesn't exist yet).
-Install Aptos and the dependencies needed to develop on the Aptos platform.
-Create the initial project structure, prepare the development environment.
+  1. When you click this button, Movelazy will do the following:
+  2. Initialize a new npm project (if it doesn't exist yet).
+  3. Install Aptos and the dependencies needed to develop on the Aptos platform.
+  4. Create the initial project structure, prepare the development environment.
 * Step 5: Configure the Compiler***
 
 **Package Directory**:
 
-- Use the command in the terminal to get the current path and fill it in here. Make sure that this path is the correct folder that you created in the first step.`pwd`
-- If left empty, it will take the current directory.
+ +Use the command in the terminal to get the current path and fill it in here. Make sure that this path is the correct folder that you created in the first step.`pwd`
+ If left empty, it will take the current directory.
 
 **Chain Management**:
 
