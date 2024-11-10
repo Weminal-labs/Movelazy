@@ -1,6 +1,6 @@
 interface BasicSettingsProps {
     version: string
-    evmVersion: string
+    evmVersion: string | undefined
     onChange: (key: string, value: string) => void
 }
 

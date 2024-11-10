@@ -1,200 +1,156 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import axios from 'axios';
-import { useLocation } from "react-router-dom";
-import { useState } from "react";
-import FileUpload from "../../components/FileUpload";
-import InputWallet from "../../components/InputWallet";
-import DeployButton from '../../components/DeployButton';
-const Deployer = () => {
-    //@ts-ignore
-    const [privatekey, setPrivateKey] = useState<string>(() => localStorage.getItem('privateKey') || '');
-    const [deploymentInfo, setDeploymentInfo] = useState('');
+import { useEffect, useState } from 'react';
+import { DeployerSettings } from '../../../aptos/types/settings';
+import NamedAddressesInput from '../../components/deployer/NamedAddresses';
+import AccountAddress from '../../components/deployer/AccountInfo';
 
-    const [loading, setLoading] = useState(false); // For button loading state
-    const [apiError, setApiError] = useState('');  // To show any API errors
+const DeployerPage = () => {
+    const [settings, setSettings] = useState<DeployerSettings>({
+        nameAddresses: "",
+        account: '',
+        balance: 0,
+    });
 
-    const [file, setFile] = useState<File | null>(null);
-    //@ts-ignore
-    const [fileName, setFileName] = useState<string | null>(null);
-    //@ts-ignore
-    const [modName, setModName] = useState('');
+    const [accountAddress, setAccountAddress] = useState<string>("");
+    const [balance, setBalance] = useState<number | null>(0);
+    const [deploying, setDeploying] = useState(false);
+    const [deployStatus, setDeployStatus] = useState<{
+        type: 'success' | 'error' | null;
+        message: string;
+        stdout: string;
+        stderr: string;
+    }>({ type: null, message: '', stdout: '', stderr: '' });
 
-    const [transactionHash, setTransactionHash] = useState<string | null>(null);
+    useEffect(() => {
+        const messageHandler = (event: MessageEvent) => {
+            const message = event.data;
+            console.log("Received message:", message);
 
-    const [maxGas, setMaxGas] = useState<number | ''>(1000);
-    const [gasUnitPrice, setGasUnitPrice] = useState<number | ''>(1);
-
-    const [selectedNetwork, setSelectedNetwork] = useState<string>('https://mevm.devnet.imola.movementlabs.xyz');
-
-    const getTransactionHash = (response: string): string | null => {
-        // Tìm dòng chứa Transaction hash
-        const lines = response.split('\n');
-        for (const line of lines) {
-            if (line.startsWith('Transaction hash:')) {
-                // Trả về giá trị sau dấu hai chấm
-                return line.split(': ')[1].trim();
+            if (message.type === 'deployStatus') {
+                setDeploying(false);
+                setDeployStatus({
+                    type: message.success ? 'success' : 'error',
+                    message: message.message,
+                    stdout: message.stdout,
+                    stderr: message.stderr
+                });
             }
-        }
-        return null; // Nếu không tìm thấy Transaction hash
-    };
 
-    const location = useLocation();
-    const page = location.state?.page;
-    const handleNetworkChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedNetwork(e.target.value);
-        console.log(e.target.value);
-    };
-    //@ts-ignore
-    const handleModName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setModName(e.target.value);
-    }
+            if (message.type === 'accountAddress') {
+                console.log("Received account address:", message.address);
+                setAccountAddress(message.address);
+            }
 
-    const handleMaxGasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setMaxGas(value === '' ? '' : Number(value)); // Convert to number or keep as empty string
-    };
+            if (message.type === 'balance') {
+                console.log("Received balance:", message.balance);
+                setBalance(message.balance / 1e8); // Cập nhật balance
+            }
+        };
 
-    const handleGasUnitPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setGasUnitPrice(value === '' ? '' : Number(value)); // Convert to number or keep as empty string
-    };
+        window.addEventListener('message', messageHandler);
+
+        // Yêu cầu cập nhật balance và account address khi component mount
+        window.vscode.postMessage({
+            command: 'aptos.balance',
+        });
+        window.vscode.postMessage({
+            command: 'aptos.accountAddress',
+        });
+
+        return () => window.removeEventListener('message', messageHandler);
+    }, []);
 
     const handleDeploy = async () => {
-        setLoading(true);
-        setApiError('');
-        setDeploymentInfo('');
-
-        const url = 'http://3.26.212.161:3000/upload/solidity';
-
-        try {
-            const formData = new FormData();
-            if (file) {
-                formData.append('file', file);
-            } else {
-                throw new Error('No file selected for upload');
-            }
-
-            formData.append('privateKey', privatekey);
-            formData.append('rpcUrl', selectedNetwork);
-
-            const response = await axios.post(url, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+        if (!settings.nameAddresses) {
+            setDeployStatus({
+                type: 'error',
+                message: 'Named addresses are required.',
+                stdout: '',
+                stderr: ''
             });
-            console.log("Deployment successful:", response.data);
-            console.log(getTransactionHash(response.data));
-            setTransactionHash(getTransactionHash(response.data));
-            setDeploymentInfo(response.data);
-            alert(`Deployment successful:\n${response.data}`);
-        } catch (error) {
-            console.error('Error during deployment:', error);
+            return;
+        }
 
-            if (axios.isAxiosError(error)) {
-                setApiError(error.response?.data || 'Failed to deploy');
-            } else {
-                setApiError('An unknown error occurred');
+        setDeploying(true);
+        setDeployStatus({ type: null, message: '', stdout: '', stderr: '' });
+        console.log("Deploying with named addresses:", settings.nameAddresses);
+        if (window.vscode) {
+            try {
+                window.vscode.postMessage({
+                    command: 'aptos.deploy',
+                    settings: settings
+                });
+            } catch {
+                setDeploying(false);
+                setDeployStatus({
+                    type: 'error',
+                    message: 'Failed to start deployment',
+                    stdout: '',
+                    stderr: ''
+                });
             }
-        } finally {
-            setLoading(false);
         }
     };
 
     return (
-        <>
-           <div className="h-[calc(100vh-64px)] flex flex-col">
-                <div className="flex-1 overflow-auto bg-background-light">
-                   <div className="min-h-full w-full border border-border">
-                     <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-text text-2xl font-medium">Compiler Settings</h3>
-                      </div>
-                        <div className="flex flex-col gap-[24px] my-5 w-full ">
-                            <div>
-                                <FileUpload file={file} setFile={setFile} page={page} setFileName={setFileName} />
-                            </div>
-                            <div className=''>
-                                <InputWallet
-                                    label="Module Name"
-                                    value={privatekey}
-                                />
-                            </div>
-                            <div>
-                                <InputWallet
-                                    label="Private Key"
-                                    value={privatekey}
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    className=" block text-white text-xl font-semibold mb-2 "
-                                >Max Gas</label>
-                                <input
-                                    type="number"
-                                    placeholder="Max Gas"
-                                    value={maxGas}
-                                    onChange={handleMaxGasChange}
-                                    className="w-full peer outline-none ring px-4 py-3 h-12 text-[20px] text-black border-0 rounded-lg ring-gray-200 duration-500 focus:ring-2 focus:border-gray-100 relative placeholder:duration-500 placeholder:absolute focus:placeholder:pt-10 shadow-xl shadow-gray-400/10 focus:shadow-none focus:rounded-md focus:ring-[#15ba42] placeholder:text-gray-400"
-                                    max={1000000000}
-                                />
-                            </div>
-
-                            <div className=''>
-                                <label
-                                    className=" block text-white text-xl font-semibold mb-2 "
-                                >Gas Unit Price</label>
-                                <input
-                                    type="number"
-                                    placeholder="Gas Unit Price"
-                                    value={gasUnitPrice}
-                                    onChange={handleGasUnitPriceChange}
-                                    className="w-full peer outline-none ring px-4 py-3 h-12 text-[20px] text-black border-0 rounded-lg ring-gray-200 duration-500 focus:ring-2 focus:border-gray-100 relative placeholder:duration-500 placeholder:absolute focus:placeholder:pt-10 shadow-xl shadow-gray-400/10 focus:shadow-none focus:rounded-md focus:ring-[#15ba42] placeholder:text-gray-400"
-                                    max={1000}
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="network" className="block text-xl text-white font-semibold mb-2 ">
-                                    Select Network
-                                </label>
-                                <select
-                                    id="network"
-                                    value={selectedNetwork}
-                                    onChange={handleNetworkChange}
-                                    className="w-full px-5 py-4 text-black text-[20px] border border-[#5a5a5a] rounded-lg bg-white"
-                                >
-                                    <option value="https://aptos.testnet.suzuka.movementlabs.xyz/v1" className="bg-white text-[20px] text-black">
-                                        https://aptos.testnet.suzuka.movementlabs.xyz/v1
-                                    </option>
-                                    <option value="https://devnet.suzuka.movementnetwork.xyz/v1" className="bg-white text-[20px] text-black">
-                                        https://devnet.suzuka.movementnetwork.xyz/v1
-                                    </option>
-                                </select>
-                            </div>
-                            <div className="mt-5">
-                                <DeployButton handleDeploy={handleDeploy} loading={loading} apiError={apiError} />
-                            </div>
-
-                            {deploymentInfo && (
-                                <div className="mt-4 p-4 bg-gray-800 text-white rounded-lg ">
-                                    <h3 className="text-lg font-semibold">Deployment Info:</h3>
-                                    <pre className="whitespace-pre-wrap break-words ">{deploymentInfo}</pre>
-
-                                </div>
-                            )}
-                            {deploymentInfo && (
-                                <a
-                                    href={`https://explorer.movementnetwork.xyz/txn/${transactionHash}`}
-                                    className=" w-full px-5 py-4 mt-4 text-white text-center text-[18px] rounded-lg bg-blue-500 hover:bg-blue-600 transition-colors"
-                                >
-                                    Explore
-                                </a>
-                            )}
+        <div className="flex flex-col w-full h-[calc(100vh-64px)]">
+            <div className="flex-1 bg-background-light border border-border">
+                <div className="p-8">
+                    <div className="flex justify-between items-center mb-8">
+                    <h3 className="text-text text-2xl font-medium">Deploy Settings</h3>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handleDeploy}
+                                disabled={deploying}
+                                className={`px-8 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors ${deploying ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {deploying ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Deploying...
+                                    </div>
+                                ) : 'Deploy'}
+                            </button>
                         </div>
                     </div>
+                    <div className="mt-2 space-y-6">
+                        <AccountAddress
+                            namedAddresses={accountAddress || ''}
+                            onChange={(value) => {
+                                setAccountAddress(value);
+                            }}
+                            balance={balance}
+                        />
+                        <NamedAddressesInput
+                            namedAddresses={settings.nameAddresses || ''}
+                            onChange={(value) => {
+                                setSettings({ ...settings, nameAddresses: value });
+                            }}
+                        />
+                    </div>
                 </div>
+                {deployStatus.type && (
+                    <div
+                        className={`p-4 border-t border-border transition-all ${deployStatus.type === 'success'
+                            ? 'bg-green-500/5 text-green-500 border-green-500/20'
+                            : 'bg-red-500/5 text-red-500 border-red-500/20'
+                            }`}
+                    >
+                        <pre className="font-mono text-sm whitespace-pre-wrap">
+                            {deployStatus.message}
+                        </pre>
+                    </div>
+                )}
+                {deployStatus.stdout && (
+                    <div className="mb-4">
+                        <h4 className="block text-text-muted text-sm mb-2">Deployment Result:</h4>
+                        <pre className="font-mono text-sm whitespace-pre-wrap ">
+                            {deployStatus.stdout}
+                        </pre>
+                    </div>
+                )}
             </div>
-
-        </>
+        </div>
     );
-}
+};
 
-export default Deployer;
+export default DeployerPage;

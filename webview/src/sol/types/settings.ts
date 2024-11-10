@@ -30,13 +30,14 @@ export interface HardhatConfig {
     evmVersion: string;
     optimizer: {
         enabled: boolean;
-        runs: number;
+        runs?: number;
+        level?: string;
     };
-    metadata: {
+    metadata?: {
         bytecodeHash: string;
     };
-    viaIR: boolean;
-    debug: {
+    viaIR?: boolean;
+    debug?: {
         debugInfo: string[];
     };
     networks: {

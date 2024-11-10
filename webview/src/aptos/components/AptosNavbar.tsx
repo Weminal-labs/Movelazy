@@ -5,10 +5,10 @@ export const AptosNavbar = () => {
   const navigate = useNavigate()
 
   return (
-    <nav className="flex items-center justify-between p-4 border-b border-white/10">
+    <nav className="flex items-center justify-between p-4 border-b border-border bg-background-light">
       <button
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-white hover:text-white/80"
+        className="flex items-center gap-2 text-text hover:text-text-muted"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>Back</span>
@@ -16,19 +16,19 @@ export const AptosNavbar = () => {
 
       <ul className="flex gap-4">
         <li>
-          <Link to="/aptos/YourAddress" className="text-white hover:text-white/80">
-              YourAddress
-            </Link>
-          </li>
-          <li>
-            <Link to="/aptos/AccountBalance" className="text-white hover:text-white/80">
-              AccountBalance
-            </Link>
-          </li>
-          <li>
-            <Link to="/aptos/deployer" className="text-white hover:text-white/80">
-              Deployer
-            </Link>
+          <Link to="/aptos/compiler" className="text-white hover:text-white/80">
+            Compile
+          </Link>
+        </li>
+        <li>
+          <Link to="/aptos/tester" className="text-white hover:text-white/80">
+            Test
+          </Link>
+        </li>
+        <li>
+          <Link to="/aptos/deployer" className="text-white hover:text-white/80">
+            Deploy
+          </Link>
         </li>
       </ul>
     </nav>

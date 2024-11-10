@@ -54,6 +54,7 @@
     "webview:dev": "cd webview && npm run dev"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "20.x",
     "@types/vscode": "^1.93.0",
     "@typescript-eslint/eslint-plugin": "^8.3.0",
