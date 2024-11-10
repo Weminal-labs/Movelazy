@@ -59,7 +59,7 @@ const AccountAddress: React.FC<AccountProps> = ({ namedAddresses, onChange, bala
       <div className="flex items-center gap-4">
         <input
           type="text"
-          value={`0x${currentAccount}`}
+          value={`${currentAccount}`}
           onChange={(e) => onChange(e.target.value)}
           className="flex-1 bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
         />
