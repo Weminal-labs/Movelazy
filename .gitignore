@@ -4,6 +4,9 @@ dist/
 node_modules/
 .vscode-test/
 
+# Ignore all .vsix files
+*.vsix
+
 # Logs
 logs
 *.log

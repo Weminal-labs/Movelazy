@@ -1,9 +1,9 @@
 {
-  "name": "movelazy",
-  "displayName": "movelazy",
+  "name": "movelazy-extension",
+  "displayName": "Movelazy - Movement Extension",
   "icon": "media/icon.png",
   "publisher": "Movelazy",
-  "description": "move with GUI",
+  "description": "Simplify the Development of Move Contracts on Movement",
   "license": "MIT",
   "version": "0.0.1",
   "engines": {
