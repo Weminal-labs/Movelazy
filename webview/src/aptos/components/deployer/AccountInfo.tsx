@@ -73,9 +73,12 @@ const AccountAddress: React.FC<AccountProps> = ({ namedAddresses, onChange, bala
 
       <div className="mt-4">
         <label className="block text-text-muted text-sm mb-2">Public Key</label>
-        <div className="w-full bg-background-dark text-text p-4 rounded-lg border border-border">
+        <div className='className="flex-1 bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary
+               truncate'
+        >
           {publicKey || 'No public key available'}
         </div>
+        
       </div>
 
       <div>

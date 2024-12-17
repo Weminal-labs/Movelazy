@@ -10,6 +10,10 @@ const DeployerPage = () => {
         balance: 0,
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+
+    
+
     const [accountAddress, setAccountAddress] = useState<string>("");
     const [balance, setBalance] = useState<number | null>(0);
     const [deploying, setDeploying] = useState(false);
@@ -60,6 +64,8 @@ const DeployerPage = () => {
     }, []);
 
     const handleDeploy = async () => {
+        setIsLoading(true);
+
         if (!settings.nameAddresses) {
             setDeployStatus({
                 type: 'error',
@@ -67,6 +73,7 @@ const DeployerPage = () => {
                 stdout: '',
                 stderr: ''
             });
+            setIsLoading(false);
             return;
         }
 
@@ -90,6 +97,33 @@ const DeployerPage = () => {
             }
         }
     };
+
+    const extractJSON = (stdout: string) => {
+        try {
+          // Tìm khối JSON trong stdout
+          const jsonMatch = stdout.match(/{.*}/s); // Regex để tìm JSON đầu tiên
+          if (jsonMatch) {
+            return JSON.parse(jsonMatch[0]); // Phân tích cú pháp JSON
+          }
+          console.error("No JSON found in stdout");
+          return null;
+        } catch (error) {
+          console.error("Failed to parse stdout:", error);
+          return null;
+        }
+      };
+
+        const getTransactionHash = (stdout:string) => {
+            const parsedResult = extractJSON(stdout); 
+            console.log("check parsedResult", parsedResult)
+            return parsedResult?.Result?.transaction_hash || ""; 
+          };
+
+    useEffect(() => {
+        if (deployStatus.type === "success") {
+          setIsLoading(false);
+        }
+      }, [deployStatus.type]);
 
     return (
         <div className="flex flex-col w-full h-[calc(100vh-64px)]">
@@ -128,26 +162,73 @@ const DeployerPage = () => {
                         />
                     </div>
                 </div>
-                {deployStatus.type && (
-                    <div
-                        className={`p-4 border-t border-border transition-all ${deployStatus.type === 'success'
-                            ? 'bg-green-500/5 text-green-500 border-green-500/20'
-                            : 'bg-red-500/5 text-red-500 border-red-500/20'
-                            }`}
-                    >
-                        <pre className="font-mono text-sm whitespace-pre-wrap">
-                            {deployStatus.message}
-                        </pre>
-                    </div>
-                )}
-                {deployStatus.stdout && (
-                    <div className="mb-4">
-                        <h4 className="block text-text-muted text-sm mb-2">Deployment Result:</h4>
-                        <pre className="font-mono text-sm whitespace-pre-wrap ">
-                            {deployStatus.stdout}
-                        </pre>
-                    </div>
-                )}
+                <div>
+      {isLoading ? (
+        // Hiển thị trạng thái "Đang load..."
+        <div className="p-4 border-t  bg-blue-500/5 text-blue-500 border-blue-500/20">
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+            <span className="font-mono text-sm text-blue-500">Loading...</span>
+          </div>
+        </div>
+      ) : (
+        deployStatus.type === "success" ? (
+          // Hiển thị trạng thái thành công
+          <div className="p-4 border-t  bg-green-500/5 text-green-500 border-green-500/20">
+            <pre className="font-mono text-sm whitespace-pre-wrap">
+              {deployStatus.message}
+            </pre>
+          </div>):(deployStatus.message===""?(<></>):(<div className="p-4 border-t bg-red-500/5 text-red-500 border-red-500/20">
+            <pre className="font-mono text-sm whitespace-pre-wrap">
+              {deployStatus.message}
+            </pre>
+          </div>))
+        )
+      }
+    </div>
+    {deployStatus.stdout && (() => {
+  const transactionHash = getTransactionHash(deployStatus.stdout);
+  return transactionHash ? (
+    <>
+    <div className="mt-2">
+        <div className='className="flex-1  text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary
+               truncate'
+        >
+        <label className="block text-text-muted text-sm mb-2">Transaction Hash:</label>
+
+          {transactionHash}
+        </div>
+        
+      </div>
+      <a
+  href={`https://explorer.movementnetwork.xyz/txn/${transactionHash}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-500 rounded-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+>
+  View on Explorer
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    className="ml-2 h-4 w-4"
+  >
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+    <polyline points="15 3 21 3 21 9"></polyline>
+    <line x1="10" y1="14" x2="21" y2="3"></line>
+  </svg>
+</a>
+    </>
+  ) : (
+    <div className="p-4 text-red-500">Transaction hash not available.</div>
+  );
+})()}
             </div>
         </div>
     );

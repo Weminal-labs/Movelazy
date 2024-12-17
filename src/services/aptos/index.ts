@@ -20,7 +20,7 @@ export class AptosService {
     async compile(webview: vscode.Webview) {
         const settings = this.workspace.getSettings();
         const packageDir = settings.package;
-        const namedAddresses = settings.nameAddresses;
+        const namedAddresses = settings.namedAddresses;
         const moveVersion = settings.moveVersion;
         const optimizer = settings.optimizer.enabled;
         const optimizerlevel = settings.optimizer.level;
@@ -36,7 +36,7 @@ export class AptosService {
         const optimizer = settings.optimizer.enabled;
         const optimizerlevel = settings.optimizer.level;
         const bytecodeHash = settings.metadata.bytecodeHash;
-        const namedAddresses = settings.nameAddresses;
+        const namedAddresses = settings.namedAddresses;
         console.log("checksettings", settings);
         return this.tester.tester(webview, enabled, testName, moveVersion, namedAddresses, optimizer, optimizerlevel, bytecodeHash);
     }
@@ -46,7 +46,6 @@ export class AptosService {
     }
 
     async updateConfig(settings: any) {
-        await this.workspace.updateAptosConfig(settings);
         await this.workspace.saveSettings(settings);
     }
 
@@ -64,7 +63,7 @@ export class AptosService {
 
     async deploy(webview: vscode.Webview) {
         const settings = this.workspace.getSettings();
-        const { package: packageDir, nameAddresses: namedAddresses } = settings;
+        const { packageDir, namedAddresses} = settings;
         console.log("Named Addresses:", namedAddresses);
         console.log("checkk>>>", packageDir, namedAddresses);
         return this.deployer.deploy(webview, namedAddresses);

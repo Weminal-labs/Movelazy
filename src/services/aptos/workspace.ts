@@ -25,142 +25,157 @@ export class WorkspaceService {
   }
 
   public getSettings(): any {
-    const settings = this.context.workspaceState.get(this.stateKey) || {
-      version: '4.3.0',
-      moveVersion: 'Move 1',
-      optimizer: {
-        enabled: false,
-        level: "default"
-      },
-      metadata: {
-        bytecodeHash: '6',
-      },
-      packageDir: "",
-      nameAddresses: "",
-      network: 'https://aptos.testnet.porto.movementlabs.xyz/v1'
-    };
+    const settings = this.context.workspaceState.get(this.stateKey, {
+        version: '4.3.0',
+        moveVersion: 'Move 1',
+        optimizer: {
+            enabled: false,
+            level: "default"
+        },
+        metadata: {
+            bytecodeHash: '6',
+        },
+        packageDir: "",
+        namedAddresses: "",
+        network: 'https://aptos.testnet.porto.movementlabs.xyz/v1'
+    });
+
     console.log("Retrieved settings:", settings);
     return settings;
-  }
+}
 
   public async initializeWorkspace() {
     const workspacePath = this.getWorkspacePath();
     console.log("Initializing workspace at", workspacePath);
-
+  
     try {
       // Check if npm is installed
-      await execAsync('npm --version');
-
+      await execAsync("npm --version");
+  
       // Initialize npm if needed
-      if (!fs.existsSync(path.join(workspacePath, 'package.json'))) {
-        await execAsync('npm init -y', { cwd: workspacePath });
+      // if (!fs.existsSync(path.join(workspacePath, "package.json"))) {
+      //   await execAsync("npm init -y", { cwd: workspacePath });
+      // }
+  
+      // Check and install Aptos CLI if needed
+      const isAptosCLIReady = await this.checkAndInstallAptosCLI();
+      if (!isAptosCLIReady) {
+        throw new Error("Failed to install Aptos CLI. Please check the logs for details.");
       }
-
-      // Check if Aptos CLI is installed
-      try {
-        await execAsync('aptos --version');
-      } catch {
-        console.log('Aptos CLI not found. Installing...');
-        try {
-          await execAsync('python3 --version', { cwd: workspacePath });
-        } catch {
-          console.log('Python3 is not installed. Installing Python3...');
-          await execAsync('sudo apt-get install python3 -y', { cwd: workspacePath, shell: '/bin/bash' });
-        }
-        await execAsync('curl -fsSL "https://aptos.dev/scripts/install_cli.py" | python3', {
-          cwd: workspacePath,
-          shell: '/bin/bash'
-        });
-      }
-
+  
       // Install Aptos dependencies if not installed
-      if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'aptos'))) {
-        await execAsync('npm install --save-dev aptos', {
-          cwd: workspacePath
-        });
-      }
-
+      // if (!fs.existsSync(path.join(workspacePath, "node_modules", "aptos"))) {
+      //   await execAsync("npm install --save-dev aptos", { cwd: workspacePath });
+      // }
+  
       // Create tsconfig.json if it doesn't exist
-      const tsconfigPath = path.join(workspacePath, 'tsconfig.json');
-      if (!fs.existsSync(tsconfigPath)) {
-        const tsconfigContent = {
-          compilerOptions: {
-            module: "NodeNext",
-            moduleResolution: "NodeNext",
-            target: "es2020",
-            outDir: "dist",
-            rootDir: "./",
-            strict: true,
-            esModuleInterop: true,
-            forceConsistentCasingInFileNames: true
-          }
-        };
-        await fs.promises.writeFile(
-          tsconfigPath,
-          JSON.stringify(tsconfigContent, null, 2)
-        );
-      }
-
+      // const tsconfigPath = path.join(workspacePath, "tsconfig.json");
+      // if (!fs.existsSync(tsconfigPath)) {
+      //   const tsconfigContent = {
+      //     compilerOptions: {
+      //       module: "NodeNext",
+      //       moduleResolution: "NodeNext",
+      //       target: "es2020",
+      //       outDir: "dist",
+      //       rootDir: "./",
+      //       strict: true,
+      //       esModuleInterop: true,
+      //       forceConsistentCasingInFileNames: true,
+      //     },
+      //   };
+      //   await fs.promises.writeFile(tsconfigPath, JSON.stringify(tsconfigContent, null, 2));
+      // }
+  
       // Run aptos move init
-      const moveTomlPath = path.join(workspacePath, 'Move.toml');
+      const moveTomlPath = path.join(workspacePath, "Move.toml");
       if (!fs.existsSync(moveTomlPath)) {
         try {
-          const { stdout, stderr } = await execAsync('aptos move init --name hello_blockchain --template hello-blockchain', {
-            cwd: workspacePath,
-            shell: '/bin/bash'
-          });
-
+          const { stdout, stderr } = await execAsync(
+            "aptos move init --name hello_blockchain --template hello-blockchain",
+            { cwd: workspacePath, shell: "/bin/bash" }
+          );
+  
           if (stderr) {
             console.error(`Error during aptos move init: ${stderr}`);
-            return false
+            return false;
           } else {
             console.log(`Aptos move init completed successfully: ${stdout}`);
           }
         } catch (error) {
-          console.error(`Failed to run aptos move init: ${(error as Error).message}`);
-          return false
+          throw new Error(`Failed to run aptos move init: ${(error as Error).message}`);
         }
       } else {
-        console.log('move.toml already exists, skipping aptos move init.');
+        console.log("Move.toml already exists, skipping aptos move init.");
       }
+  
       return true;
     } catch (error) {
-      throw new Error(`Failed to initialize workspace: ${(error as Error).message}`);
+      console.error(`Error initializing workspace: ${(error as Error).message}`);
+      return false;
     }
   }
-
-  public async updateAptosConfig(settings: any) {
-    console.log("Updating Aptos config with settings:", settings);
-    const workspacePath = this.getWorkspacePath();
-    const aptosConfigPath = path.join(workspacePath, 'aptos.config.ts');
-
-    // If the file does not exist, create it
-    if (!fs.existsSync(aptosConfigPath)) {
-      // Check and install Aptos if needed
+  
+  private async checkAndInstallAptosCLI(): Promise<boolean> {
+    try {
+      await execAsync("aptos --version");
+      console.log("Aptos CLI is already installed.");
+      return true;
+    } catch {
+      console.log("Aptos CLI not found. Installing...");
+  
       try {
-        await execAsync('npm install --save-dev aptos', {
-          cwd: workspacePath
-        });
+        // Ensure Python3 is installed
+        await this.checkAndInstallPython3();
+  
+        // Install Aptos CLI using Python script
+        await execAsync('curl -fsSL "https://aptos.dev/scripts/install_cli.py" | python3', { shell: "/bin/bash" });
+        console.log("Aptos CLI installed successfully via Python script.");
+  
+        // Add Aptos CLI to PATH
+        const aptosPath = `${process.env.HOME}/.aptos/bin`;
+        console.log("aptosPath", aptosPath);
+        if (!process.env.PATH?.includes(aptosPath)) {
+          console.log("Adding Aptos CLI to PATH...");
+          const shellConfigFile = process.env.SHELL?.includes("zsh") ? "~/.zshrc" : "~/.bashrc";
+  
+          try {
+            await fs.promises.appendFile(shellConfigFile, `\nexport PATH="${aptosPath}:$PATH"\n`);
+            console.log(`Aptos CLI added to PATH in ${shellConfigFile}. Please reload your shell.`);
+          } catch (error) {
+            console.error(`Failed to add Aptos CLI to PATH: ${(error as Error).message}`);
+            return false;
+          }
+        }
+  
+        // Verify Aptos CLI
+        await execAsync("aptos --version");
+        console.log("Aptos CLI is now available.");
+        return true;
       } catch (error) {
-        throw new Error('Failed to install Aptos. Please check your npm installation.');
+        console.error(`Failed to install Aptos CLI: ${(error as Error).message}`);
+        return false;
       }
     }
-
-    // Create new config content
-    const configContent = `
-import { AptosConfig } from "aptos";
-
-const config: AptosConfig = {
-  version: "${settings.version}",
-  // Add other settings here
-};
-
-export default config;
-        `;
-
-    // Write the file
-    await fs.promises.writeFile(aptosConfigPath, configContent);
   }
+  
+  private async checkAndInstallPython3(): Promise<void> {
+    try {
+      await execAsync("python3 --version");
+      console.log("Python3 is already installed.");
+    } catch {
+      console.log("Python3 is not installed. Installing...");
+      const osType = process.platform;
+      if (osType === "linux") {
+        await execAsync("sudo apt-get update && sudo apt-get install -y python3", { shell: "/bin/bash" });
+      } else if (osType === "darwin") {
+        await execAsync("brew install python3");
+      } else {
+        throw new Error("Unsupported operating system. Please install Python3 manually.");
+      }
+    }
+  }
+
+
 
   public async getContractFiles(): Promise<string[]> {
     const workspacePath = this.getWorkspacePath();
@@ -181,7 +196,7 @@ export default config;
 
   public getNamedAddresses(): string {
     const settings = this.getSettings();
-    return settings.addresses || {};
+    return settings.namedAddresses || {};
   }
 
   public async isAptosWorkspace(): Promise<boolean> {

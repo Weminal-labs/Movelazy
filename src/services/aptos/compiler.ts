@@ -9,6 +9,7 @@ const execAsync = promisify(exec);
 
 export class AptosCompilerService {
     async compile(webview: vscode.Webview, packageDir: string, namedAddresses: string, moveVersion: string, optimizer: boolean, optimizerlevel: string, bytecodeHash: string, network: string) {
+        console.log("check dfjkgoadjkgf", packageDir, "check dsjkfasdoijg", namedAddresses);
         const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
         if (!workspacePath) {
             webview.postMessage({
@@ -61,7 +62,7 @@ export class AptosCompilerService {
                     aptosProcess.stdin.end(); // End the stdin stream properly
                 });
 
-                await aptosPromise; // Wait for aptos process to finish
+                await aptosPromise;
                 console.log('Aptos process completed successfully.');
             }
 
@@ -83,7 +84,6 @@ export class AptosCompilerService {
                         const isInformational = stdout.includes('"Result"');
 
                         if (stderr && !isInformational) {
-                            console.log("check error", "sadasfasf", stderr)
                             webview.postMessage({
                                 type: 'compileStatus',
                                 success: false,

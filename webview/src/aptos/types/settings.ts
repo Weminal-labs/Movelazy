@@ -17,6 +17,7 @@ export interface CompilerSettings {
 
     packageDir?: string,
     namedAddresses?: string,
+    network?: string,
 }
 
 export interface DeployerSettings {

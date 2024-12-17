@@ -4,7 +4,7 @@ import { OptimizerSettings } from '../../components/compiler/OptimizerSettings';
 import { AdvancedSettings } from '../../components/compiler/AdvancedSettings';
 import { CompilerSettings } from '../../types/settings';
 import PackageDirInput from '../../components/compiler/PackageDir';
-import NamedAddressesInput from '../../components/compiler/NameAddress';
+import NamedAddressesInput from '../../components/compiler/NameModule';
 import NetworkSelector from '../../components/compiler/Network';
 import { Network } from '../../types/network';
 
@@ -20,7 +20,7 @@ const CompilerPage = () => {
             bytecodeHash: "6"
         },
         packageDir: "",
-        nameAddresses: "",
+        namedAddresses: "",
         network: Network.PORTO
     });
 
@@ -65,7 +65,7 @@ const CompilerPage = () => {
     const handleCompile = async () => {
         setCompiling(true);
         setCompileStatus({ type: null, message: '' });
-        console.log("check settings", settings.packageDir, "  ", settings.nameAddresses);
+        console.log("check settings", settings.packageDir, "  ", settings.namedAddresses);
         if (window.vscode) {
             try {
                 window.vscode.postMessage({
@@ -144,8 +144,8 @@ const CompilerPage = () => {
                             onChange={(value) => setSettings({ ...settings, network: value })}
                         />
                         <NamedAddressesInput
-                            namedAddresses={settings.nameAddresses || ''}
-                            onChange={(value) => setSettings({ ...settings, nameAddresses: value })}
+                            namedAddresses={settings.namedAddresses || ''}
+                            onChange={(value) => setSettings({ ...settings, namedAddresses: value })}
                         />
                         <BasicSettings
                             moveVersion={settings.moveVersion || ''}
