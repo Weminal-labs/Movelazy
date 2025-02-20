@@ -11,6 +11,7 @@ interface WorkspaceStatus {
 const AptosPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isAptosInstalled = useState<boolean>(false);
   const [status, setStatus] = useState<WorkspaceStatus>({ loading: true });
 
   useEffect(() => {

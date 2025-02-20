@@ -55,10 +55,10 @@ export default function CliNotFound() {
                             <Button
                                 variant="outline"
                                 className="h-24 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                                onClick={() => navigate("/installation/advanced")}
+                                onClick={() => navigate("/installation/specific-version")}
                             >
                                 <Wrench className="h-6 w-6" />
-                                <span>Advanced Installation</span>
+                                <span>Specific Version Installation</span>
                             </Button>
                         </div>
                     </CardContent>

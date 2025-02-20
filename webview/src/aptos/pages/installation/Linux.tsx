@@ -17,11 +17,11 @@ export default function LinuxInstallationGuide() {
                 <Button
                     variant="outline"
                     className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                    onClick={() => navigate("/installation/cli-not-found")}
+                    onClick={() => navigate("/cli-not-found")}
                 >
                     <span>Back</span>
                 </Button>
-                
+
                 <div className="space-y-4">
                     <h1 className="text-4xl font-bold text-white">Install the Aptos CLI on Linux</h1>
                     <p className="text-gray-400">

@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/ta
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 
-export default function AdvancedInstallationGuide() {
+export default function SpecificInstallationGuide() {
     const navigate = useNavigate()
 
     return (
@@ -14,7 +14,7 @@ export default function AdvancedInstallationGuide() {
                 <Button
                     variant="outline"
                     className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                    onClick={() => navigate("/installation/cli-not-found")}
+                    onClick={() => navigate("/cli-not-found")}
                 >
                     <span>Back</span>
                 </Button>

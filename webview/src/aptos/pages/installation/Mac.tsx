@@ -7,7 +7,7 @@ import { Card, CardContent } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 
-export default function InstallationOnMac() {
+export default function MacInstallationGuide() {
     const navigate = useNavigate()
     return (
         <div className="min-h-screen bg-black p-6">
@@ -16,11 +16,11 @@ export default function InstallationOnMac() {
                 <Button
                     variant="outline"
                     className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                    onClick={() => navigate("/installation/cli-not-found")}
+                    onClick={() => navigate("/cli-not-found")}
                 >
                     <span>Back</span>
                 </Button>
-                
+
                 <div className="space-y-4">
                     <h1 className="text-4xl font-bold text-white">Install the Aptos CLI on Mac</h1>
                     <p className="text-gray-400">

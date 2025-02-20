@@ -17,7 +17,7 @@ export default function WindowsInstallationGuide() {
                 <Button
                     variant="outline"
                     className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                    onClick={() => navigate("/installation/cli-not-found")}
+                    onClick={() => navigate("/cli-not-found")}
                 >
                     <span>Back</span>
                 </Button>
