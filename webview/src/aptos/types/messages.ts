@@ -18,7 +18,9 @@ import { CompilerSettings, DeployerSettings, Flags } from './settings';
 // };
 
 export type AptosMessage = {
-    command: 'aptos.getSettings'
+    command:
+    'aptos.getSettings'
+    | 'aptos.check'
     | 'aptos.updateConfig'
     | 'aptos.compile'
     | 'aptos.initWorkspace'
@@ -34,7 +36,8 @@ export type AptosMessage = {
 };
 
 export type VSCodeMessage = {
-    type: 'settings' | 'compileStatus' | 'workspaceStatus' | 'error' | 'testerStatus' | 'deployStatus';
+    type: 'CliStatus' | 'settings' | 'compileStatus' | 'workspaceStatus' | 'error' | 'testerStatus' | 'deployStatus';
+    installed?: boolean;
     settings?: CompilerSettings | DeployerSettings;
     success?: boolean;
     message?: string;

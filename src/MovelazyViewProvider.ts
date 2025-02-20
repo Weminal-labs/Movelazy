@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { SolidityService } from './services/solidity';
-import { AptosService } from './services/aptos';
-import { WorkspaceService } from './services/solidity/workspace';
-import { DeployerService } from './services/solidity/deployer';
-import { AptosTesterService } from './services/aptos/tester';
-
+import { SolidityService } from './contract/solidity';
+import { AptosService } from './contract/aptos';
+import { WorkspaceService } from './contract/solidity/workspace';
+import { DeployerService } from './contract/solidity/deployer';
+import { CheckAptos } from './services/Aptos-Cli';
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
@@ -112,6 +111,13 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
                                 message: (error as Error).message
                             });
                         }
+                        break;
+                    case 'aptos.check':
+                        const isAptosInstalled = await CheckAptos();
+                        webviewView.webview.postMessage({
+                            type: 'CliStatus',
+                            installed: isAptosInstalled
+                        });
                         break;
                     case 'aptos.compile':
                         await this.aptosService.updateConfig(message.settings);

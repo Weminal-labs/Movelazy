@@ -16,6 +16,11 @@ import CompilerAptosPage from './aptos/pages/compiler'
 import TesterAptosPage from './aptos/pages/tester'
 import DeployerAptosPage from './aptos/pages/deployer'
 import ProjectPageAptos from './aptos/pages/project'
+import CliNotFound from './aptos/pages/installation/cli-not-found'
+import LinuxInstallationGuide from './aptos/pages/installation/Linux'
+import MacInstallationGuide from './aptos/pages/installation/Mac'
+import WindowsInstallationGuide from './aptos/pages/installation/Window'
+import SpecificInstallationGuide from './aptos/pages/installation/SpecificVersion'
 
 // Router configuration
 const router = createMemoryRouter([
@@ -53,6 +58,27 @@ const router = createMemoryRouter([
         path: 'aptos',
         element: <AptosPage />,
         children: [
+          {
+            path: 'cli-not-found',
+            element: <CliNotFound />,
+          },
+          {
+            path: 'mac',
+            element: <MacInstallationGuide />
+          },
+          {
+            path: 'linux',
+            element: <LinuxInstallationGuide />
+          },
+
+          {
+            path: 'windows',
+            element: <WindowsInstallationGuide />
+          },
+          {
+            path: 'specific-version',
+            element: <SpecificInstallationGuide />
+          },
           {
             path: 'project',
             element: <ProjectPageAptos />

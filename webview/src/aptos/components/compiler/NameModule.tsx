@@ -14,7 +14,7 @@ const NamedAddressesInput: React.FC<NamedAddressesInputProps> = ({ namedAddresse
                 value={namedAddresses}
                 onChange={(e) => onChange(e.target.value)}
                 className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
-                placeholder="Example: moveview"
+                placeholder="Example: hello_blockchain"
             />
         </div>
     );

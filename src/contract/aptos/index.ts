@@ -1,7 +1,8 @@
-import { AptosCompilerService } from './compiler';
+import { AptosCompilerService} from './compiler';
 import { AptosTesterService } from './tester';
 import { WorkspaceService } from './workspace';
 import { AptosDeployerService } from './deployer';
+import {CompileSettings} from './types'
 import * as vscode from 'vscode';
 
 export class AptosService {
@@ -19,14 +20,16 @@ export class AptosService {
 
     async compile(webview: vscode.Webview) {
         const settings = this.workspace.getSettings();
-        const packageDir = settings.package;
-        const namedAddresses = settings.nameAddresses;
-        const moveVersion = settings.moveVersion;
-        const optimizer = settings.optimizer.enabled;
-        const optimizerlevel = settings.optimizer.level;
-        const bytecodeHash = settings.metadata.bytecodeHash;
-        const network = settings.network;
-        return this.compiler.compile(webview, packageDir, namedAddresses, moveVersion, optimizer, optimizerlevel, bytecodeHash, network);
+        const compileSettings: CompileSettings = {
+            packageDir: settings.packageDir,
+            namedAddresses: settings.namedAddresses,
+            moveVersion: settings.moveVersion,
+            optimizer: settings.optimizer.enabled,
+            optimizerlevel: settings.optimizer.level,
+            bytecodeHash: settings.metadata.bytecodeHash,
+            network: settings.network,
+        };
+        return this.compiler.compile(webview, compileSettings);
     }
 
 
@@ -36,7 +39,7 @@ export class AptosService {
         const optimizer = settings.optimizer.enabled;
         const optimizerlevel = settings.optimizer.level;
         const bytecodeHash = settings.metadata.bytecodeHash;
-        const namedAddresses = settings.nameAddresses;
+        const namedAddresses = settings.namedAddresses;
         console.log("checksettings", settings);
         return this.tester.tester(webview, enabled, testName, moveVersion, namedAddresses, optimizer, optimizerlevel, bytecodeHash);
     }
@@ -46,7 +49,6 @@ export class AptosService {
     }
 
     async updateConfig(settings: any) {
-        await this.workspace.updateAptosConfig(settings);
         await this.workspace.saveSettings(settings);
     }
 
@@ -64,7 +66,7 @@ export class AptosService {
 
     async deploy(webview: vscode.Webview) {
         const settings = this.workspace.getSettings();
-        const { package: packageDir, nameAddresses: namedAddresses } = settings;
+        const { packageDir, namedAddresses} = settings;
         console.log("Named Addresses:", namedAddresses);
         console.log("checkk>>>", packageDir, namedAddresses);
         return this.deployer.deploy(webview, namedAddresses);

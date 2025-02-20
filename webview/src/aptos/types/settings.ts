@@ -1,7 +1,7 @@
 export interface CompilerSettings {
     version: string;
     evmVersion?: string;
-    moveVersion?: string;
+    // moveVersion?: string;
     optimizer: {
         enabled: boolean;
         runs?: number;
@@ -17,6 +17,7 @@ export interface CompilerSettings {
 
     packageDir?: string,
     namedAddresses?: string,
+    network?: string,
 }
 
 export interface DeployerSettings {
