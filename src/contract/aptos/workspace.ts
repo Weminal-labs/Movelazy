@@ -26,48 +26,48 @@ export class WorkspaceService {
 
   public getSettings(): any {
     const settings = this.context.workspaceState.get(this.stateKey, {
-        version: '4.3.0',
-        moveVersion: 'Move 1',
-        optimizer: {
-            enabled: false,
-            level: "default"
-        },
-        metadata: {
-            bytecodeHash: '6',
-        },
-        packageDir: "",
-        namedAddresses: "",
-        network: 'https://aptos.testnet.porto.movementlabs.xyz/v1'
+      version: '4.3.0',
+      moveVersion: 'Move 1',
+      optimizer: {
+        enabled: false,
+        level: "default"
+      },
+      metadata: {
+        bytecodeHash: '6',
+      },
+      packageDir: "",
+      namedAddresses: "",
+      network: 'https://aptos.testnet.porto.movementlabs.xyz/v1'
     });
 
     console.log("Retrieved settings:", settings);
     return settings;
-}
+  }
 
   public async initializeWorkspace() {
     const workspacePath = this.getWorkspacePath();
     console.log("Initializing workspace at", workspacePath);
-  
+
     try {
       // Check if npm is installed
       await execAsync("npm --version");
-  
+
       // Initialize npm if needed
       // if (!fs.existsSync(path.join(workspacePath, "package.json"))) {
       //   await execAsync("npm init -y", { cwd: workspacePath });
       // }
-  
+
       // Check and install Aptos CLI if needed
       const isAptosCLIReady = await this.checkAndInstallAptosCLI();
       if (!isAptosCLIReady) {
         throw new Error("Failed to install Aptos CLI. Please check the logs for details.");
       }
-  
+
       // Install Aptos dependencies if not installed
       // if (!fs.existsSync(path.join(workspacePath, "node_modules", "aptos"))) {
       //   await execAsync("npm install --save-dev aptos", { cwd: workspacePath });
       // }
-  
+
       // Create tsconfig.json if it doesn't exist
       // const tsconfigPath = path.join(workspacePath, "tsconfig.json");
       // if (!fs.existsSync(tsconfigPath)) {
@@ -85,7 +85,7 @@ export class WorkspaceService {
       //   };
       //   await fs.promises.writeFile(tsconfigPath, JSON.stringify(tsconfigContent, null, 2));
       // }
-  
+
       // Run aptos move init
       const moveTomlPath = path.join(workspacePath, "Move.toml");
       if (!fs.existsSync(moveTomlPath)) {
@@ -94,7 +94,7 @@ export class WorkspaceService {
             "aptos move init --name hello_blockchain --template hello-blockchain",
             { cwd: workspacePath, shell: "/bin/bash" }
           );
-  
+
           if (stderr) {
             console.error(`Error during aptos move init: ${stderr}`);
             return false;
@@ -107,14 +107,14 @@ export class WorkspaceService {
       } else {
         console.log("Move.toml already exists, skipping aptos move init.");
       }
-  
+
       return true;
     } catch (error) {
       console.error(`Error initializing workspace: ${(error as Error).message}`);
       return false;
     }
   }
-  
+
   private async checkAndInstallAptosCLI(): Promise<boolean> {
     try {
       await execAsync("aptos --version");
@@ -122,22 +122,22 @@ export class WorkspaceService {
       return true;
     } catch {
       console.log("Aptos CLI not found. Installing...");
-  
+
       try {
         // Ensure Python3 is installed
         await this.checkAndInstallPython3();
-  
+
         // Install Aptos CLI using Python script
         await execAsync('curl -fsSL "https://aptos.dev/scripts/install_cli.py" | python3', { shell: "/bin/bash" });
         console.log("Aptos CLI installed successfully via Python script.");
-  
+
         // Add Aptos CLI to PATH
         const aptosPath = `${process.env.HOME}/.aptos/bin`;
         console.log("aptosPath", aptosPath);
         if (!process.env.PATH?.includes(aptosPath)) {
           console.log("Adding Aptos CLI to PATH...");
           const shellConfigFile = process.env.SHELL?.includes("zsh") ? "~/.zshrc" : "~/.bashrc";
-  
+
           try {
             await fs.promises.appendFile(shellConfigFile, `\nexport PATH="${aptosPath}:$PATH"\n`);
             console.log(`Aptos CLI added to PATH in ${shellConfigFile}. Please reload your shell.`);
@@ -146,7 +146,7 @@ export class WorkspaceService {
             return false;
           }
         }
-  
+
         // Verify Aptos CLI
         await execAsync("aptos --version");
         console.log("Aptos CLI is now available.");
@@ -157,7 +157,7 @@ export class WorkspaceService {
       }
     }
   }
-  
+
   private async checkAndInstallPython3(): Promise<void> {
     try {
       await execAsync("python3 --version");
