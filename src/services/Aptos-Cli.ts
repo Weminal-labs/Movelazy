@@ -1,26 +1,20 @@
 import { exec } from 'child_process';
+import * as vscode from 'vscode';
+import { promisify } from 'util';
 
-function CheckAptos(): Boolean {
-    // Command to check if Aptos is installed
-    const comm = "aptos --version";
+const execAsync = promisify(exec);
 
-    // Execute the command, Return 1 if Aptos existed, 0 if not
-    let isAptosInstalled = false;
-    exec(comm, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            isAptosInstalled = false;
-        }
+async function CheckAptos(): Promise<Boolean> {
+    try {
+        // Run command "aptos --version"
+        const { stdout } = await execAsync("aptos --version");
 
-        if (stderr) {
-            console.error(`stderr: ${stderr}`);
-            isAptosInstalled = false;
-        }
-
-        isAptosInstalled = true;
-    });
-
-    return isAptosInstalled;
+        // If has output, Aptos has been installed
+        return stdout.trim().length > 0;
+    } catch (error) {
+        console.error(`Error executing command: ${error}`);
+        return false;
+    }
 }
 
 export { CheckAptos }
