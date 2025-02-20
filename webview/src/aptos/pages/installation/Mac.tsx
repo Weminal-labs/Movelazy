@@ -5,7 +5,7 @@ import { Terminal } from "lucide-react"
 import { Alert, AlertDescription } from "../../components/ui/alert"
 import { Card, CardContent } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 export default function MacInstallationGuide() {
     const navigate = useNavigate()
@@ -16,7 +16,7 @@ export default function MacInstallationGuide() {
                 <Button
                     variant="outline"
                     className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                    onClick={() => navigate("/cli-not-found")}
+                    onClick={() => navigate("/aptos/cli-not-found")}
                 >
                     <span>Back</span>
                 </Button>
@@ -87,9 +87,9 @@ export default function MacInstallationGuide() {
                         <Terminal className="h-4 w-4 text-yellow-400" />
                         <AlertDescription className="text-yellow-200">
                             If brew does not work for you, you can try the steps here:{" "}
-                            <a href="#" className="text-yellow-400 hover:underline">
+                            <Link to="/aptos/specific-version" className="text-yellow-400 hover:underline">
                                 Install Specific Aptos CLI Versions (Advanced)
-                            </a>
+                            </Link>
                         </AlertDescription>
                     </Alert>
                 </section>

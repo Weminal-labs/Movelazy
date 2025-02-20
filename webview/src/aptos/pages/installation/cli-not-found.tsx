@@ -13,6 +13,15 @@ export default function CliNotFound() {
     return (
         <div className="min-h-screen bg-black p-6">
             <div className="mx-auto max-w-3xl space-y-8">
+                {/* Back Button */}
+                <Button
+                    variant="outline"
+                    className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+                    onClick={() => navigate("/")}
+                >
+                    <span>Back</span>
+                </Button>
+
                 <Alert variant="destructive" className="border-red-600/20 bg-red-600/10">
                     <AlertCircle className="h-5 w-5 text-red-400" />
                     <AlertTitle className="text-red-400 text-lg">Aptos CLI Not Found</AlertTitle>
@@ -28,7 +37,7 @@ export default function CliNotFound() {
                             <Button
                                 variant="outline"
                                 className="h-24 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                                onClick={() => navigate("/installation/mac")}
+                                onClick={() => navigate("/aptos/mac")}
                             >
                                 <Apple className="h-6 w-6" />
                                 <span>Install on macOS</span>
@@ -37,7 +46,7 @@ export default function CliNotFound() {
                             <Button
                                 variant="outline"
                                 className="h-24 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                                onClick={() => navigate("/installation/windows")}
+                                onClick={() => navigate("/aptos/windows")}
                             >
                                 <Windows className="h-6 w-6" />
                                 <span>Install on Windows</span>
@@ -46,7 +55,7 @@ export default function CliNotFound() {
                             <Button
                                 variant="outline"
                                 className="h-24 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                                onClick={() => navigate("/installation/linux")}
+                                onClick={() => navigate("/aptos/linux")}
                             >
                                 <Linux className="h-6 w-6" />
                                 <span>Install on Linux</span>
@@ -55,7 +64,7 @@ export default function CliNotFound() {
                             <Button
                                 variant="outline"
                                 className="h-24 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                                onClick={() => navigate("/installation/specific-version")}
+                                onClick={() => navigate("/aptos/specific-version")}
                             >
                                 <Wrench className="h-6 w-6" />
                                 <span>Specific Version Installation</span>

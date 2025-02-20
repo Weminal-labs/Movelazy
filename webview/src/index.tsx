@@ -61,24 +61,23 @@ const router = createMemoryRouter([
           {
             path: 'cli-not-found',
             element: <CliNotFound />,
-            children: [
-              {
-                path: 'linux',
-                element: <LinuxInstallationGuide />
-              },
-              {
-                path: 'mac',
-                element: <MacInstallationGuide />
-              },
-              {
-                path: 'windows',
-                element: <WindowsInstallationGuide />
-              },
-              {
-                path: 'specific-version',
-                element: <SpecificInstallationGuide />
-              }
-            ]
+          },
+          {
+            path: 'mac',
+            element: <MacInstallationGuide />
+          },
+          {
+            path: 'linux',
+            element: <LinuxInstallationGuide />
+          },
+
+          {
+            path: 'windows',
+            element: <WindowsInstallationGuide />
+          },
+          {
+            path: 'specific-version',
+            element: <SpecificInstallationGuide />
           },
           {
             path: 'project',

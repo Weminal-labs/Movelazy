@@ -14,7 +14,7 @@ export default function SpecificInstallationGuide() {
                 <Button
                     variant="outline"
                     className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                    onClick={() => navigate("/cli-not-found")}
+                    onClick={() => navigate("/aptos/cli-not-found")}
                 >
                     <span>Back</span>
                 </Button>
@@ -56,7 +56,7 @@ export default function SpecificInstallationGuide() {
                                         </span>
                                         <p>
                                             Follow the steps to{" "}
-                                            <a href="#" className="text-blue-400 hover:underline">
+                                            <a href="https://aptos.dev/en/network/nodes/building-from-source" className="text-blue-400 hover:underline">
                                                 build Aptos from source
                                             </a>
                                             .
@@ -72,7 +72,7 @@ export default function SpecificInstallationGuide() {
                                         <p>
                                             Ensure you have <code className="bg-gray-800 px-1 py-0.5 rounded">cargo</code> installed by
                                             following the steps on{" "}
-                                            <a href="#" className="text-blue-400 hover:underline">
+                                            <a href="https://doc.rust-lang.org/cargo/getting-started/installation.html#install-rust-and-cargo" className="text-blue-400 hover:underline">
                                                 this page
                                             </a>
                                             .
@@ -89,7 +89,7 @@ export default function SpecificInstallationGuide() {
                                     </div>
                                     <Card className="border-gray-800 bg-gray-900">
                                         <CardContent className="p-4">
-                                            <pre className="text-sm text-gray-300">
+                                            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
                                                 <code>cargo build --package aptos --profile cli</code>
                                             </pre>
                                         </CardContent>
@@ -118,7 +118,7 @@ export default function SpecificInstallationGuide() {
                                     </div>
                                     <Card className="border-gray-800 bg-gray-900">
                                         <CardContent className="p-4">
-                                            <pre className="text-sm text-gray-300">
+                                            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
                                                 <code>target/cli/aptos help</code>
                                             </pre>
                                         </CardContent>
@@ -141,7 +141,7 @@ export default function SpecificInstallationGuide() {
                                         </span>
                                         <p>
                                             Follow the steps to build Aptos from source{" "}
-                                            <a href="#" className="text-blue-400 hover:underline">
+                                            <a href="https://aptos.dev/en/network/nodes/building-from-source" className="text-blue-400 hover:underline">
                                                 here
                                             </a>
                                             .
@@ -157,7 +157,7 @@ export default function SpecificInstallationGuide() {
                                         <p>
                                             Ensure you have <code className="bg-gray-800 px-1 py-0.5 rounded">cargo</code> installed by
                                             following the steps on{" "}
-                                            <a href="#" className="text-blue-400 hover:underline">
+                                            <a href="https://doc.rust-lang.org/cargo/getting-started/installation.html#install-rust-and-cargo" className="text-blue-400 hover:underline">
                                                 this page
                                             </a>
                                             .
@@ -174,7 +174,7 @@ export default function SpecificInstallationGuide() {
                                     </div>
                                     <Card className="border-gray-800 bg-gray-900">
                                         <CardContent className="p-4">
-                                            <pre className="text-sm text-gray-300">
+                                            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
                                                 <code>cargo build --package aptos --profile cli</code>
                                             </pre>
                                         </CardContent>
@@ -203,7 +203,7 @@ export default function SpecificInstallationGuide() {
                                     </div>
                                     <Card className="border-gray-800 bg-gray-900">
                                         <CardContent className="p-4">
-                                            <pre className="text-sm text-gray-300">
+                                            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
                                                 <code>target\cli\aptos.exe help</code>
                                             </pre>
                                         </CardContent>

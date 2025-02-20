@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from "../../components/ui/alert"
 import { Card, CardContent } from "../../components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { Button } from "../../components/ui/button"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 export default function WindowsInstallationGuide() {
     const navigate = useNavigate()
@@ -17,7 +17,7 @@ export default function WindowsInstallationGuide() {
                 <Button
                     variant="outline"
                     className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                    onClick={() => navigate("/cli-not-found")}
+                    onClick={() => navigate("/aptos/cli-not-found")}
                 >
                     <span>Back</span>
                 </Button>
@@ -32,7 +32,7 @@ export default function WindowsInstallationGuide() {
                 </div>
 
                 <Tabs defaultValue="python" className="space-y-6">
-                    <TabsList className="bg-gray-900">
+                    <TabsList className="bg-gray-900 flex flex-wrap md:flex-col min-h-fit">
                         <TabsTrigger value="python" className="data-[state=active]:bg-gray-800">
                             Install via Python Script
                         </TabsTrigger>
@@ -40,6 +40,10 @@ export default function WindowsInstallationGuide() {
                             Install via Pre-Compiled Binaries
                         </TabsTrigger>
                     </TabsList>
+
+
+
+
 
                     <TabsContent value="python" className="space-y-6">
                         <section className="space-y-6">
@@ -77,7 +81,7 @@ export default function WindowsInstallationGuide() {
                                     </div>
                                     <Card className="border-gray-800 bg-gray-900">
                                         <CardContent className="p-4">
-                                            <pre className="text-sm text-gray-300">
+                                            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
                                                 <code>
                                                     Invoke-WebRequest -Uri "https://aptos.dev/scripts/install_cli.py" -OutFile
                                                     "$env:TEMP\install_cli.py"
@@ -152,7 +156,7 @@ export default function WindowsInstallationGuide() {
                                         </span>
                                         <p>
                                             Go to the{" "}
-                                            <a href="#" className="text-blue-400 hover:underline">
+                                            <a href="https://github.com/aptos-labs/aptos-core/releases" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
                                                 Aptos CLI release page
                                             </a>
                                             .
@@ -266,9 +270,9 @@ export default function WindowsInstallationGuide() {
                     <AlertTriangle className="h-4 w-4 text-yellow-400" />
                     <AlertDescription className="text-yellow-200">
                         If neither of the above methods work, you will have to build the CLI from source by following these steps:{" "}
-                        <a href="#" className="text-yellow-400 hover:underline">
+                        <Link to="/aptos/specific-version" className="text-yellow-400 hover:underline">
                             Install Specific Aptos CLI Versions (Advanced)
-                        </a>
+                        </Link>
                     </AlertDescription>
                 </Alert>
             </div>

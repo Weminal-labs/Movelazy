@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from "../../components/ui/alert"
 import { Card, CardContent } from "../../components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { Button } from "../../components/ui/button"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 export default function LinuxInstallationGuide() {
     const navigate = useNavigate()
@@ -17,7 +17,7 @@ export default function LinuxInstallationGuide() {
                 <Button
                     variant="outline"
                     className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                    onClick={() => navigate("/cli-not-found")}
+                    onClick={() => navigate("/aptos/cli-not-found")}
                 >
                     <span>Back</span>
                 </Button>
@@ -35,9 +35,9 @@ export default function LinuxInstallationGuide() {
                     <AlertTriangle className="h-4 w-4 text-yellow-400" />
                     <AlertDescription className="text-yellow-200">
                         Note: If you are using an ARM architecture, you will have to install using the steps here:{" "}
-                        <a href="#" className="text-yellow-400 hover:underline">
+                        <Link to="/aptos/specific-version" className="text-yellow-400 hover:underline">
                             Install Specific Aptos CLI Versions (Advanced)
-                        </a>
+                        </Link>
                     </AlertDescription>
                 </Alert>
 
@@ -87,7 +87,7 @@ export default function LinuxInstallationGuide() {
                                     </div>
                                     <Card className="border-gray-800 bg-gray-900">
                                         <CardContent className="p-4">
-                                            <pre className="text-sm text-gray-300">
+                                            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
                                                 <code>curl -fsSL "https://aptos.dev/scripts/install_cli.py" | python3</code>
                                             </pre>
                                         </CardContent>
@@ -95,7 +95,7 @@ export default function LinuxInstallationGuide() {
                                     <p className="text-gray-400 pl-8">Or use the equivalent wget command:</p>
                                     <Card className="border-gray-800 bg-gray-900">
                                         <CardContent className="p-4">
-                                            <pre className="text-sm text-gray-300">
+                                            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
                                                 <code>wget -qO- "https://aptos.dev/scripts/install_cli.py" | python3</code>
                                             </pre>
                                         </CardContent>
@@ -170,7 +170,7 @@ export default function LinuxInstallationGuide() {
                                         </span>
                                         <p>
                                             Go to the{" "}
-                                            <a href="#" className="text-blue-400 hover:underline">
+                                            <a href="https://github.com/aptos-labs/aptos-core/releases" className="text-blue-400 hover:underline">
                                                 Aptos CLI release page
                                             </a>
                                             .
