@@ -1,11 +1,24 @@
 "use client"
 import { Card, CardContent } from "../../components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { Button } from "../../components/ui/button"
+import { useNavigate } from "react-router-dom"
 
 export default function AdvancedInstallationGuide() {
+    const navigate = useNavigate()
+
     return (
         <div className="min-h-screen bg-black p-6">
             <div className="mx-auto max-w-3xl space-y-8">
+                {/* Back Button */}
+                <Button
+                    variant="outline"
+                    className="h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+                    onClick={() => navigate("/installation/cli-not-found")}
+                >
+                    <span>Back</span>
+                </Button>
+
                 <div className="space-y-4">
                     <h1 className="text-4xl font-bold text-white">Install Specific Aptos CLI Versions (Advanced)</h1>
                     <p className="text-gray-400">
