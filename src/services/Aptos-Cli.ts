@@ -10,11 +10,13 @@ async function CheckAptos(): Promise<Boolean> {
         const { stdout } = await execAsync("aptos --version");
 
         // If has output, Aptos has been installed
-        return stdout.trim().length > 0;
+        if (stdout.trim().length > 0) { return true; }
+
+        // Other case, Aptos has not been installed
+        return false;
     } catch (error) {
-        console.error(`Error executing command: ${error}`);
         return false;
     }
 }
 
-export { CheckAptos }
+export { CheckAptos };
