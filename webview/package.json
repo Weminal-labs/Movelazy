@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aptos-labs/ts-sdk": "^1.29.0",
+    "@aptos-labs/ts-sdk": "^1.35.0",
     "@mantine/core": "^7.13.1",
     "@material-tailwind/react": "^2.1.10",
     "@nomiclabs/hardhat-ethers": "^2.2.3",

@@ -4,12 +4,14 @@ import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import { CompileSettings } from './types';
 
 const execAsync = promisify(exec);
 
+
+
 export class AptosCompilerService {
-    async compile(webview: vscode.Webview, packageDir: string, namedAddresses: string, moveVersion: string, optimizer: boolean, optimizerlevel: string, bytecodeHash: string, network: string) {
-        console.log("check dfjkgoadjkgf", packageDir, "check dsjkfasdoijg", namedAddresses);
+    async compile(webview: vscode.Webview, settings: CompileSettings) {
         const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
         if (!workspacePath) {
             webview.postMessage({
@@ -36,7 +38,7 @@ export class AptosCompilerService {
                 const shouldOverwrite = fs.existsSync(aptosDirPath);
 
                 const aptosPromise = new Promise<void>((resolve, reject) => {
-                    const aptosProcess = spawn('aptos', ['init', '--network', 'custom', '--rest-url', `${network}`], {
+                    const aptosProcess = spawn('aptos', ['init', '--network', 'custom', '--rest-url', `${settings.network}`], {
                         cwd: workspacePath,
                         stdio: ['pipe', 'pipe', 'pipe']
                     });
@@ -73,13 +75,13 @@ export class AptosCompilerService {
                     try {
                         console.log('Now you can run the next command.');
                         // Continue with the next task
-                        let command = `aptos move compile --package-dir ${packageDir} --named-addresses ${namedAddresses}=default `;
+                        let command = `aptos move compile --package-dir ${settings.packageDir} --named-addresses ${settings.namedAddresses}=default `;
 
-                        if (moveVersion === 'Move 2') {
-                            command += `--move-2`;
-                        } else {
-                            command += `${optimizer === true ? `--optimize ${optimizerlevel}` : ''}--bytecode-version ${bytecodeHash} `;
-                        }
+                        // if (moveVersion === 'Move 2') {
+                        //     command += `--move-2`;
+                        // } else {
+                        //     command += `${optimizer === true ? `--optimize ${optimizerlevel}` : ''}--bytecode-version ${bytecodeHash} `;
+                        // }
                         const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
                         const isInformational = stdout.includes('"Result"');
 

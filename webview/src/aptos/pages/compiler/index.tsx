@@ -11,13 +11,13 @@ import { Network } from '../../types/network';
 const CompilerPage = () => {
     const [settings, setSettings] = useState<CompilerSettings>({
         version: '4.3.0',
-        moveVersion: 'Move 1',
+        // moveVersion: 'Move 1',
         optimizer: {
             enabled: false,
             level: "default"
         },
         metadata: {
-            bytecodeHash: "6"
+            bytecodeHash: "7"
         },
         packageDir: "",
         namedAddresses: "",
@@ -147,10 +147,10 @@ const CompilerPage = () => {
                             namedAddresses={settings.namedAddresses || ''}
                             onChange={(value) => setSettings({ ...settings, namedAddresses: value })}
                         />
-                        <BasicSettings
+                        {/* <BasicSettings
                             moveVersion={settings.moveVersion || ''}
                             onChange={(key, value) => setSettings({ ...settings, [key]: value })}
-                        />
+                        /> */}
                         <OptimizerSettings
                             enabled={settings.optimizer?.enabled}
                             level={settings.optimizer?.level || ''}
@@ -164,7 +164,6 @@ const CompilerPage = () => {
                         />
                         <AdvancedSettings
                             bytecodeHash={settings.metadata?.bytecodeHash || ''}
-                            moveVersion={settings.moveVersion || ''}
                             onChange={(key, value) => {
                                 if (key === 'bytecodeHash' && typeof value === 'string') {
                                     setSettings({

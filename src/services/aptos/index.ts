@@ -1,7 +1,8 @@
-import { AptosCompilerService } from './compiler';
+import { AptosCompilerService} from './compiler';
 import { AptosTesterService } from './tester';
 import { WorkspaceService } from './workspace';
 import { AptosDeployerService } from './deployer';
+import {CompileSettings} from './types'
 import * as vscode from 'vscode';
 
 export class AptosService {
@@ -19,14 +20,16 @@ export class AptosService {
 
     async compile(webview: vscode.Webview) {
         const settings = this.workspace.getSettings();
-        const packageDir = settings.package;
-        const namedAddresses = settings.namedAddresses;
-        const moveVersion = settings.moveVersion;
-        const optimizer = settings.optimizer.enabled;
-        const optimizerlevel = settings.optimizer.level;
-        const bytecodeHash = settings.metadata.bytecodeHash;
-        const network = settings.network;
-        return this.compiler.compile(webview, packageDir, namedAddresses, moveVersion, optimizer, optimizerlevel, bytecodeHash, network);
+        const compileSettings: CompileSettings = {
+            packageDir: settings.packageDir,
+            namedAddresses: settings.namedAddresses,
+            moveVersion: settings.moveVersion,
+            optimizer: settings.optimizer.enabled,
+            optimizerlevel: settings.optimizer.level,
+            bytecodeHash: settings.metadata.bytecodeHash,
+            network: settings.network,
+        };
+        return this.compiler.compile(webview, compileSettings);
     }
 
 

@@ -1,7 +1,7 @@
 export interface CompilerSettings {
     version: string;
     evmVersion?: string;
-    moveVersion?: string;
+    // moveVersion?: string;
     optimizer: {
         enabled: boolean;
         runs?: number;
