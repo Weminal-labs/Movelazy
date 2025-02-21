@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as path from "path";
 import { SolidityService } from "./contract/solidity";
 import { AptosService } from "./contract/aptos";
 import { WorkspaceService } from "./contract/aptos/workspace";
@@ -102,20 +101,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
           case "solidity.stopLocalNode":
             await this.solidityService.stopLocalNode();
             break;
-          // case "solidity.getCompiledContracts":
-          //   try {
-          //     const contracts = await this.workspace.getCompiledContracts();
-          //     webviewView.webview.postMessage({
-          //       type: "compiledContracts",
-          //       contracts: contracts,
-          //     });
-          //   } catch (error) {
-          //     webviewView.webview.postMessage({
-          //       type: "error",
-          //       message: (error as Error).message,
-          //     });
-          //   }
-          //   break;
+
           case "aptos.check":
             const isAptosInstalled = await CheckAptos();
             webviewView.webview.postMessage({
@@ -137,37 +123,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
               settings: aptosSettings,
             });
             break;
-          // case "aptos.initWorkspace":
-          //   webviewView.webview.postMessage({
-          //     type: "workspaceStatus",
-          //     loading: true,
-          //   });
-          //   try {
-          //     await this.aptosService.initWorkspace();
-          //     webviewView.webview.postMessage({
-          //       type: "workspaceStatus",
-          //       initialized: true,
-          //       loading: false,
-          //     });
-          //   } catch (error) {
-          //     webviewView.webview.postMessage({
-          //       type: "workspaceStatus",
-          //       error: (error as Error).message,
-          //       loading: false,
-          //     });
-          //   }
-          //   break;
-          // case "aptos.checkWorkspace":
-          //   const isAptos = await this.aptosService.checkWorkspace();
-          //   webviewView.webview.postMessage({
-          //     type: "workspaceStatus",
-          //     initialized: isAptos,
-          //     loading: false,
-          //   });
-          //   break;
-          case "aptos.clean":
-            await this.aptosService.clean(webviewView.webview);
-            break;
+
           case "aptos.tester":
             await this.aptosService.test(
               webviewView.webview,

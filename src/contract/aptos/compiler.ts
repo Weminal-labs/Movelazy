@@ -73,7 +73,6 @@ export class AptosCompilerService {
         });
 
         await aptosPromise;
-        console.log("Aptos process completed successfully.");
       }
 
       runAptos()
@@ -83,14 +82,11 @@ export class AptosCompilerService {
             // Continue with the next task
             let command = `aptos move compile --named-addresses ${settings.namedAddresses}=default `;
 
-            // if (moveVersion === 'Move 2') {
-            //     command += `--move-2`;
-            // } else {
-            //     command += `${optimizer === true ? `--optimize ${optimizerlevel}` : ''}--bytecode-version ${bytecodeHash} `;
-            // }
+
             const { stdout, stderr } = await execAsync(command, {
               cwd: workspacePath,
             });
+
             const isInformational = stdout.includes('"Result"');
 
             if (stderr && !isInformational) {
@@ -127,45 +123,6 @@ export class AptosCompilerService {
     } catch (error) {
       webview.postMessage({
         type: "compileStatus",
-        success: false,
-        message: (error as Error).message,
-      });
-    }
-  }
-
-  async clean(webview: vscode.Webview) {
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    if (!workspacePath) {
-      webview.postMessage({
-        type: "cleanStatus",
-        success: false,
-        message: "No workspace folder found.",
-      });
-      return;
-    }
-
-    try {
-      const { stdout, stderr } = await execAsync("npm aptos clean", {
-        cwd: workspacePath,
-      });
-
-      if (stderr) {
-        webview.postMessage({
-          type: "cleanStatus",
-          success: false,
-          message: stderr,
-        });
-        return;
-      }
-
-      webview.postMessage({
-        type: "cleanStatus",
-        success: true,
-        message: stdout || "Cleaned successfully!",
-      });
-    } catch (error) {
-      webview.postMessage({
-        type: "cleanStatus",
         success: false,
         message: (error as Error).message,
       });
