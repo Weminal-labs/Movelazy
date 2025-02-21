@@ -81,7 +81,7 @@ export class AptosCompilerService {
           try {
             console.log("Now you can run the next command.");
             // Continue with the next task
-            let command = `aptos move compile --package-dir ${settings.packageDir} --named-addresses ${settings.namedAddresses}=default `;
+            let command = `aptos move compile --named-addresses ${settings.namedAddresses}=default `;
 
             // if (moveVersion === 'Move 2') {
             //     command += `--move-2`;
