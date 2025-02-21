@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "./assets/icons/ArrowRight/ArrowRight";
 import logo from "./assets/logo.svg";
-import { VSCodeApi } from "./aptos/types/vscode";
+import { VSCodeApi } from "./utils/vscode";
 
 declare global {
   interface Window {

@@ -7,11 +7,6 @@ interface WorkspaceStatus {
   error?: string;
 }
 
-// declare global {
-//     interface Window {
-//         vscode: VSCodeApi;
-//     }
-// }
 const AptosPage = () => {
   const navigate = useNavigate();
   const location = useLocation();

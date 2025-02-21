@@ -1,16 +1,9 @@
-import { SolidityMessage } from '../../sol/types/messages';
-import { AptosMessage } from './messages';
+import { SolidityMessage } from '../sol/types/messages';
+import { AptosMessage } from '../aptos/types/messages';
 
 export interface VSCodeApi {
     postMessage(message: AptosMessage | SolidityMessage): void;
 }
-
-// declare global {
-//     interface Window {
-//         vscode: VSCodeApi;
-//     }
-// }
-
 
 // Example function to log VSCode API usage
 export function logPostMessage(message: AptosMessage) {
