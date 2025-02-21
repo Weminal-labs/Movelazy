@@ -38,7 +38,7 @@ const ProjectPageAptos = () => {
 
   useEffect(() => {
     if (isAptosInitialized === true) {
-      navigate("/aptos/compiler");
+      navigate("/aptos/help");
     }
   }, [isAptosInitialized, navigate]);
 

@@ -171,4 +171,14 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
     }
 }
 
-export { CheckAptos, CheckAptosInit, AptosInit };
+async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: string, namedAddresses: string, template: string, assumeYes: boolean, assumeNo: boolean, frameworkGitRev: string, frameworkLocalDir: string, skipFetchLatestGitDeps: boolean) {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+        throw new Error("Workspace path not found");
+    }
+
+    const command = ["move", "init"];
+
+}
+
+export { CheckAptos, CheckAptosInit, AptosInit, AptosMoveInit };
