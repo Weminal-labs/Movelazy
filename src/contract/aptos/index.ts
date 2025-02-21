@@ -21,11 +21,9 @@ export class AptosService {
   async compile(webview: vscode.Webview) {
     const settings = this.workspace.getSettings();
     const compileSettings: CompileSettings = {
-      packageDir: settings.packageDir,
       namedAddresses: settings.namedAddresses,
       optimizer: settings.optimizer.enabled,
       optimizerlevel: settings.optimizer.level,
-      bytecodeHash: settings.metadata.bytecodeHash,
       network: settings.network,
     };
     return this.compiler.compile(webview, compileSettings);

@@ -1,9 +1,7 @@
 interface Settings {
-  packageDir: string;
   namedAddresses: string;
   optimizer: boolean;
   optimizerlevel: string;
-  bytecodeHash: string;
   network: string;
 }
 

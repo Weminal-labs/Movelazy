@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { OptimizerSettings } from "../../components/compiler/OptimizerSettings";
 import { AdvancedSettings } from "../../components/compiler/AdvancedSettings";
 import { CompilerSettings } from "../../types/settings";
-import PackageDirInput from "../../components/compiler/PackageDir";
 import NamedAddressesInput from "../../components/compiler/NameModule";
 import NetworkSelector from "../../components/compiler/Network";
 import { Network } from "../../types/network";
@@ -16,7 +15,6 @@ const CompilerPage = () => {
     metadata: {
       bytecodeHash: "7",
     },
-    packageDir: "",
     namedAddresses: "",
     network: Network.Testnet,
   });
@@ -151,13 +149,6 @@ const CompilerPage = () => {
               </div>
             </div>
             <div className="space-y-6">
-              <PackageDirInput
-                packageDir={settings.packageDir || ""}
-                onChange={(value) =>
-                  setSettings({ ...settings, packageDir: value })
-                }
-              />
-
               <NetworkSelector
                 network={settings.network || ""}
                 onChange={(value) =>
