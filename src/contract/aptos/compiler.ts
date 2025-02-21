@@ -1,9 +1,6 @@
 import * as vscode from "vscode";
-import { exec, spawn } from "child_process";
+import { exec } from "child_process";
 import { promisify } from "util";
-import path from "path";
-import fs from "fs";
-import yaml from "js-yaml";
 import { CompileSettings } from "./types";
 
 const execAsync = promisify(exec);
@@ -11,6 +8,7 @@ const execAsync = promisify(exec);
 export class AptosCompilerService {
   async compile(webview: vscode.Webview, settings: CompileSettings) {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+
     if (!workspacePath) {
       webview.postMessage({
         type: "compileStatus",
@@ -21,105 +19,17 @@ export class AptosCompilerService {
     }
 
     try {
-      // Check if Aptos CLI is installed
-      await execAsync("aptos --version", { cwd: workspacePath });
+      let command = `aptos move compile --named-addresses ${settings.namedAddresses}=default`;
+      console.log("command: ", command);
+      const { stdout, stderr } = await execAsync(command, {
+        cwd: workspacePath,
+      });
 
-      const input = "skip\n";
-
-      async function runAptos() {
-        if (!workspacePath) {
-          throw new Error("Workspace path is undefined.");
-        }
-
-        const aptosDirPath = path.join(workspacePath, ".aptos");
-        const shouldOverwrite = fs.existsSync(aptosDirPath);
-
-        const aptosPromise = new Promise<void>((resolve, reject) => {
-          const aptosProcess = spawn(
-            "aptos",
-            [
-              "init",
-              "--network",
-              "custom",
-              "--rest-url",
-              `${settings.network}`,
-            ],
-            {
-              cwd: workspacePath,
-              stdio: ["pipe", "pipe", "pipe"],
-            }
-          );
-
-          aptosProcess.on("close", (code) => {
-            console.log("check aptosProcess", aptosProcess);
-            if (code === 0) {
-              resolve();
-            } else {
-              reject(new Error(`Aptos process failed with exit code ${code}`)); // Added error message
-            }
-          });
-
-          if (shouldOverwrite) {
-            aptosProcess.stdin.write("yes\n");
-          }
-          if (input) {
-            aptosProcess.stdin.write("skip\n"); // Ensure input is valid
-          } else {
-            reject(new Error("Input is required but not provided."));
-            return;
-          }
-
-          aptosProcess.stdin.end(); // End the stdin stream properly
-        });
-
-        await aptosPromise;
-      }
-
-      runAptos()
-        .then(async () => {
-          try {
-            console.log("Now you can run the next command.");
-            // Continue with the next task
-            let command = `aptos move compile --named-addresses ${settings.namedAddresses}=default `;
-
-
-            const { stdout, stderr } = await execAsync(command, {
-              cwd: workspacePath,
-            });
-
-            const isInformational = stdout.includes('"Result"');
-
-            if (stderr && !isInformational) {
-              webview.postMessage({
-                type: "compileStatus",
-                success: false,
-                message: stderr,
-              });
-              return;
-            }
-
-            webview.postMessage({
-              type: "compileStatus",
-              success: true,
-              message: stderr + stdout || "Compilation successful!",
-            });
-          } catch (error) {
-            console.error("An error occurred while reading the config:", error);
-            webview.postMessage({
-              type: "compileStatus",
-              success: false,
-              message: (error as Error).message,
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("An error occurred:", error);
-          webview.postMessage({
-            type: "compileStatus",
-            success: false,
-            message: (error as Error).message,
-          });
-        });
+      webview.postMessage({
+        type: "compileStatus",
+        success: true,
+        message: stderr + stdout || "Compilation successful!",
+      });
     } catch (error) {
       webview.postMessage({
         type: "compileStatus",
