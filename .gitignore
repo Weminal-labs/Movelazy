@@ -85,6 +85,9 @@ build/Release
 .dynamodb/
 
 # OS generated files
+package-lock.json
+yarn.lock
+bun.lockb
 .DS_Store
 .DS_Store?
 ._*
