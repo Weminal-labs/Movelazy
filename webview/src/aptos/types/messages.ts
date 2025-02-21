@@ -1,4 +1,4 @@
-import { CompilerSettings, DeployerSettings, Flags } from './settings';
+import { CompilerSettings, DeployerSettings, Flags } from "./settings";
 
 // export type CompilerMessage = {
 //     command: 'solidity.compile' | 'solidity.getSettings' | 'solidity.updateConfig' | 'solidity.initWorkspace' | 'solidity.checkWorkspace' | 'solidity.clean' | 'aptos.getSettings' | 'aptos.updateConfig' | 'aptos.compile' | 'aptos.initWorkspace' | 'aptos.clean' | 'aptos.checkWorkspace' | 'aptos.tester' | 'aptos.deploy';
@@ -18,32 +18,43 @@ import { CompilerSettings, DeployerSettings, Flags } from './settings';
 // };
 
 export type AptosMessage = {
-    command:
-    'aptos.getSettings'
-    | 'aptos.check'
-    | 'aptos.updateConfig'
-    | 'aptos.compile'
-    | 'aptos.initWorkspace'
-    | 'aptos.clean'
-    | 'aptos.checkWorkspace'
-    | 'aptos.tester'
-    | 'aptos.deploy'
-    | 'aptos.accountAddress'
-    | 'aptos.requestFaucet'
-    | 'aptos.balance';
-    settings?: CompilerSettings | DeployerSettings;
-    flags?: Flags;
+  command:
+    | "aptos.getSettings"
+    | "aptos.check"
+    | "aptos.updateConfig"
+    | "aptos.compile"
+    | "aptos.initWorkspace"
+    | "aptos.clean"
+    | "aptos.checkWorkspace"
+    | "aptos.tester"
+    | "aptos.deploy"
+    | "aptos.accountAddress"
+    | "aptos.requestFaucet"
+    | "aptos.balance"
+    | "aptos.checkFolder"
+    | "aptos.selectFolder"
+    | "aptos.createTemplate";
+  settings?: CompilerSettings | DeployerSettings;
+  flags?: Flags;
 };
 
 export type VSCodeMessage = {
-    type: 'CliStatus' | 'settings' | 'compileStatus' | 'workspaceStatus' | 'error' | 'testerStatus' | 'deployStatus';
-    installed?: boolean;
-    settings?: CompilerSettings | DeployerSettings;
-    success?: boolean;
-    message?: string;
-    initialized?: boolean;
-    loading?: boolean;
-    error?: string;
-    flags?: Flags;
-};
+  type:
+    | "CliStatus"
+    | "settings"
+    | "compileStatus"
+    | "workspaceStatus"
+    | "error"
+    | "testerStatus"
+    | "deployStatus"
+    | "folderStatus";
 
+  installed?: boolean;
+  settings?: CompilerSettings | DeployerSettings;
+  success?: boolean;
+  message?: string;
+  initialized?: boolean;
+  loading?: boolean;
+  error?: string;
+  flags?: Flags;
+};

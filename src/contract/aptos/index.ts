@@ -37,9 +37,9 @@ export class AptosService {
     return this.tester.tester(webview, enabled, testName, settings);
   }
 
-  async initWorkspace() {
-    return this.workspace.initializeWorkspace();
-  }
+  // async initWorkspace() {
+  //   return this.workspace.initializeWorkspace();
+  // }
 
   async updateConfig(settings: any) {
     await this.workspace.saveSettings(settings);
@@ -49,9 +49,9 @@ export class AptosService {
     return this.workspace.getSettings();
   }
 
-  async checkWorkspace() {
-    return this.workspace.isAptosWorkspace();
-  }
+  // async checkWorkspace() {
+  //   return this.workspace.isAptosWorkspace();
+  // }
 
   async clean(webview: vscode.Webview) {
     return this.compiler.clean(webview);

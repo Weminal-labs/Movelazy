@@ -63,7 +63,7 @@ export class AptosCompilerService {
             aptosProcess.stdin.write("yes\n");
           }
           if (input) {
-            aptosProcess.stdin.write(input); // Ensure input is valid
+            aptosProcess.stdin.write("skip\n"); // Ensure input is valid
           } else {
             reject(new Error("Input is required but not provided."));
             return;
