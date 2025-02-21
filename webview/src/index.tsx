@@ -21,6 +21,7 @@ import LinuxInstallationGuide from './aptos/pages/installation/Linux'
 import MacInstallationGuide from './aptos/pages/installation/Mac'
 import WindowsInstallationGuide from './aptos/pages/installation/Window'
 import SpecificInstallationGuide from './aptos/pages/installation/SpecificVersion'
+import AptosInitForm from './aptos/pages/aptos_init'
 
 // Router configuration
 const router = createMemoryRouter([
@@ -70,10 +71,13 @@ const router = createMemoryRouter([
             path: 'linux',
             element: <LinuxInstallationGuide />
           },
-
           {
             path: 'windows',
             element: <WindowsInstallationGuide />
+          },
+          {
+            path: 'init',
+            element: <AptosInitForm />
           },
           {
             path: 'specific-version',

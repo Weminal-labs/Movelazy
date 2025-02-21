@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../../assets/logo.svg";
-import { AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -11,80 +11,42 @@ import {
 import { Button } from "../../components/ui/button";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 
-interface WorkspaceStatus {
-  loading: boolean;
-  hasRequiredFolders: boolean;
-  initialized?: boolean;
-  hasFolder?: boolean;
-  error?: string;
-}
 
 const ProjectPageAptos = () => {
   const navigate = useNavigate();
-  const [status, setStatus] = useState<WorkspaceStatus>({
-    loading: true,
-    hasFolder: false,
-    hasRequiredFolders: false,
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAptosInitialized, setIsAptosInitialized] = useState<boolean | null>(
+    null
+  );
 
   useEffect(() => {
+    console.log("🔹 Sending message to VS Code to check Aptos is init...");
+    window.vscode.postMessage({ command: "aptos.checkInit" });
+
     const messageHandler = (event: MessageEvent) => {
+      console.log("📩 Received message from VS Code:", event.data);
       const message = event.data;
-      switch (message.type) {
-        case "folderStatus":
-          setStatus((prev) => ({
-            ...prev,
-            hasFolder: message.hasFolder,
-            hasRequiredFolders: message.hasRequiredFolders,
-            loading: false,
-          }));
-          console.log("check hasrequire:", message.hasRequiredFolders);
-          break;
-        case "workspaceStatus":
-          setStatus((prev) => ({
-            ...prev,
-            initialized: message.initialized,
-            loading: false,
-            error: message.error,
-          }));
-          if (message.initialized && !message.loading) {
-            navigate("/aptos/compiler");
-          }
-          break;
+
+      if (message.type === "CliStatus" || message.type === "error") {
+        console.log("✅ Aptos CLI Status:", message.isAptosInitialized ? "Initialized" : "Not Initialized");
+        setIsAptosInitialized(message.isAptosInitialized);
       }
     };
 
     window.addEventListener("message", messageHandler);
-    if (window.vscode) {
-      window.vscode.postMessage({ command: "aptos.checkFolder" });
-    }
-
     return () => window.removeEventListener("message", messageHandler);
-  }, [navigate]);
+  }, []);
+
+  useEffect(() => {
+    if (isAptosInitialized === true) {
+      navigate("/aptos/compiler");
+    }
+  }, [isAptosInitialized, navigate]);
 
   const handleSelectFolder = () => {
     if (window.vscode) {
       window.vscode.postMessage({ command: "aptos.selectFolder" });
     }
   };
-
-  const handleCreateTemplate = () => {
-    if (window.vscode) {
-      setIsLoading(true);
-
-      window.vscode.postMessage({ command: "aptos.createTemplate" });
-    }
-  };
-
-  if (status.loading) {
-    return (
-      <div className="flex items-center justify-center gap-2">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        <span>Checking workspace status...</span>
-      </div>
-    );
-  }
 
   // Project initialized
   return (
@@ -100,32 +62,20 @@ const ProjectPageAptos = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
-          {!status.hasFolder && !status.hasRequiredFolders && (
+          {!isAptosInitialized && (
             <Alert className="border-yellow-600/20 bg-yellow-600/10">
               <AlertTriangle className="h-4 w-4 text-yellow-400" />
               <AlertDescription className="text-yellow-200">
-                No Aptos workspace found! Please select a folder without Aptos
-                workspace.
+                Aptos has not Initialized! Run the command `aptos init` or click the button below
               </AlertDescription>
             </Alert>
           )}
 
-          {status.hasFolder && !status.hasRequiredFolders && (
-            <Alert className="border-yellow-600/20 bg-yellow-600/10">
-              <AlertTriangle className="h-4 w-4 text-yellow-400" />
-              <AlertDescription className="text-yellow-200">
-                Not an Aptos workspace! Select another folder or create a
-                template project?
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {status.hasFolder && status.hasRequiredFolders && (
+          {isAptosInitialized && (
             <Alert className="border-green-600/20 bg-green-600/10">
               <CheckCircle className="h-4 w-4 text-green-400" />
               <AlertDescription className="text-green-200">
-                Aptos workspace detected! You can select another folder or go to
-                compiler.
+                Aptos Initialized.
               </AlertDescription>
             </Alert>
           )}
@@ -139,24 +89,20 @@ const ProjectPageAptos = () => {
                   className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
                   size="sm"
                 >
-                  Select Folder
+                  Select Other Folder
                 </Button>
 
-                {status.hasFolder && !status.hasRequiredFolders && (
+                {!isAptosInitialized && (
                   <Button
-                    onClick={handleCreateTemplate}
+                    onClick={() => navigate("/aptos/init")}
                     variant="outline"
                     className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
                   >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Create Template"
-                    )}
+                    Aptos Init
                   </Button>
                 )}
 
-                {status.hasFolder && status.hasRequiredFolders && (
+                {isAptosInitialized && (
                   <Button
                     onClick={() => navigate("/aptos/compiler")}
                     variant="outline"

@@ -17,13 +17,14 @@ export default function AptosInitForm() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        // Here you would typically handle the form submission,
-        // e.g., by calling an API or executing the `aptos init` command
-        console.log({ network, privateKey, endpoint, faucetEndpoint })
+        
     }
 
+    // Disable the submit button if 'endpoint' is required and not filled in when custom network is selected
+    const isSubmitDisabled = network === "custom" && !endpoint;
+
     return (
-        <div className="min-h-screen bg-black p-6">
+        <div className="min-h-screen bg-black">
             <div className="mx-auto max-w-2xl">
                 <Card className="border-gray-800 bg-gray-900/50">
                     <CardHeader>
@@ -42,7 +43,7 @@ export default function AptosInitForm() {
                                     <SelectContent className="bg-gray-800 border-gray-700">
                                         {["devnet", "testnet", "mainnet", "local", "custom"].map((net) => (
                                             <SelectItem key={net} value={net} className="text-white hover:bg-gray-700">
-                                                {net}
+                                                {net.toUpperCase()}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -52,7 +53,7 @@ export default function AptosInitForm() {
                             {network !== "custom" && (
                                 <div className="space-y-2">
                                     <Label htmlFor="privateKey" className="text-white">
-                                        Import Private Key (optional)
+                                        Private Key (None: Auto generate new key-pair)
                                     </Label>
                                     <Input
                                         id="privateKey"
@@ -69,7 +70,7 @@ export default function AptosInitForm() {
                                 <>
                                     <div className="space-y-2">
                                         <Label htmlFor="endpoint" className="text-white">
-                                            Endpoint (optional)
+                                            Endpoint (required)
                                         </Label>
                                         <Input
                                             id="endpoint"
@@ -77,6 +78,7 @@ export default function AptosInitForm() {
                                             onChange={(e) => setEndpoint(e.target.value)}
                                             className="bg-gray-800 border-gray-700 text-white"
                                             placeholder="Enter custom endpoint"
+                                            required
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -93,7 +95,7 @@ export default function AptosInitForm() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="customPrivateKey" className="text-white">
-                                            Private Key
+                                            Private Key (None: Auto generate new key-pair)
                                         </Label>
                                         <Input
                                             id="customPrivateKey"
@@ -107,7 +109,11 @@ export default function AptosInitForm() {
                                 </>
                             )}
 
-                            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                            <Button
+                                type="submit"
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={isSubmitDisabled}  // Disable button if endpoint is empty and network is custom
+                            >
                                 Init
                             </Button>
                         </form>
@@ -117,4 +123,3 @@ export default function AptosInitForm() {
         </div>
     )
 }
-
