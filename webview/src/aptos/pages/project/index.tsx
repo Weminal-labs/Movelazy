@@ -27,8 +27,8 @@ const ProjectPageAptos = () => {
       const message = event.data;
 
       if (message.type === "CliStatus" || message.type === "error") {
-        console.log("✅ Aptos CLI Status:", message.isAptosInitialized ? "Initialized" : "Not Initialized");
-        setIsAptosInitialized(message.isAptosInitialized);
+        console.log("✅ Aptos CLI Status:", message.initialized ? "Initialized" : "Not Initialized");
+        setIsAptosInitialized(message.initialized);
       }
     };
 

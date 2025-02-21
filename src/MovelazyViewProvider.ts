@@ -3,7 +3,7 @@ import { SolidityService } from "./contract/solidity";
 import { AptosService } from "./contract/aptos";
 import { WorkspaceService } from "./contract/aptos/workspace";
 import { DeployerService } from "./contract/solidity/deployer";
-import { CheckAptos, CheckAptosInit } from "./services/Aptos-Cli";
+import { CheckAptos, CheckAptosInit, AptosInit } from "./services/Aptos-Cli";
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";
@@ -114,6 +114,14 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({
               type: "CliStatus",
               initialized: isAptosInitialized,
+            });
+            break;
+          case "aptos.init":
+            const [network, endpoint, faucetEndpoint, privateKey] = message.initConfig;
+            const initInfo = await AptosInit(network, endpoint, faucetEndpoint, privateKey);
+            webviewView.webview.postMessage({
+              type: "CliStatus",
+              initInfo: initInfo,
             });
             break;
           case "aptos.compile":

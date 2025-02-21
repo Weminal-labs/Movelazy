@@ -5,6 +5,7 @@ export type AptosMessage = {
   | "aptos.getSettings"
   | "aptos.check"
   | "aptos.checkInit"
+  | "aptos.init"
   | "aptos.updateConfig"
   | "aptos.compile"
   | "aptos.initWorkspace"
@@ -18,6 +19,7 @@ export type AptosMessage = {
   | "aptos.checkFolder"
   | "aptos.selectFolder"
   | "aptos.createTemplate";
+  initConfig?: [string, string, string, string];
   settings?: CompilerSettings | DeployerSettings;
   flags?: Flags;
 };

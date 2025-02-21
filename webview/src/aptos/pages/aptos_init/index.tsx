@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Input } from "../../components/ui/input"
@@ -15,10 +15,31 @@ export default function AptosInitForm() {
     const [endpoint, setEndpoint] = useState<string>("")
     const [faucetEndpoint, setFaucetEndpoint] = useState<string>("")
 
+    const [initInfo, setInitInfo] = useState<string>("");
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        
+
+        window.vscode.postMessage({
+            command: "aptos.init",
+            initConfig: [network, endpoint, faucetEndpoint, privateKey]
+        })
     }
+
+    useEffect(() => {
+        const messageHandler = (event: MessageEvent) => {
+            const message = event.data
+
+            if (message.type === "CliStatus") {
+                if (message.initInfo) {
+                    setInitInfo(message.initInfo);
+                }
+            }
+        }
+
+        window.addEventListener("message", messageHandler)
+        return () => window.removeEventListener("message", messageHandler)
+    }, []);
 
     // Disable the submit button if 'endpoint' is required and not filled in when custom network is selected
     const isSubmitDisabled = network === "custom" && !endpoint;

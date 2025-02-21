@@ -68,4 +68,95 @@ async function CheckAptosInit(): Promise<boolean> {
     });
 }
 
-export { CheckAptos, CheckAptosInit };
+async function AptosInit(network: string, endpoint: string, faucetEndpoint: string, privateKey: string) {
+    // Get workspace path
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+        throw new Error("Workspace path not found");
+    }
+
+    function custom(network: string, endpoint: string, faucetEndpoint: string, privateKey: string): string {
+        const aptosProcess = spawn("aptos", ["init"], {
+            cwd: workspacePath,
+            stdio: ["pipe", "pipe", "pipe"],
+        });
+
+        let outputData = "";
+        aptosProcess.stderr.on("data", (data) => {
+            const output = data.toString();
+
+            if (output.includes("Choose network")) {
+                aptosProcess.stdin.write(`${network}\n`);
+            }
+
+            if (output.includes("Enter your rest endpoint")) {
+                aptosProcess.stdin.write(`${endpoint || ""}\n`);
+            }
+
+            if (output.includes("Enter your faucet endpoint")) {
+                aptosProcess.stdin.write(`${faucetEndpoint || ""}\n`);
+            }
+
+            if (output.includes("Enter your private key as a hex literal")) {
+                aptosProcess.stdin.write(`${privateKey || ""}\n`);
+            }
+
+            if (output.includes("account") || output.includes("Account")) {
+                outputData += output;
+            }
+        });
+
+        aptosProcess.on("close", (code) => {
+            if (code === 0) {
+                return outputData;
+            } else {
+                return `Aptos initialization failed with exit code ${code}`;
+            }
+        });
+
+        return outputData;
+    }
+
+    function notCustom(network: string, privateKey: string): string {
+        const aptosProcess = spawn("aptos", ["init"], {
+            cwd: workspacePath,
+            stdio: ["pipe", "pipe", "pipe"],
+        });
+
+        let outputData = "";
+        aptosProcess.stderr.on("data", (data) => {
+            const output = data.toString();
+
+            if (output.includes("Choose network")) {
+                aptosProcess.stdin.write(`${network}\n`);
+            }
+
+            if (output.includes("Enter your private key as a hex literal")) {
+                aptosProcess.stdin.write(`${privateKey || ""}\n`);
+            }
+
+            if (output.includes("account") || output.includes("Account")) {
+                outputData += output;
+            }
+        });
+
+
+        aptosProcess.on("close", (code) => {
+            if (code === 0) {
+                return outputData;
+            } else {
+                return `Aptos initialization failed with exit code ${code}`;
+            }
+        });
+        return outputData;
+    }
+
+    if (network === 'custom') {
+        custom(network, endpoint, faucetEndpoint, privateKey);
+    }
+    else {
+        notCustom(network, privateKey);
+    }
+}
+
+export { CheckAptos, CheckAptosInit, AptosInit };
