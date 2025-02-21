@@ -1,23 +1,38 @@
-import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
 
 interface NamedAddressesInputProps {
-    namedAddresses: string;
-    onChange: (value: string) => void;
+  namedAddresses: string;
+  onChange: (value: string) => void;
 }
 
-const NamedAddressesInput: React.FC<NamedAddressesInputProps> = ({ namedAddresses, onChange }) => {
-    return (
-        <div className="mb-4">
-            <label className="block text-text-muted text-sm mb-2">Name module</label>
-            <input
-                type="text"
-                value={namedAddresses}
-                onChange={(e) => onChange(e.target.value)}
-                className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
-                placeholder="Example: hello_blockchain"
-            />
+const NamedAddressesInput: React.FC<NamedAddressesInputProps> = ({
+  namedAddresses,
+  onChange,
+}) => {
+  return (
+    <Card className="w-full border-gray-800 bg-gray-900/50">
+      <CardHeader>
+        <CardTitle className="text-base font-medium">Name Module</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <Input
+            id="module-name"
+            value={namedAddresses}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Example: hello_blockchain"
+            className="text-base flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+          />
         </div>
-    );
+      </CardContent>
+    </Card>
+  );
 };
 
 export default NamedAddressesInput;

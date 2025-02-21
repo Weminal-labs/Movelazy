@@ -92,7 +92,7 @@ const AptosPage = () => {
   }, [isAptosInstalled, navigate]);
 
   return (
-    <div className="min-h-screen bg-[#0e0f0e]">
+    <div className="min-h-screen bg-black">
       <main className="p-0">
         <Outlet />
       </main>

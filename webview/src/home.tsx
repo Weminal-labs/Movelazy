@@ -1,7 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "./assets/icons/ArrowRight/ArrowRight";
+import { ArrowRight } from "lucide-react";
 import logo from "./assets/logo.svg";
 import { VSCodeApi } from "./aptos/types/vscode";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "./aptos/components/ui/card";
+import { Button } from "./aptos/components/ui/button";
 
 declare global {
   interface Window {
@@ -13,29 +20,38 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-8">
-      <div className="flex flex-col items-center">
-        <img src={logo} alt="Logo" className="w-32 h-32" />
-        <h1 className="font-pacifico text-4xl text-white mt-4 mb-8">
-          Movelazy
-        </h1>
-      </div>
+    <div className="container flex items-center justify-center min-h-screen ">
+      <Card className="w-full max-w-md border-none">
+        <CardHeader className="space-y-2 text-center">
+          <div className="flex flex-col items-center">
+            <img src={logo} alt="Logo" className="h-24 w-24" />
+            <CardTitle className="mt-4 font-pacifico text-3xl">
+              Movelazy
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button
+            variant="outline"
+            className="w-full"
+            size="lg"
+            onClick={() => navigate("/sol")}
+          >
+            <span>Solidity</span>
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
 
-      <button
-        onClick={() => navigate("/sol")}
-        className="flex items-center gap-2 px-6 py-3 text-white transition-all border rounded-lg hover:bg-white/10"
-      >
-        <span>Solidity</span>
-        <ArrowRight className="w-5 h-5" />
-      </button>
-
-      <button
-        onClick={() => navigate("/aptos")}
-        className="flex items-center gap-2 px-6 py-3 text-white transition-all border rounded-lg hover:bg-white/10"
-      >
-        <span>Aptos</span>
-        <ArrowRight className="w-5 h-5" />
-      </button>
+          <Button
+            variant="outline"
+            className="w-full"
+            size="lg"
+            onClick={() => navigate("/aptos")}
+          >
+            <span>Aptos</span>
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
