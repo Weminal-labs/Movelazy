@@ -36,7 +36,6 @@ async function CheckAptosInit(): Promise<boolean> {
         // Listen output (stdout) from process
         aptosProcess.stdout.on("data", (data) => {
             const output = data.toString();
-            console.log(output);  // In ra để debug nếu cần
 
             // Check notify "Aptos already initialized for profile default"
             if (output.includes("Aptos already initialized for profile default")) {
@@ -68,14 +67,14 @@ async function CheckAptosInit(): Promise<boolean> {
     });
 }
 
-async function AptosInit(network: string, endpoint: string, faucetEndpoint: string, privateKey: string) {
+async function AptosInit(webview: vscode.Webview, network: string, endpoint: string, faucetEndpoint: string, privateKey: string) {
     // Get workspace path
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
         throw new Error("Workspace path not found");
     }
 
-    function custom(network: string, endpoint: string, faucetEndpoint: string, privateKey: string): string {
+    function custom(network: string, endpoint: string, faucetEndpoint: string, privateKey: string) {
         const aptosProcess = spawn("aptos", ["init"], {
             cwd: workspacePath,
             stdio: ["pipe", "pipe", "pipe"],
@@ -108,16 +107,22 @@ async function AptosInit(network: string, endpoint: string, faucetEndpoint: stri
 
         aptosProcess.on("close", (code) => {
             if (code === 0) {
-                return outputData;
+                webview.postMessage({
+                    type: "initStatus",
+                    success: true,
+                    initInfo: outputData,
+                });
             } else {
-                return `Aptos initialization failed with exit code ${code}`;
+                webview.postMessage({
+                    type: "initStatus",
+                    success: false,
+                    initInfo: `Aptos initialization failed with exit code ${code}`,
+                });
             }
         });
-
-        return outputData;
     }
 
-    function notCustom(network: string, privateKey: string): string {
+    function notCustom(network: string, privateKey: string) {
         const aptosProcess = spawn("aptos", ["init"], {
             cwd: workspacePath,
             stdio: ["pipe", "pipe", "pipe"],
@@ -143,12 +148,19 @@ async function AptosInit(network: string, endpoint: string, faucetEndpoint: stri
 
         aptosProcess.on("close", (code) => {
             if (code === 0) {
-                return outputData;
+                webview.postMessage({
+                    type: "initStatus",
+                    success: true,
+                    initInfo: outputData,
+                });
             } else {
-                return `Aptos initialization failed with exit code ${code}`;
+                webview.postMessage({
+                    type: "initStatus",
+                    success: false,
+                    initInfo: `Aptos initialization failed with exit code ${code}`,
+                });
             }
         });
-        return outputData;
     }
 
     if (network === 'custom') {

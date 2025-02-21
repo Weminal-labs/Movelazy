@@ -118,11 +118,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             break;
           case "aptos.init":
             const [network, endpoint, faucetEndpoint, privateKey] = message.initConfig;
-            const initInfo = await AptosInit(network, endpoint, faucetEndpoint, privateKey);
-            webviewView.webview.postMessage({
-              type: "CliStatus",
-              initInfo: initInfo,
-            });
+            await AptosInit(webviewView.webview, network, endpoint, faucetEndpoint, privateKey);
             break;
           case "aptos.compile":
             await this.aptosService.updateConfig(message.settings);

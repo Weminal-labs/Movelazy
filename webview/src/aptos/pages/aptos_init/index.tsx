@@ -8,31 +8,55 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
 import { Button } from "../../components/ui/button"
+import { useNavigate } from "react-router-dom"
+import { StatusDialog } from "../../components/status-dialog"
 
 export default function AptosInitForm() {
+    const navigate = useNavigate();
+
     const [network, setNetwork] = useState<string>("devnet")
     const [privateKey, setPrivateKey] = useState<string>("")
     const [endpoint, setEndpoint] = useState<string>("")
     const [faucetEndpoint, setFaucetEndpoint] = useState<string>("")
 
-    const [initInfo, setInitInfo] = useState<string>("");
+    const [initStatus, setInitStatus] = useState<{
+        type: "success" | "error" | null;
+        message: string;
+    }>({ type: null, message: "" });
+    const [showDialog, setShowDialog] = useState(false);
+    const [initializing, setInitializing] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
 
-        window.vscode.postMessage({
-            command: "aptos.init",
-            initConfig: [network, endpoint, faucetEndpoint, privateKey]
-        })
+        setInitializing(true)
+        if (window.vscode) {
+            try {
+                window.vscode.postMessage({
+                    command: "aptos.init",
+                    initConfig: [network, endpoint, faucetEndpoint, privateKey]
+                })
+            } catch (error) {
+                console.error(error)
+                setInitializing(false)
+                setInitStatus({ type: "error", message: "Failed to initialize config" })
+                setShowDialog(true)
+            }
+        }
+
     }
 
     useEffect(() => {
         const messageHandler = (event: MessageEvent) => {
             const message = event.data
-
-            if (message.type === "CliStatus") {
+            if (message.type === "initStatus") {
                 if (message.initInfo) {
-                    setInitInfo(message.initInfo);
+                    setInitStatus({
+                        type: message.success ? "success" : "error",
+                        message: message.initInfo
+                    });
+                    setInitializing(false)
+                    setShowDialog(true)
                 }
             }
         }
@@ -140,6 +164,20 @@ export default function AptosInitForm() {
                         </form>
                     </CardContent>
                 </Card>
+                <StatusDialog
+                    open={showDialog}
+                    onOpenChange={setShowDialog}
+                    loading={initializing}
+                    status={initStatus}
+                    loadingTitle="Initializing..."
+                    loadingMessage="Please wait while initializing config..."
+                    successTitle="Initialization Successful"
+                    errorTitle="Initialization Failed"
+                    successAction={{
+                        label: "Go to Compile",
+                        onClick: () => navigate("/aptos/compiler"),
+                    }}
+                />
             </div>
         </div>
     )

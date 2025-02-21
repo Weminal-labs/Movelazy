@@ -44,7 +44,7 @@ export function StatusDialog({
   return (
     <AlertDialog
       open={open}
-      onOpenChange={(open) => {
+      onOpenChange={(open: boolean) => {
         if (!loading || !preventCloseWhileLoading) {
           onOpenChange(open);
         }
@@ -85,11 +85,10 @@ export function StatusDialog({
               >
                 <AlertDescription>
                   <pre
-                    className={`font-mono text-sm whitespace-pre-wrap break-all ${
-                      status.type === "success"
+                    className={`font-mono text-sm whitespace-pre-wrap break-all ${status.type === "success"
                         ? "text-green-400"
                         : "text-red-400"
-                    }`}
+                      }`}
                   >
                     {status.message}
                   </pre>
