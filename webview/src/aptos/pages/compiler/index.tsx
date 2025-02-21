@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { OptimizerSettings } from "../../components/compiler/OptimizerSettings";
-import { AdvancedSettings } from "../../components/compiler/AdvancedSettings";
 import { CompilerSettings } from "../../types/settings";
 import NamedAddressesInput from "../../components/compiler/NameModule";
 import NetworkSelector from "../../components/compiler/Network";
 import { Network } from "../../types/network";
+import { Button } from "../../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { StatusDialog } from "../../components/status-dialog";
 
 const CompilerPage = () => {
   const [settings, setSettings] = useState<CompilerSettings>({
@@ -25,7 +34,9 @@ const CompilerPage = () => {
     message: string;
   }>({ type: null, message: "" });
 
-  const [cleaning, setCleaning] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
@@ -38,22 +49,10 @@ const CompilerPage = () => {
           message: message.message,
         });
       } else if (message.type === "cleanStatus") {
-        setCleaning(false);
         setCompileStatus({
           type: message.success ? "success" : "error",
           message: message.message,
         });
-      }
-
-      // Clear status after 5 seconds
-      if (
-        message.type === "compileStatus" ||
-        message.type === "deployStatus" ||
-        message.type === "cleanStatus"
-      ) {
-        setTimeout(() => {
-          setCompileStatus({ type: null, message: "" });
-        }, 5000);
       }
     };
 
@@ -61,15 +60,16 @@ const CompilerPage = () => {
     return () => window.removeEventListener("message", messageHandler);
   }, []);
 
+  // useEffect(() => {
+  //   if (compileStatus.type) {
+  //  setShowDialog(true);
+  //   }
+  // }, [compileStatus]);
+
   const handleCompile = async () => {
     setCompiling(true);
     setCompileStatus({ type: null, message: "" });
-    console.log(
-      "check settings",
-      settings.packageDir,
-      "  ",
-      settings.namedAddresses
-    );
+    setShowDialog(true);
     if (window.vscode) {
       try {
         window.vscode.postMessage({
@@ -86,126 +86,107 @@ const CompilerPage = () => {
     }
   };
 
-  const handleClean = async () => {
-    setCleaning(true);
-    setCompileStatus({ type: null, message: "" });
-    if (window.vscode) {
-      try {
-        window.vscode.postMessage({
-          command: "aptos.clean",
-        });
-      } catch {
-        setCleaning(false);
-        setCompileStatus({
-          type: "error",
-          message: "Failed to clean artifacts",
-        });
-      }
-    }
-  };
-
   return (
-    <>
-      <div className="flex flex-col w-full h-[calc(100vh-64px)]">
-        <div className="flex-1 bg-background-light border border-border">
-          <div className="p-8">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-text text-2xl font-medium">
+    <div className="container mx-auto p-4">
+      <Card className=" border  border-gray-800 bg-gray-900/50">
+        <CardHeader className="border-b border-gray-700 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-blue-600/20">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-blue-500"
+              >
+                <path d="m18 16 4-4-4-4" />
+                <path d="m6 8-4 4 4 4" />
+                <path d="m14.5 4-5 16" />
+              </svg>
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold text-gray-200">
                 Compiler Settings
-              </h3>
-              <div className="flex gap-4">
-                <button
-                  onClick={handleClean}
-                  disabled={cleaning || compiling}
-                  className={`px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ${
-                    cleaning || compiling ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {cleaning ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Cleaning...
-                    </div>
-                  ) : (
-                    "Clean"
-                  )}
-                </button>
-                <button
-                  onClick={handleCompile}
-                  disabled={cleaning || compiling}
-                  className={`px-8 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors ${
-                    cleaning || compiling ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {compiling ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Compiling...
-                    </div>
-                  ) : (
-                    "Compile"
-                  )}
-                </button>
-              </div>
-            </div>
-            <div className="space-y-6">
-              <NetworkSelector
-                network={settings.network || ""}
-                onChange={(value) =>
-                  setSettings({ ...settings, network: value })
-                }
-              />
-              <NamedAddressesInput
-                namedAddresses={settings.namedAddresses || ""}
-                onChange={(value) =>
-                  setSettings({ ...settings, namedAddresses: value })
-                }
-              />
-              <OptimizerSettings
-                enabled={settings.optimizer?.enabled}
-                level={settings.optimizer?.level || ""}
-                onChange={(enabled, level) =>
-                  setSettings({
-                    ...settings,
-                    optimizer: {
-                      enabled,
-                      level: level || settings.optimizer?.level,
-                    },
-                  })
-                }
-              />
-              <AdvancedSettings
-                bytecodeHash={settings.metadata?.bytecodeHash || ""}
-                onChange={(key, value) => {
-                  if (key === "bytecodeHash" && typeof value === "string") {
-                    setSettings({
-                      ...settings,
-                      metadata: { ...settings.metadata, bytecodeHash: value },
-                    });
-                  } else {
-                    setSettings({ ...settings, [key]: value });
-                  }
-                }}
-              />
+              </CardTitle>
+              <p className="text-sm text-gray-400 mt-1">
+                Configure your Move contract compilation options
+              </p>
             </div>
           </div>
-        </div>
-        {compileStatus.type && (
-          <div
-            className={`p-4 border-t border-border transition-all ${
-              compileStatus.type === "success"
-                ? "bg-green-500/5 text-green-500 border-green-500/20"
-                : "bg-red-500/5 text-red-500 border-red-500/20"
-            }`}
-          >
-            <pre className="font-mono text-sm whitespace-pre-wrap">
-              {compileStatus.message}
-            </pre>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <NetworkSelector
+            network={settings.network || ""}
+            onChange={(value) => setSettings({ ...settings, network: value })}
+          />
+
+          <NamedAddressesInput
+            namedAddresses={settings.namedAddresses || ""}
+            onChange={(value) =>
+              setSettings({ ...settings, namedAddresses: value })
+            }
+          />
+
+          <OptimizerSettings
+            enabled={settings.optimizer?.enabled}
+            level={settings.optimizer?.level || ""}
+            onChange={(enabled, level) =>
+              setSettings({
+                ...settings,
+                optimizer: {
+                  enabled,
+                  level: level || settings.optimizer?.level,
+                },
+              })
+            }
+          />
+
+          <div className="flex justify-between items-center gap-4">
+            <Button
+              variant="outline"
+              className="h-12 flex items-center justify-center gap-2 hover:bg-gray-700"
+              onClick={() => navigate("/")}
+            >
+              <span>Back</span>
+            </Button>
+            <Button
+              size="lg"
+              onClick={handleCompile}
+              disabled={compiling}
+              className="h-12 px-6 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {compiling ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Compiling...</span>
+                </div>
+              ) : (
+                "Compile"
+              )}
+            </Button>
           </div>
-        )}
-      </div>
-    </>
+        </CardContent>
+      </Card>
+      <StatusDialog
+        open={showDialog}
+        onOpenChange={setShowDialog}
+        loading={compiling}
+        status={compileStatus}
+        loadingTitle="Compiling..."
+        loadingMessage="Please wait while your code is being compiled..."
+        successTitle="Compilation Successful"
+        errorTitle="Compilation Failed"
+        successAction={{
+          label: "Go to Deploy",
+          onClick: () => navigate("/aptos/deployer"),
+        }}
+      />
+    </div>
   );
 };
-
 export default CompilerPage;

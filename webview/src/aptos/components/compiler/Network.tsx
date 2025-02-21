@@ -1,4 +1,16 @@
-import React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 import { Network } from "../../types/network";
 
 interface NetworkSelectorProps {
@@ -10,25 +22,28 @@ const NetworkSelector: React.FC<NetworkSelectorProps> = ({
   network,
   onChange,
 }) => {
-  const handleNetworkChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange(event.target.value as Network);
-  };
-
   return (
-    <div>
-      <label className="block text-text-muted text-sm mb-2">
-        Select Network
-      </label>
-      <select
-        id="network-select"
-        value={network}
-        onChange={handleNetworkChange}
-        className="w-full bg-background-dark text-text p-4 rounded-lg border border-border focus:outline-none focus:border-primary"
-      >
-        <option value={Network.Testnet}>Testnet</option>
-        <option value={Network.Devnet}>Devnet</option>
-      </select>
-    </div>
+    <Card className="w-full border-none bg-card">
+      <CardHeader>
+        <CardTitle className="text-lg font-medium -mb-4">
+          Choose Network
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Select
+          value={network}
+          onValueChange={(value) => onChange(value as Network)}
+        >
+          <SelectTrigger className="border-gray-800 bg-gray-900/50">
+            <SelectValue placeholder="Select network" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-900/50">
+            <SelectItem value={Network.Testnet}>Testnet</SelectItem>
+            <SelectItem value={Network.Devnet}>Devnet</SelectItem>
+          </SelectContent>
+        </Select>
+      </CardContent>
+    </Card>
   );
 };
 
