@@ -101,7 +101,7 @@ const ProjectPageAptos = () => {
 
                 {isAptosInitialized && (
                   <Button
-                    onClick={() => navigate("/aptos/compiler")}
+                    onClick={() => navigate("/aptos/compile")}
                     variant="outline"
                     className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
                   >
