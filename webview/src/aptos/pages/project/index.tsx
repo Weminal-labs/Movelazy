@@ -24,7 +24,7 @@ const ProjectPageAptos = () => {
 
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
-
+      console.log("checkWorkspace:", message.hasFolder);
       if (message.type === "folderStatus") {
         // Handle folder status here if needed
         setIsWorkspace(message.hasFolder);
@@ -125,7 +125,7 @@ const ProjectPageAptos = () => {
 
                 {isAptosInitialized && (
                   <Button
-                    onClick={() => navigate("/aptos/compiler")}
+                    onClick={() => navigate("/aptos/help")}
                     variant="outline"
                     className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
                   >

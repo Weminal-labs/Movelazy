@@ -18,15 +18,36 @@ export class AptosService {
     this.deployer = new AptosDeployerService();
   }
 
-  async compile(webview: vscode.Webview) {
-    const settings = this.workspace.getSettings();
-    const compileSettings: CompileSettings = {
-      namedAddresses: settings.namedAddresses,
-      optimizer: settings.optimizer.enabled,
-      optimizerlevel: settings.optimizer.level,
-      network: settings.network,
-    };
-    return this.compiler.compile(webview, compileSettings);
+  async compile(
+    webview: vscode.Webview,
+    saveMetadata: boolean,
+    fetchDepsOnly: boolean,
+    artifacts: "none" | "sparse" | "all",
+    packageDir_compile: string,
+    outputDir: string,
+    namedAddresses_compile: string,
+    overrideStd: string | null,
+    devMode: boolean,
+    skipGitDeps: boolean,
+    skipAttributeChecks: boolean,
+    checkTestCode: boolean,
+    optimization: "none" | "default" | "extra"
+  ) {
+    return this.compiler.compile(
+      webview,
+      saveMetadata,
+      fetchDepsOnly,
+      artifacts,
+      packageDir_compile,
+      outputDir,
+      namedAddresses_compile,
+      overrideStd,
+      devMode,
+      skipGitDeps,
+      skipAttributeChecks,
+      checkTestCode,
+      optimization
+    );
   }
 
   async test(webview: vscode.Webview, enabled: boolean, testName: string) {

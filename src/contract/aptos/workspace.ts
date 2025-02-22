@@ -16,6 +16,8 @@ export class WorkspaceService {
       vscode.workspace.workspaceFolders &&
       vscode.workspace.workspaceFolders.length > 0;
 
+    console.log("check hasFolder", hasFolder);
+
     webview.postMessage({
       type: "folderStatus",
       hasFolder,

@@ -3,7 +3,13 @@ import { SolidityService } from "./contract/solidity";
 import { AptosService } from "./contract/aptos";
 import { WorkspaceService } from "./contract/aptos/workspace";
 import { DeployerService } from "./contract/solidity/deployer";
-import { CheckAptos, CheckAptosInit, AptosInit, AptosMoveInit, AptosInfo } from "./services/Aptos-Cli";
+import {
+  CheckAptos,
+  CheckAptosInit,
+  AptosInit,
+  AptosMoveInit,
+  AptosInfo,
+} from "./services/Aptos-Cli";
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";
@@ -120,11 +126,19 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             });
             break;
           case "aptos.init":
-            const [network, endpoint, faucetEndpoint, privateKey] = message.initConfig;
-            await AptosInit(webviewView.webview, network, endpoint, faucetEndpoint, privateKey);
+            const [network, endpoint, faucetEndpoint, privateKey] =
+              message.initConfig;
+            await AptosInit(
+              webviewView.webview,
+              network,
+              endpoint,
+              faucetEndpoint,
+              privateKey
+            );
             break;
           case "aptos.moveinit":
-            const [name,
+            const [
+              name,
               packageDir,
               namedAddresses,
               template,
@@ -132,12 +146,52 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
               assumeNo,
               frameworkGitRev,
               frameworkLocalDir,
-              skipFetchLatestGitDeps] = message.initArgs;
-            await AptosMoveInit(webviewView.webview, name, packageDir, namedAddresses, template, assumeYes, assumeNo, frameworkGitRev, frameworkLocalDir, skipFetchLatestGitDeps);
+              skipFetchLatestGitDeps,
+            ] = message.initArgs;
+            await AptosMoveInit(
+              webviewView.webview,
+              name,
+              packageDir,
+              namedAddresses,
+              template,
+              assumeYes,
+              assumeNo,
+              frameworkGitRev,
+              frameworkLocalDir,
+              skipFetchLatestGitDeps
+            );
             break;
+
           case "aptos.compile":
-            await this.aptosService.updateConfig(message.settings);
-            await this.aptosService.compile(webviewView.webview);
+            const [
+              saveMetadata,
+              fetchDepsOnly,
+              artifacts,
+              packageDir_compile,
+              outputDir,
+              namedAddresses_compile,
+              overrideStd,
+              devMode,
+              skipGitDeps,
+              skipAttributeChecks,
+              checkTestCode,
+              optimization,
+            ] = message.compileArgs;
+            await this.aptosService.compile(
+              webviewView.webview,
+              saveMetadata,
+              fetchDepsOnly,
+              artifacts,
+              packageDir_compile,
+              outputDir,
+              namedAddresses_compile,
+              overrideStd,
+              devMode,
+              skipGitDeps,
+              skipAttributeChecks,
+              checkTestCode,
+              optimization
+            );
             break;
           case "aptos.updateConfig":
             await this.aptosService.updateConfig(message.settings);
