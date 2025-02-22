@@ -28,8 +28,13 @@ export class AptosCompilerService {
 
     let command = "aptos move compile";
     command += ` --named-addresses ${namedAddresses_compile}=default`;
-    command += ` --included-artifacts ${artifacts}`;
-    command += ` --optimize ${optimization}`;
+
+    if (optimization !== "default") {
+      command += ` --optimize ${optimization}`;
+    }
+    if (artifacts !== "sparse") {
+      command += ` --included-artifacts ${artifacts}`;
+    }
     if (saveMetadata) {
       command += " --save-metadata";
     }
@@ -45,8 +50,12 @@ export class AptosCompilerService {
     if (checkTestCode) {
       command += " --check-test-code";
     }
-    command += ` --package-dir ${packageDir_compile}`;
-    command += ` --output-dir ${outputDir}`;
+    if (packageDir_compile) {
+      command += ` --package-dir ${packageDir_compile}`;
+    }
+    if (outputDir) {
+      command += ` --output-dir ${outputDir}`;
+    }
     if (fetchDepsOnly) {
       command += " --fetch-deps-only";
     }

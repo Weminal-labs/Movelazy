@@ -20,11 +20,11 @@ const ProjectPageAptos = () => {
 
   useEffect(() => {
     console.log("🔹 Sending message to VS Code to check Aptos is init...");
-    window.vscode.postMessage({ command: "aptos.checkInit" });
+    window.vscode.postMessage({ command: "aptos.checkFolder" });
 
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
-      console.log("checkWorkspace:", message.hasFolder);
+      console.log("checkWorkspace:", message);
       if (message.type === "folderStatus") {
         // Handle folder status here if needed
         setIsWorkspace(message.hasFolder);

@@ -93,6 +93,7 @@ export default function MoveCompile() {
     setShowDialog(true);
     if (window.vscode) {
       try {
+        console.log("check compile agrs:", compileArgs);
         window.vscode.postMessage({
           command: "aptos.compile",
           compileArgs: [
@@ -120,11 +121,11 @@ export default function MoveCompile() {
     }
   };
 
-  useEffect(() => {
-    if (compileStatus.type) {
-      setShowDialog(true);
-    }
-  }, [compileStatus]);
+  // useEffect(() => {
+  //   if (compileStatus.type) {
+  //     setShowDialog(true);
+  //   }
+  // }, [compileStatus]);
 
   return (
     <div className="min-h-screen bg-black text-white p-4">
@@ -137,7 +138,7 @@ export default function MoveCompile() {
       </Button>
 
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-6">Init Project</h1>
+        <h1 className="text-2xl font-semibold mb-6">Compile Code</h1>
 
         <Tabs defaultValue="simple" className="mb-6">
           <TabsList className="grid w-full grid-cols-2 bg-gray-800 mb-6">
