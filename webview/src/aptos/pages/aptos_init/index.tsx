@@ -66,12 +66,11 @@ export default function AptosInitForm() {
     }, []);
 
     // Disable the submit button if 'endpoint' is required and not filled in when custom network is selected
-    const isSubmitDisabled = network === "custom" && !endpoint;
 
     return (
         <div className="min-h-screen bg-black">
             <div className="mx-auto max-w-2xl">
-                <Card className="border-gray-800 bg-gray-900/50">
+                <Card className="min-h-screen border-gray-800 bg-gray-900/50">
                     <CardHeader>
                         <CardTitle className="text-2xl font-bold text-white">Aptos Init Configuration</CardTitle>
                     </CardHeader>
@@ -156,10 +155,16 @@ export default function AptosInitForm() {
 
                             <Button
                                 type="submit"
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                                disabled={isSubmitDisabled}  // Disable button if endpoint is empty and network is custom
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white mb-4"
                             >
                                 Init
+                            </Button>
+                            <Button
+                                onClick={() => navigate("/aptos/help")}
+                                variant="outline"
+                                className="w-full bg-grey-600 hover:bg-red-700 text-white"
+                            >
+                                Back
                             </Button>
                         </form>
                     </CardContent>

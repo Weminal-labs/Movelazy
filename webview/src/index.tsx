@@ -12,7 +12,6 @@ import DeployerPage from './sol/pages/deployer'
 import ProjectPageSol from './sol/pages/project'
 //------------------- Aptos imports --------------------- //
 import AptosPage from './aptos'
-import CompilerAptosPage from './aptos/pages/compiler'
 import TesterAptosPage from './aptos/pages/tester'
 import DeployerAptosPage from './aptos/pages/deployer'
 import ProjectPageAptos from './aptos/pages/project'
@@ -23,6 +22,10 @@ import WindowsInstallationGuide from './aptos/pages/installation/Window'
 import SpecificInstallationGuide from './aptos/pages/installation/SpecificVersion'
 import AptosInitForm from './aptos/pages/aptos_init'
 import AptosHelp from './aptos/pages/aptos_help'
+import AptosMove from './aptos/pages/aptos_move'
+import MoveHelp from './aptos/pages/aptos_move/help'
+import MoveInit from './aptos/pages/aptos_move/init'
+import MoveCompile from './aptos/pages/aptos_move/compile'
 
 // Router configuration
 const router = createMemoryRouter([
@@ -85,16 +88,30 @@ const router = createMemoryRouter([
             element: <AptosHelp />
           },
           {
+            path: 'move',
+            element: <AptosMove />,
+            children: [
+              {
+                path: 'help',
+                element: <MoveHelp />
+              },
+              {
+                path: 'init',
+                element: <MoveInit />
+              },
+              {
+                path: 'compile',
+                element: <MoveCompile />
+              }
+            ]
+          },
+          {
             path: 'specific-version',
             element: <SpecificInstallationGuide />
           },
           {
             path: 'project',
             element: <ProjectPageAptos />
-          },
-          {
-            path: 'compiler',
-            element: <CompilerAptosPage />
           },
           {
             path: 'tester',

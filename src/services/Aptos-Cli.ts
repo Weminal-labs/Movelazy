@@ -177,8 +177,47 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
         throw new Error("Workspace path not found");
     }
 
-    const command = ["move", "init"];
+    let command = "aptos move init --name " + name;
+    if (packageDir !== "") {
+        command += " --package-dir " + packageDir;
+    }
+    if (namedAddresses !== "") {
+        command += " --named-addresses " + namedAddresses;
+    }
+    if (template !== "") {
+        command += " --template " + template;
+    }
+    if (assumeYes) {
+        command += " --assume-yes";
+    }
+    if (assumeNo) {
+        command += " --assume-no";
+    }
+    if (frameworkGitRev !== "") {
+        command += " --framework-git-rev " + frameworkGitRev;
+    }
+    if (frameworkLocalDir !== "") {
+        command += " --framework-local-dir " + frameworkLocalDir;
+    }
+    if (skipFetchLatestGitDeps) {
+        command += " --skip-fetch-latest-git-deps";
+    }
 
+    try {
+        const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+        webview.postMessage({
+            type: "moveInitStatus",
+            success: true,
+            initInfo: stderr + stdout,
+        });
+    } catch (error) {
+        webview.postMessage({
+            type: "moveInitStatus",
+            success: false,
+            initInfo: (error as Error).message,
+        });
+
+    }
 }
 
 export { CheckAptos, CheckAptosInit, AptosInit, AptosMoveInit };
