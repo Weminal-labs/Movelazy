@@ -19,15 +19,12 @@ const ProjectPageAptos = () => {
   );
 
   useEffect(() => {
-    console.log("🔹 Sending message to VS Code to check Aptos is init...");
     window.vscode.postMessage({ command: "aptos.checkInit" });
 
     const messageHandler = (event: MessageEvent) => {
-      console.log("📩 Received message from VS Code:", event.data);
       const message = event.data;
 
       if (message.type === "CliStatus" || message.type === "error") {
-        console.log("✅ Aptos CLI Status:", message.initialized ? "Initialized" : "Not Initialized");
         setIsAptosInitialized(message.initialized);
       }
     };

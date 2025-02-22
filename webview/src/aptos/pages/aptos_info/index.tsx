@@ -68,13 +68,13 @@ export default function AptosInfo() {
 
     return (
         <div className="min-h-screen bg-gray-900 p-0">
-            <div className="max-w-4xl mx-auto">
-                <Card className="border-gray-700 bg-gray-800/50 overflow-hidden">
-                    <CardHeader className="border-b border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600">
+            <div className="min-h-screen max-w-4xl mx-auto">
+                <Card className="min-h-screen border-gray-700 bg-gray-800/50 overflow-hidden">
+                    <CardHeader className="border-b border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600 p-4">
                         <CardTitle className="text-2xl font-bold text-white">Aptos Information</CardTitle>
                     </CardHeader>
 
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                         {isLoading ? (
                             <div className="text-white text-lg font-semibold">
                                 Loading...
@@ -139,14 +139,14 @@ export default function AptosInfo() {
                                 </div>
                             </>
                         )}
+                        <Button
+                            onClick={() => navigate("/aptos/help")}
+                            variant="outline"
+                            className="w-full bg-grey-600 hover:bg-red-700 text-white mt-6"
+                        >
+                            Back
+                        </Button>
                     </CardContent>
-                    <Button
-                        onClick={() => navigate("/aptos/help")}
-                        variant="outline"
-                        className="w-full bg-grey-600 hover:bg-red-700 text-white"
-                    >
-                        Back
-                    </Button>
                 </Card>
             </div>
         </div>

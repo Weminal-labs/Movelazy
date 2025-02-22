@@ -10,6 +10,8 @@ import { Label } from "../../components/ui/label"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { StatusDialog } from "../../components/status-dialog"
+import { Alert, AlertDescription } from "../../components/ui/alert"
+import { AlertTriangle } from "lucide-react"
 
 export default function AptosInitForm() {
     const navigate = useNavigate();
@@ -25,6 +27,24 @@ export default function AptosInitForm() {
     }>({ type: null, message: "" });
     const [showDialog, setShowDialog] = useState(false);
     const [initializing, setInitializing] = useState(false);
+    const [isAptosInitialized, setIsAptosInitialized] = useState<boolean | null>(
+        null
+    );
+
+    useEffect(() => {
+        window.vscode.postMessage({ command: "aptos.checkInit" });
+
+        const messageHandler = (event: MessageEvent) => {
+            const message = event.data;
+
+            if (message.type === "CliStatus" || message.type === "error") {
+                setIsAptosInitialized(message.initialized);
+            }
+        };
+
+        window.addEventListener("message", messageHandler);
+        return () => window.removeEventListener("message", messageHandler);
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -75,6 +95,14 @@ export default function AptosInitForm() {
                         <CardTitle className="text-2xl font-bold text-white">Aptos Init Configuration</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        {isAptosInitialized && (
+                            <Alert className="border-yellow-600/20 bg-yellow-600/10">
+                                <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                                <AlertDescription className="text-yellow-200">
+                                    Aptos has been Initialized! Do you want to re-initialize?
+                                </AlertDescription>
+                            </Alert>
+                        )}
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
                                 <Label htmlFor="network" className="text-white">
