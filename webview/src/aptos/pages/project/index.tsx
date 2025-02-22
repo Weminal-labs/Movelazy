@@ -11,20 +11,42 @@ import {
 import { Button } from "../../components/ui/button";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 
-
 const ProjectPageAptos = () => {
   const navigate = useNavigate();
   const [isAptosInitialized, setIsAptosInitialized] = useState<boolean | null>(
     null
   );
+  const [isWorkspace, setIsWorkspace] = useState<boolean | null>(null);
 
   useEffect(() => {
+    console.log("🔹 Sending message to VS Code to check Aptos is init...");
     window.vscode.postMessage({ command: "aptos.checkInit" });
 
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
 
+      if (message.type === "folderStatus") {
+        // Handle folder status here if needed
+        setIsWorkspace(message.hasFolder);
+        console.log("checkWorkspace:", message.hasFolder);
+
+        // If the folder exists, continue to check Aptos initialization
+        if (message.hasFolder) {
+          console.log(
+            "🔹 Sending message to VS Code to check Aptos is init..."
+          );
+          window.vscode.postMessage({ command: "aptos.checkInit" });
+        } else {
+          // Handle the case where the folder does not exist
+          setIsAptosInitialized(false);
+        }
+      }
+
       if (message.type === "CliStatus" || message.type === "error") {
+        console.log(
+          "✅ Aptos CLI Status:",
+          message.initialized ? "Initialized" : "Not Initialized"
+        );
         setIsAptosInitialized(message.initialized);
       }
     };
@@ -32,12 +54,6 @@ const ProjectPageAptos = () => {
     window.addEventListener("message", messageHandler);
     return () => window.removeEventListener("message", messageHandler);
   }, []);
-
-  useEffect(() => {
-    if (isAptosInitialized === true) {
-      navigate("/aptos/help");
-    }
-  }, [isAptosInitialized, navigate]);
 
   const handleSelectFolder = () => {
     if (window.vscode) {
@@ -59,24 +75,32 @@ const ProjectPageAptos = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
-          {!isAptosInitialized && (
+          {!isWorkspace && (
+            <Alert className="border-red-600/20 bg-red-600/10">
+              <AlertTriangle className="h-4 w-4 text-yellow-400" />
+              <AlertDescription className="text-yellow-200">
+                No workspace found. Please open a folder.
+              </AlertDescription>
+            </Alert>
+          )}
+          {!isAptosInitialized && isWorkspace && (
             <Alert className="border-yellow-600/20 bg-yellow-600/10">
               <AlertTriangle className="h-4 w-4 text-yellow-400" />
               <AlertDescription className="text-yellow-200">
-                Aptos has not Initialized! Run the command `aptos init` or click the button below
+                Aptos has not been initialized! Run the command `aptos init` or
+                select other folder.
               </AlertDescription>
             </Alert>
           )}
-
-          {isAptosInitialized && (
+          {isAptosInitialized && isWorkspace && (
             <Alert className="border-green-600/20 bg-green-600/10">
               <CheckCircle className="h-4 w-4 text-green-400" />
               <AlertDescription className="text-green-200">
-                Aptos Initialized.
+                You already have a folder Aptos initialized. If you want, you
+                can select a different folder or Run the command `aptos help`
               </AlertDescription>
             </Alert>
           )}
-
           <Card className="w-full border-gray-800 bg-gray-900/50">
             <CardContent className="p-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -89,7 +113,7 @@ const ProjectPageAptos = () => {
                   Select Other Folder
                 </Button>
 
-                {!isAptosInitialized && (
+                {!isAptosInitialized && isWorkspace && (
                   <Button
                     onClick={() => navigate("/aptos/init")}
                     variant="outline"
@@ -101,11 +125,11 @@ const ProjectPageAptos = () => {
 
                 {isAptosInitialized && (
                   <Button
-                    onClick={() => navigate("/aptos/move/compile")}
+                    onClick={() => navigate("/aptos/compiler")}
                     variant="outline"
                     className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
                   >
-                    Go to Compiler
+                    Aptos help
                   </Button>
                 )}
               </div>
