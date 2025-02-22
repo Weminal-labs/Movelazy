@@ -26,6 +26,7 @@ import AptosMove from './aptos/pages/aptos_move'
 import MoveHelp from './aptos/pages/aptos_move/help'
 import MoveInit from './aptos/pages/aptos_move/init'
 import MoveCompile from './aptos/pages/aptos_move/compile'
+import AptosInfo from './aptos/pages/aptos_info'
 
 // Router configuration
 const router = createMemoryRouter([
@@ -78,6 +79,10 @@ const router = createMemoryRouter([
           {
             path: 'windows',
             element: <WindowsInstallationGuide />
+          },
+          {
+            path: 'info',
+            element: <AptosInfo />
           },
           {
             path: 'init',

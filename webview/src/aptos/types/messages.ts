@@ -6,6 +6,7 @@ export type AptosMessage = {
   | "aptos.check"
   | "aptos.checkInit"
   | "aptos.init"
+  | "aptos.info"
   | "aptos.moveinit"
   | "aptos.updateConfig"
   | "aptos.compile"

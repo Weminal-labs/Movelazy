@@ -171,6 +171,28 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
     }
 }
 
+async function AptosInfo(webview: vscode.Webview) {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+        throw new Error("Workspace path not found");
+    }
+
+    try {
+        const { stdout, stderr } = await execAsync("aptos info", { cwd: workspacePath });
+        webview.postMessage({
+            type: "aptosInfo",
+            success: true,
+            aptosInfo: stderr + stdout,
+        });
+    } catch (error) {
+        webview.postMessage({
+            type: "aptosInfo",
+            success: false,
+            aptosInfo: (error as Error).message,
+        });
+    }
+}
+
 async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: string, namedAddresses: string, template: string, assumeYes: boolean, assumeNo: boolean, frameworkGitRev: string, frameworkLocalDir: string, skipFetchLatestGitDeps: boolean) {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
@@ -220,4 +242,5 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
     }
 }
 
-export { CheckAptos, CheckAptosInit, AptosInit, AptosMoveInit };
+
+export { CheckAptos, CheckAptosInit, AptosInit, AptosMoveInit, AptosInfo };
