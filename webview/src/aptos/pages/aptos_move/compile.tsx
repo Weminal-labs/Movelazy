@@ -1,4 +1,4 @@
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -20,6 +20,12 @@ import { Separator } from "../../components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { StatusDialog } from "../../components/status-dialog";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 
 // interface CompileArgs {
 //   namedAddresses: string;
@@ -128,217 +134,231 @@ export default function MoveCompile() {
   // }, [compileStatus]);
 
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <Button
-        variant="ghost"
-        className="mb-6 -ml-2 text-white hover:text-white/80 hover:bg-white/10"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
-      </Button>
-
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-6">Compile Code</h1>
-
-        <Tabs defaultValue="simple" className="mb-6">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-800 mb-6">
-            <TabsTrigger value="simple">Simple</TabsTrigger>
-            <TabsTrigger value="advanced">Advanced</TabsTrigger>
-          </TabsList>
-
-          <div className="mb-6">
-            <Label htmlFor="namedAddresses">Named Addresses (required)</Label>
-            <Input
-              id="namedAddresses"
-              value={compileArgs.namedAddresses_compile}
-              onChange={(e) =>
-                handleChange("namedAddresses_compile", e.target.value)
-              }
-              placeholder="e.g. alice=0x1234, bob=0x5678"
-              className="bg-gray-800 border-gray-700 mt-2"
-            />
-          </div>
-
-          <TabsContent value="advanced">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Save Metadata</Label>
-                  <div className="text-sm text-gray-400">
-                    Save the package metadata in build directory
-                  </div>
-                </div>
-                <Switch
-                  checked={compileArgs.saveMetadata}
-                  onCheckedChange={(checked) =>
-                    handleChange("saveMetadata", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Fetch Dependencies Only</Label>
-                  <div className="text-sm text-gray-400">
-                    Skip compilation, only fetch dependencies
-                  </div>
-                </div>
-                <Switch
-                  checked={compileArgs.fetchDepsOnly}
-                  onCheckedChange={(checked) =>
-                    handleChange("fetchDepsOnly", checked)
-                  }
-                />
-              </div>
-
-              <div>
-                <Label>Artifacts</Label>
-                <Select
-                  value={compileArgs.artifacts}
-                  onValueChange={(value) => handleChange("artifacts", value)}
-                >
-                  <SelectTrigger className="bg-gray-800 border-gray-700 mt-2">
-                    <SelectValue placeholder="Select artifacts" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="sparse">Sparse</SelectItem>
-                    <SelectItem value="all">All</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Package Directory</Label>
-                <Input
-                  value={compileArgs.packageDir_compile}
-                  onChange={(e) =>
-                    handleChange("packageDir_compile", e.target.value)
-                  }
-                  placeholder="Path to Move package"
-                  className="bg-gray-800 border-gray-700 mt-2"
-                />
-              </div>
-
-              <div>
-                <Label>Output Directory</Label>
-                <Input
-                  value={compileArgs.outputDir}
-                  onChange={(e) => handleChange("outputDir", e.target.value)}
-                  placeholder="Path to save compiled package"
-                  className="bg-gray-800 border-gray-700 mt-2"
-                />
-              </div>
-
-              <div>
-                <Label>Override Standard Library</Label>
-                <Select
-                  value={compileArgs.overrideStd || ""}
-                  onValueChange={(value) =>
-                    handleChange("overrideStd", value || null)
-                  }
-                >
-                  <SelectTrigger className="bg-gray-800 border-gray-700 mt-2">
-                    <SelectValue placeholder="Select network" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mainnet">Mainnet</SelectItem>
-                    <SelectItem value="testnet">Testnet</SelectItem>
-                    <SelectItem value="devnet">Devnet</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Separator className="bg-gray-800" />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Dev Mode</Label>
-                  <div className="text-sm text-gray-400">
-                    Use dev-addresses and dev-dependencies
-                  </div>
-                </div>
-                <Switch
-                  checked={compileArgs.devMode}
-                  onCheckedChange={(checked) =>
-                    handleChange("devMode", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Skip Git Dependencies</Label>
-                  <div className="text-sm text-gray-400">
-                    Skip pulling latest git dependencies
-                  </div>
-                </div>
-                <Switch
-                  checked={compileArgs.skipGitDeps}
-                  onCheckedChange={(checked) =>
-                    handleChange("skipGitDeps", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Skip Attribute Checks</Label>
-                  <div className="text-sm text-gray-400">
-                    Do not complain about unknown attributes in Move code
-                  </div>
-                </div>
-                <Switch
-                  checked={compileArgs.skipAttributeChecks}
-                  onCheckedChange={(checked) =>
-                    handleChange("skipAttributeChecks", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Check Test Code</Label>
-                  <div className="text-sm text-gray-400">
-                    Apply extended checks for Aptos on test code
-                  </div>
-                </div>
-                <Switch
-                  checked={compileArgs.checkTestCode}
-                  onCheckedChange={(checked) =>
-                    handleChange("checkTestCode", checked)
-                  }
-                />
-              </div>
-
-              <div>
-                <Label>Optimization Level</Label>
-                <Select
-                  value={compileArgs.optimization}
-                  onValueChange={(value) => handleChange("optimization", value)}
-                >
-                  <SelectTrigger className="bg-gray-800 border-gray-700 mt-2">
-                    <SelectValue placeholder="Select optimization level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="default">Default</SelectItem>
-                    <SelectItem value="extra">Extra</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-
+    <div>
+      <Card className="min-h-screen border-gray-800 bg-gray-900/50">
         <Button
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-          onClick={handleCompile}
-          disabled={compiling}
+          variant="outline"
+          className="h-12 flex items-center justify-center gap-2 hover:bg-gray-700 mt-2 ml-2"
+          onClick={() => navigate("/aptos/move/help")}
         >
-          {compiling ? <Loader2 /> : "Compile"}
+          <span>Back</span>
         </Button>
-      </div>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-white">
+            Compile Code
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="simple" className="mb-6">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-800 mb-6">
+              <TabsTrigger value="simple">Simple</TabsTrigger>
+              <TabsTrigger value="advanced">Advanced</TabsTrigger>
+            </TabsList>
+
+            <div className="space-y-2">
+              <Label htmlFor="namedAddresses" className="text-white">
+                Named Addresses (required)
+              </Label>
+              <Input
+                id="namedAddresses"
+                value={compileArgs.namedAddresses_compile}
+                onChange={(e) =>
+                  handleChange("namedAddresses_compile", e.target.value)
+                }
+                placeholder="e.g. alice=0x1234, bob=0x5678"
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <TabsContent value="advanced">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Save Metadata</Label>
+                    <div className="text-sm text-gray-400">
+                      Save the package metadata in build directory
+                    </div>
+                  </div>
+                  <Switch
+                    checked={compileArgs.saveMetadata}
+                    onCheckedChange={(checked) =>
+                      handleChange("saveMetadata", checked)
+                    }
+                    className="bg-white "
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Fetch Dependencies Only</Label>
+                    <div className="text-sm text-gray-400">
+                      Skip compilation, only fetch dependencies
+                    </div>
+                  </div>
+                  <Switch
+                    checked={compileArgs.fetchDepsOnly}
+                    onCheckedChange={(checked) =>
+                      handleChange("fetchDepsOnly", checked)
+                    }
+                    className="bg-white "
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Artifacts</Label>
+                  <Select
+                    value={compileArgs.artifacts}
+                    onValueChange={(value) => handleChange("artifacts", value)}
+                  >
+                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                      <SelectValue placeholder="Select artifacts" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="sparse">Sparse</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Package Directory</Label>
+                  <Input
+                    value={compileArgs.packageDir_compile}
+                    onChange={(e) =>
+                      handleChange("packageDir_compile", e.target.value)
+                    }
+                    placeholder="Path to Move package"
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Output Directory</Label>
+                  <Input
+                    value={compileArgs.outputDir}
+                    onChange={(e) => handleChange("outputDir", e.target.value)}
+                    placeholder="Path to save compiled package"
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Override Standard Library</Label>
+                  <Select
+                    value={compileArgs.overrideStd || ""}
+                    onValueChange={(value) =>
+                      handleChange("overrideStd", value || null)
+                    }
+                  >
+                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                      <SelectValue placeholder="Select network" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="mainnet">Mainnet</SelectItem>
+                      <SelectItem value="testnet">Testnet</SelectItem>
+                      <SelectItem value="devnet">Devnet</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator className="bg-gray-800" />
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Dev Mode</Label>
+                    <div className="text-sm text-gray-400">
+                      Use dev-addresses and dev-dependencies
+                    </div>
+                  </div>
+                  <Switch
+                    checked={compileArgs.devMode}
+                    onCheckedChange={(checked) =>
+                      handleChange("devMode", checked)
+                    }
+                    className="bg-white "
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Skip Git Dependencies</Label>
+                    <div className="text-sm text-gray-400">
+                      Skip pulling latest git dependencies
+                    </div>
+                  </div>
+                  <Switch
+                    checked={compileArgs.skipGitDeps}
+                    onCheckedChange={(checked) =>
+                      handleChange("skipGitDeps", checked)
+                    }
+                    className="bg-white "
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Skip Attribute Checks</Label>
+                    <div className="text-sm text-gray-400">
+                      Do not complain about unknown attributes in Move code
+                    </div>
+                  </div>
+                  <Switch
+                    checked={compileArgs.skipAttributeChecks}
+                    onCheckedChange={(checked) =>
+                      handleChange("skipAttributeChecks", checked)
+                    }
+                    className="bg-white "
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Check Test Code</Label>
+                    <div className="text-sm text-gray-400">
+                      Apply extended checks for Aptos on test code
+                    </div>
+                  </div>
+                  <Switch
+                    checked={compileArgs.checkTestCode}
+                    onCheckedChange={(checked) =>
+                      handleChange("checkTestCode", checked)
+                    }
+                    className="bg-white "
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Optimization Level</Label>
+                  <Select
+                    value={compileArgs.optimization}
+                    onValueChange={(value) =>
+                      handleChange("optimization", value)
+                    }
+                  >
+                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                      <SelectValue placeholder="Select optimization level" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="default">Default</SelectItem>
+                      <SelectItem value="extra">Extra</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <Button
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={handleCompile}
+            disabled={compiling}
+          >
+            {compiling ? <Loader2 /> : "Compile"}
+          </Button>
+        </CardContent>
+      </Card>
 
       <StatusDialog
         open={showDialog}

@@ -55,6 +55,12 @@ const ProjectPageAptos = () => {
     return () => window.removeEventListener("message", messageHandler);
   }, []);
 
+  useEffect(() => {
+    if (isAptosInitialized) {
+      navigate("/aptos/help"); // Chuyển hướng đến /aptos/help
+    }
+  }, [isAptosInitialized, navigate]);
+
   const handleSelectFolder = () => {
     if (window.vscode) {
       window.vscode.postMessage({ command: "aptos.selectFolder" });
