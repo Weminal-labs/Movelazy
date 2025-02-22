@@ -9,6 +9,7 @@ import {
   AptosInit,
   AptosMoveInit,
   AptosInfo,
+  MoveTest,
 } from "./services/Aptos-Cli";
 
 export class MovelazyViewProvider implements vscode.WebviewViewProvider {
@@ -204,12 +205,8 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             });
             break;
 
-          case "aptos.tester":
-            await this.aptosService.test(
-              webviewView.webview,
-              message.flags.enabled,
-              message.flags.testName
-            );
+          case "aptos.movetest":
+            await MoveTest(webviewView.webview, message.testArgs);
             break;
           case "aptos.deploy":
             await this.aptosService.deploy(webviewView.webview);

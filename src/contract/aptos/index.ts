@@ -1,20 +1,16 @@
 import { AptosCompilerService } from "./compiler";
-import { AptosTesterService } from "./tester";
 import { WorkspaceService } from "./workspace";
 import { AptosDeployerService } from "./deployer";
-import { CompileSettings } from "./types";
 import * as vscode from "vscode";
 
 export class AptosService {
   private compiler: AptosCompilerService;
-  private tester: AptosTesterService;
   private workspace: WorkspaceService;
   private deployer: AptosDeployerService;
 
   constructor(context: vscode.ExtensionContext) {
     this.workspace = new WorkspaceService(context);
     this.compiler = new AptosCompilerService();
-    this.tester = new AptosTesterService();
     this.deployer = new AptosDeployerService();
   }
 
@@ -48,12 +44,6 @@ export class AptosService {
       checkTestCode,
       optimization
     );
-  }
-
-  async test(webview: vscode.Webview, enabled: boolean, testName: string) {
-    const settings = this.workspace.getSettings();
-    console.log("checksettings", settings);
-    return this.tester.tester(webview, enabled, testName, settings);
   }
 
   async updateConfig(settings: any) {
