@@ -109,13 +109,13 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
         aptosProcess.on("close", (code) => {
             if (code === 0) {
                 webview.postMessage({
-                    type: "initStatus",
+                    type: "cliStatus",
                     success: true,
                     message: outputData,
                 });
             } else {
                 webview.postMessage({
-                    type: "initStatus",
+                    type: "cliStatus",
                     success: false,
                     message: `Aptos initialization failed with exit code ${code}`,
                 });
@@ -150,13 +150,13 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
         aptosProcess.on("close", (code) => {
             if (code === 0) {
                 webview.postMessage({
-                    type: "initStatus",
+                    type: "cliStatus",
                     success: true,
                     message: outputData,
                 });
             } else {
                 webview.postMessage({
-                    type: "initStatus",
+                    type: "cliStatus",
                     success: false,
                     message: `Aptos initialization failed with exit code ${code}`,
                 });
@@ -181,15 +181,15 @@ async function AptosInfo(webview: vscode.Webview) {
     try {
         const { stdout, stderr } = await execAsync("aptos info", { cwd: workspacePath });
         webview.postMessage({
-            type: "aptosInfo",
+            type: "cliStatus",
             success: true,
-            aptosInfo: stderr + stdout,
+            message: stderr + stdout,
         });
     } catch (error) {
         webview.postMessage({
-            type: "aptosInfo",
+            type: "cliStatus",
             success: false,
-            aptosInfo: (error as Error).message,
+            message: (error as Error).message,
         });
     }
 }

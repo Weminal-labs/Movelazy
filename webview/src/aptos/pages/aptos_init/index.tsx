@@ -30,7 +30,7 @@ export default function AptosInitForm() {
   const [endpoint, setEndpoint] = useState<string>("");
   const [faucetEndpoint, setFaucetEndpoint] = useState<string>("");
 
-  const [initStatus, setInitStatus] = useState<{
+  const [cliStatus, setcliStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
   }>({ type: null, message: "" });
@@ -50,7 +50,7 @@ export default function AptosInitForm() {
       } catch (error) {
         console.error(error);
         setInitializing(false);
-        setInitStatus({
+        setcliStatus({
           type: "error",
           message: "Failed to initialize config",
         });
@@ -62,9 +62,9 @@ export default function AptosInitForm() {
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
-      if (message.type === "initStatus") {
+      if (message.type === "cliStatus") {
         if (message.message) {
-          setInitStatus({
+          setcliStatus({
             type: message.success ? "success" : "error",
             message: message.message,
           });
@@ -197,7 +197,7 @@ export default function AptosInitForm() {
           open={showDialog}
           onOpenChange={setShowDialog}
           loading={initializing}
-          status={initStatus}
+          status={cliStatus}
           loadingTitle="Initializing..."
           loadingMessage="Please wait while initializing config..."
           successTitle="Initialization Successful"
