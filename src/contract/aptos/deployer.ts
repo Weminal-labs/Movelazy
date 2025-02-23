@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { CompileArgs, DeployArgs } from "./types";
 const execAsync = promisify(exec);
 
 export class AptosDeployerService {
@@ -11,13 +12,14 @@ export class AptosDeployerService {
       return null;
     }
     try {
+      const isProfile = true;
       const accountAddress = await this.getAccount();
       const network = await this.getNetWork();
       const balance = await this.checkBalance();
       console.log("check3", accountAddress, network, balance);
       webview.postMessage({
-        type: "profileStatus",
-        message: { accountAddress, network, balance },
+        type: "cliStatus",
+        message: { accountAddress, network, balance, isProfile },
       });
       return;
     } catch (error) {
@@ -93,117 +95,84 @@ export class AptosDeployerService {
       return null;
     }
   }
-  async deploy(
-    webview: vscode.Webview,
-    overrideSizeCheck: boolean,
-    chunkedPublish: boolean,
-    largePackagesModuleAddress: string,
-    chunkSize: string,
-    includedArtifacts: string,
-    packageDir_deploy: string,
-    outputDir: string,
-    namedAddresses_deploy: string,
-    overrideStd: string,
-    skipGitDeps: boolean,
-    skipAttributeChecks: boolean,
-    checkTestCode: boolean,
-    optimize: string,
-    bytecodeVersion: string,
-    compilerVersion: string,
-    languageVersion: string,
-    senderAccount: string,
-    privateKey: string,
-    encoding: string,
-    gasUnitPrice: string,
-    maxGas: string,
-    expirationSecs: string,
-    assume_yes: boolean,
-    assume_no: boolean,
-    local: boolean,
-    benmark: boolean,
-    profile_gas: boolean
-  ) {
+  async deploy(webview: vscode.Webview, args: DeployArgs) {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
       throw new Error("Workspace path not found");
     }
     let command = "aptos move publish";
 
-    command += ` --named-addresses ${namedAddresses_deploy}=default --gas-unit-price ${gasUnitPrice} --max-gas ${maxGas}`;
+    command += ` --named-addresses ${args.namedAddresses_deploy}=default --gas-unit-price ${args.gasUnitPrice} --max-gas ${args.maxGas}`;
 
-    if (overrideSizeCheck) {
+    if (args.overrideSizeCheck) {
       command += " --override-size-check";
     }
-    if (chunkedPublish) {
+    if (args.chunkedPublish) {
       command += " --chunked-publish";
     }
     if (
-      largePackagesModuleAddress !==
+      args.largePackagesModuleAddress !==
       "0x0e1ca3011bdd07246d4d16d909dbb2d6953a86c4735d5acf5865d962c630cce7"
     ) {
-      command += ` --large-packages-module-address ${largePackagesModuleAddress}`;
+      command += ` --large-packages-module-address ${args.largePackagesModuleAddress}`;
     }
-    if (chunkSize !== "55000") {
-      command += ` --chunk-size ${chunkSize}`;
+    if (args.chunkSize !== "55000") {
+      command += ` --chunk-size ${args.chunkSize}`;
     }
-    if (includedArtifacts !== "sparse") {
-      command += ` --included-artifacts ${includedArtifacts}`;
+    if (args.includedArtifacts !== "sparse") {
+      command += ` --included-artifacts ${args.includedArtifacts}`;
     }
-    if (packageDir_deploy) {
-      command += ` --package-dir ${packageDir_deploy}`;
+    if (args.packageDir_deploy) {
+      command += ` --package-dir ${args.packageDir_deploy}`;
     }
-    if (outputDir) {
-      command += ` --output-dir ${outputDir}`;
+    if (args.outputDir_deploy) {
+      command += ` --output-dir ${args.outputDir_deploy}`;
     }
-    if (overrideStd) {
-      command += ` --override-std ${overrideStd}`;
+    if (args.overrideStd_deploy) {
+      command += ` --override-std ${args.overrideStd_deploy}`;
     }
-    if (skipGitDeps) {
+    if (args.skipGitDeps_deploy) {
       command += " --skip-git-deps";
     }
-    if (skipAttributeChecks) {
+    if (args.skipAttributeChecks_deploy) {
       command += " --skip-attribute-checks";
     }
-    if (checkTestCode) {
+    if (args.checkTestCode_deploy) {
       command += " --check-test-code";
     }
-    if (optimize !== "default") {
-      command += ` --optimize ${optimize}`;
+    if (args.optimize !== "default") {
+      command += ` --optimize ${args.optimize}`;
     }
-    if (compilerVersion !== "2.0") {
-      command += ` --compiler-version ${compilerVersion}`;
+    if (args.compilerVersion !== "2.0") {
+      command += ` --compiler-version ${args.compilerVersion}`;
     }
-    if (languageVersion !== "2.1") {
-      command += ` --language-version ${languageVersion}`;
+    if (args.languageVersion !== "2.1") {
+      command += ` --language-version ${args.languageVersion}`;
     }
-    if (senderAccount) {
-      command += ` --sender-account ${senderAccount}`;
+    if (args.senderAccount) {
+      command += ` --sender-account ${args.senderAccount}`;
     }
-    if (privateKey) {
-      command += ` --private-key ${privateKey}`;
+    if (args.privateKey_deploy) {
+      command += ` --private-key ${args.privateKey_deploy}`;
     }
-    if (encoding !== "hex") {
-      command += ` --encoding ${encoding}`;
+    if (args.encoding !== "hex") {
+      command += ` --encoding ${args.encoding}`;
     }
-    if (expirationSecs !== "30") {
-      command += ` --expiration-secs ${expirationSecs}`;
+    if (args.expirationSecs !== "30") {
+      command += ` --expiration-secs ${args.expirationSecs}`;
     }
-    if (assume_yes) {
+    if (args.assume_yes) {
       command += " --assume-yes";
     }
-    if (assume_no) {
+    if (args.assume_no) {
       command += " --assume-no";
     }
-    if (local) {
+    if (args.local) {
       command += " --local";
     }
-    if (benmark) {
+    if (args.benmark) {
       command += " --benmark";
     }
-    if (profile_gas) {
-      command += " --profile-gas";
-    }
-
     try {
       const { stdout, stderr } = await execAsync(command, {
         cwd: workspacePath,
@@ -212,7 +181,7 @@ export class AptosDeployerService {
         webview.postMessage({
           type: "cliStatus",
           success: true,
-          message: stderr + stdout,
+          message: { out: stderr + stdout, isProfile: false },
         });
         return;
       }

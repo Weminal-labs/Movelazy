@@ -1,3 +1,5 @@
+import { CompileArgs } from "./compileArgs";
+import { DeployArgs } from "./deployArgs";
 import { CompilerSettings, DeployerSettings, Flags } from "./settings";
 import { TestArgs } from "./testArgs";
 
@@ -37,44 +39,8 @@ export type AptosMessage = {
     string,
     boolean
   ];
-  compileArgs?: [
-    boolean,
-    boolean,
-    string,
-    string,
-    string,
-    string,
-    string,
-    boolean,
-    boolean,
-    boolean,
-    boolean,
-    string
-  ];
-  deployArgs?: [
-    boolean,
-    boolean,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    boolean,
-    boolean,
-    boolean,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string
-  ];
+  compileArgs?: CompileArgs;
+  deployArgs?: DeployArgs;
   testArgs?: TestArgs;
   settings?: CompilerSettings | DeployerSettings;
   flags?: Flags;

@@ -29,6 +29,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
+import { DeployArgs } from "../../types/deployArgs";
 
 export default function MoveDeploy() {
   const navigate = useNavigate();
@@ -40,9 +41,9 @@ export default function MoveDeploy() {
   const [showDialog, setShowDialog] = useState(false);
   const [cliStatus, setcliStatus] = useState<{
     type: "success" | "error" | null;
-    message: string;
-  }>({ type: "success", message: "" });
-  const [deployArgs, setDeployArgs] = useState({
+    message: { out: string; isProfile: boolean }; // Update the type here
+  }>({ type: null, message: { out: "", isProfile: false } }); // Initialize with the correct structure
+  const [deployArgs, setDeployArgs] = useState<DeployArgs>({
     overrideSizeCheck: false,
     chunkedPublish: false,
     largePackagesModuleAddress:
@@ -52,10 +53,10 @@ export default function MoveDeploy() {
     packageDir_deploy: "",
     outputDir_deploy: "",
     namedAddresses_deploy: "",
-    overrideStd_deploy: "",
-    skipGitDeps_deploy: false,
-    skipAttributeChecks_deploy: false,
-    checkTestCode_deploy: false,
+    overrideStd_deploy: "", // Ensure this is included
+    skipGitDeps_deploy: false, // Ensure this is included
+    skipAttributeChecks_deploy: false, // Ensure this is included
+    checkTestCode_deploy: false, // Ensure this is included
     optimize: "default",
     bytecodeVersion: "7",
     compilerVersion: "2.0",
@@ -86,31 +87,37 @@ export default function MoveDeploy() {
     (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.type === "profileStatus") {
+      console.log("check message profile", message);
+      if (message.type === "cliStatus" && message.message.isProfile) {
         console.log("Network Status:", message.data);
         setNetwork(message.message.network);
         setAccount(message.message.accountAddress);
-        setBalance(message.message.balance);
-
         setBalance((message.message.balance / (10 * 8)).toString());
       }
 
-      if (message.type === "cliStatus") {
+      console.log("check message deploy", message);
+      if (message.type === "cliStatus" && !message.message.isProfile) {
         setDeploying(false);
         console.log("checktype:", message.type);
-        const transactionLinkMatch = message.message.match(
+        const transactionLinkMatch = message.message.out.match(
           /Transaction submitted:\s*(https:\/\/[^ ]+)/
         );
         const transactionLink = transactionLinkMatch
           ? transactionLinkMatch[1]
           : "";
 
+        const newMessage =
+          message.message.out.split("Transaction submitted:")[1]?.trim() || "";
+
         console.log("transactionLink:", transactionLink);
         setcliStatus({
           type: message.success ? "success" : "error",
-          message: message.message,
+          message: {
+            out: "Transaction submitted: " + newMessage,
+            isProfile: false,
+          },
         });
-        console.log("check cli mess", cliStatus);
+        console.log("check cli mess", message);
         setTransactionLink(transactionLink);
       }
     },
@@ -126,42 +133,23 @@ export default function MoveDeploy() {
 
   const handleDeploy = async () => {
     setDeploying(true);
-    setcliStatus({ type: null, message: "" });
+    setcliStatus({
+      type: null,
+      message: { out: "", isProfile: false },
+    });
     setShowDialog(true);
     if (window.vscode) {
       try {
         window.vscode.postMessage({
           command: "aptos.deploy",
-          deployArgs: [
-            deployArgs.overrideSizeCheck,
-            deployArgs.chunkedPublish,
-            deployArgs.largePackagesModuleAddress,
-            deployArgs.chunkSize,
-            deployArgs.includedArtifacts,
-            deployArgs.packageDir_deploy,
-            deployArgs.outputDir_deploy,
-            deployArgs.namedAddresses_deploy,
-            deployArgs.overrideStd_deploy,
-            deployArgs.skipGitDeps_deploy,
-            deployArgs.skipAttributeChecks_deploy,
-            deployArgs.checkTestCode_deploy,
-            deployArgs.optimize,
-            deployArgs.bytecodeVersion,
-            deployArgs.compilerVersion,
-            deployArgs.languageVersion,
-            deployArgs.senderAccount,
-            deployArgs.privateKey_deploy,
-            deployArgs.encoding,
-            deployArgs.gasUnitPrice,
-            deployArgs.maxGas,
-            deployArgs.expirationSecs,
-          ],
+          deployArgs: deployArgs,
         });
+        console.log("check cliStatus.message.out", cliStatus.message);
       } catch {
         setDeploying(false);
         setcliStatus({
           type: "error",
-          message: "Failed to start deployment",
+          message: { out: "Failed to start deployment", isProfile: false },
         });
       }
     }
@@ -190,11 +178,13 @@ export default function MoveDeploy() {
         </CardHeader>
         <Card className="bg-gray-800 border-gray-700 max-w-sm mx-auto mb-4">
           <CardContent className="p-3 space-y-1.5 ">
-            <div className="flex justify-start items-center ">
-              <span className="text-sm text-gray-400">Network:</span>
+            <div className="flex justify-start items-center gap-2 min-w-0">
+              <span className="text-sm text-gray-400 flex-shrink-0">
+                Network:
+              </span>
               <Badge
                 variant={network ? "default" : "secondary"}
-                className="font-medium text-sm border-none"
+                className="font-medium text-sm border-none truncate max-w-[200px]"
               >
                 {network || "Not Connected"}
               </Badge>
@@ -465,7 +455,7 @@ export default function MoveDeploy() {
         open={showDialog}
         onOpenChange={setShowDialog}
         loading={deploying}
-        status={cliStatus}
+        status={{ type: cliStatus.type, message: cliStatus.message.out }}
         loadingTitle="Deploying..."
         loadingMessage="Please wait while deploying contract..."
         successTitle="Deployment Successful"

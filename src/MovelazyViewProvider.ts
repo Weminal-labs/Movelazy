@@ -164,95 +164,15 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             break;
 
           case "aptos.compile":
-            const [
-              saveMetadata,
-              fetchDepsOnly,
-              artifacts,
-              packageDir_compile,
-              outputDir,
-              namedAddresses_compile,
-              overrideStd,
-              devMode,
-              skipGitDeps,
-              skipAttributeChecks,
-              checkTestCode,
-              optimization,
-            ] = message.compileArgs;
             await this.aptosService.compile(
               webviewView.webview,
-              saveMetadata,
-              fetchDepsOnly,
-              artifacts,
-              packageDir_compile,
-              outputDir,
-              namedAddresses_compile,
-              overrideStd,
-              devMode,
-              skipGitDeps,
-              skipAttributeChecks,
-              checkTestCode,
-              optimization
+              message.compileArgs
             );
             break;
           case "aptos.deploy":
-            const [
-              overrideSizeCheck,
-              chunkedPublish,
-              largePackagesModuleAddress,
-              chunkSize,
-              includedArtifacts,
-              packageDir_deploy,
-              outputDir_deploy,
-              namedAddresses_deploy,
-              overrideStd_deploy,
-              skipGitDeps_deploy,
-              skipAttributeChecks_deploy,
-              checkTestCode_deploy,
-              optimize,
-              bytecodeVersion,
-              compilerVersion,
-              languageVersion,
-              senderAccount,
-              privateKey_deploy,
-              encoding,
-              gasUnitPrice,
-              maxGas,
-              expirationSecs,
-              assume_yes,
-              assume_no,
-              local,
-              benmark,
-              profile_gas,
-            ] = message.deployArgs;
             await this.aptosService.deploy(
               webviewView.webview,
-              overrideSizeCheck,
-              chunkedPublish,
-              largePackagesModuleAddress,
-              chunkSize,
-              includedArtifacts,
-              packageDir_deploy,
-              outputDir_deploy,
-              namedAddresses_deploy,
-              overrideStd_deploy,
-              skipGitDeps_deploy,
-              skipAttributeChecks_deploy,
-              checkTestCode_deploy,
-              optimize,
-              bytecodeVersion,
-              compilerVersion,
-              languageVersion,
-              senderAccount,
-              privateKey_deploy,
-              encoding,
-              gasUnitPrice,
-              maxGas,
-              expirationSecs,
-              assume_yes,
-              assume_no,
-              local,
-              benmark,
-              profile_gas
+              message.deployArgs
             );
             break;
           case "aptos.checkProfile":
@@ -265,6 +185,13 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
           case "aptos.checkFolder":
             await this.workspace.checkFolder(webviewView.webview);
+            break;
+          case "aptos.checkFolder":
+            await this.workspace.checkFolder(webviewView.webview);
+            break;
+
+          case "aptos.selectFolder":
+            await this.workspace.selectFolder(webviewView.webview);
             break;
         }
       } catch (error) {

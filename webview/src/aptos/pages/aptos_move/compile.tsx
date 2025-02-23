@@ -26,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+import { CompileArgs } from "../../types/compileArgs";
 
 export default function MoveCompile() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export default function MoveCompile() {
     type: "success" | "error" | null;
     message: string;
   }>({ type: "success", message: "" });
-  const [compileArgs, setCompileArgs] = useState({
+  const [compileArgs, setCompileArgs] = useState<CompileArgs>({
     saveMetadata: false,
     fetchDepsOnly: false,
     artifacts: "sparse",
@@ -86,20 +87,7 @@ export default function MoveCompile() {
         console.log("check compile agrs:", compileArgs);
         window.vscode.postMessage({
           command: "aptos.compile",
-          compileArgs: [
-            compileArgs.saveMetadata,
-            compileArgs.fetchDepsOnly,
-            compileArgs.artifacts,
-            compileArgs.packageDir_compile,
-            compileArgs.outputDir,
-            compileArgs.namedAddresses_compile,
-            compileArgs.overrideStd,
-            compileArgs.devMode,
-            compileArgs.skipGitDeps,
-            compileArgs.skipAttributeChecks,
-            compileArgs.checkTestCode,
-            compileArgs.optimization,
-          ],
+          compileArgs: compileArgs,
         });
       } catch {
         setCompiling(false);

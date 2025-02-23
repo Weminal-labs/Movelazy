@@ -1,10 +1,4 @@
-import {
-  Loader2,
-  AlertCircle,
-  CheckCircle,
-  Link,
-  ExternalLink,
-} from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,6 +47,7 @@ export function StatusDialog({
   preventCloseWhileLoading = true,
   link,
 }: StatusDialogProps) {
+  console.log("status:", status);
   return (
     <AlertDialog
       open={open}
@@ -127,10 +122,25 @@ export function StatusDialog({
                     href={link.transactionLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full inline-flex items-center gap-2"
+                    className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-amber-500 rounded-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
                   >
-                    {link.label}
-                    <ExternalLink className="h-4 w-4" />
+                    View on Explorer
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      className="ml-2 h-4 w-4"
+                    >
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
                   </a>
                 </Button>
               )}
