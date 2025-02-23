@@ -3,26 +3,28 @@ import { TestArgs } from "./testArgs";
 
 export type AptosMessage = {
   command:
-  | "aptos.getSettings"
-  | "aptos.check"
-  | "aptos.checkInit"
-  | "aptos.init"
-  | "aptos.info"
-  | "aptos.moveinit"
-  | "aptos.movetest"
-  | "aptos.updateConfig"
-  | "aptos.compile"
-  | "aptos.initWorkspace"
-  | "aptos.clean"
-  | "aptos.checkWorkspace"
-  | "aptos.tester"
-  | "aptos.deploy"
-  | "aptos.accountAddress"
-  | "aptos.requestFaucet"
-  | "aptos.balance"
-  | "aptos.checkFolder"
-  | "aptos.selectFolder"
-  | "aptos.createTemplate";
+    | "aptos.getSettings"
+    | "aptos.check"
+    | "aptos.checkInit"
+    | "aptos.init"
+    | "aptos.info"
+    | "aptos.moveinit"
+    | "aptos.movetest"
+    | "aptos.updateConfig"
+    | "aptos.compile"
+    | "aptos.initWorkspace"
+    | "aptos.clean"
+    | "aptos.checkWorkspace"
+    | "aptos.tester"
+    | "aptos.deploy"
+    | "aptos.accountAddress"
+    | "aptos.requestFaucet"
+    | "aptos.balance"
+    | "aptos.checkFolder"
+    | "aptos.selectFolder"
+    | "aptos.createTemplate"
+    | "aptos.checkProfile"
+    | "aptos.checkBalance";
   initConfig?: [string, string, string, string];
   initArgs?: [
     string,
@@ -47,6 +49,30 @@ export type AptosMessage = {
     boolean,
     boolean,
     boolean,
+    string
+  ];
+  deployArgs?: [
+    boolean,
+    boolean,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    boolean,
+    boolean,
+    boolean,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
     string
   ];
   testArgs?: TestArgs;

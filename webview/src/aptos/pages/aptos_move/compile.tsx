@@ -27,22 +27,6 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 
-// interface CompileArgs {
-//   namedAddresses: string;
-//   template: string;
-//   artifacts: "none" | "sparse" | "all";
-//   optimization: "none" | "default" | "extra";
-//   saveMetadata: boolean;
-//   devMode: boolean;
-//   skipGitDeps: boolean;
-//   skipAttributeChecks: boolean;
-//   checkTestCode: boolean;
-//   packageDir: string;
-//   outputDir: string;
-//   fetchDepsOnly: boolean;
-//   overrideStd: "mainnet" | "testnet" | "devnet" | null;
-// }
-
 export default function MoveCompile() {
   const navigate = useNavigate();
   const [compiling, setCompiling] = useState(false);
@@ -370,8 +354,8 @@ export default function MoveCompile() {
         successTitle="Initializion Successful"
         errorTitle="Initializion Failed"
         successAction={{
-          label: "Go to Compiler",
-          onClick: () => navigate("/"),
+          label: "Go to Deploy",
+          onClick: () => navigate("/aptos/move/deploy"),
         }}
       />
     </div>
