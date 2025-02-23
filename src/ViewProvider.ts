@@ -11,7 +11,7 @@ import {
   AptosInfo,
   MoveTest,
 } from "./services/Aptos-Cli";
-import { AiCmd } from "./ai/Ai-Cmd";
+import { AiCmd } from "./ai/chatbot";
 
 export class ViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";

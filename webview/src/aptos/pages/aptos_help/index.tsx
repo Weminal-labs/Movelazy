@@ -3,19 +3,44 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
+import { useEffect, useState } from "react";
+import { StatusDialog } from "../../components/status-dialog";
 
 export default function AptosHelp() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [cliStatus, setcliStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
+  const [showDialog, setShowDialog] = useState(false);
 
   const handleAiCommand = () => {
     if (!window.vscode) {
       return;
     }
+    setIsLoading(true)
+    setShowDialog(true)
     window.vscode.postMessage({
       command: "ai-command",
     });
   };
 
+  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      const message = event.data;
+      if (message.type === "cliStatus") {
+        if (message.message) {
+          setcliStatus({
+            type: message.success ? "success" : "error",
+            message: message.message,
+          });
+          setIsLoading(false);
+          setShowDialog(true);
+        }
+      }
+    };
+
+    window.addEventListener("message", messageHandler);
+    return () => window.removeEventListener("message", messageHandler);
+  }, []);
   return (
     <div className="min-h-screen bg-black">
       <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
@@ -161,6 +186,16 @@ export default function AptosHelp() {
           </div>
 
         </CardContent>
+        <StatusDialog
+          open={showDialog}
+          onOpenChange={setShowDialog}
+          loading={isLoading}
+          status={cliStatus}
+          loadingTitle="Ai Executing..."
+          loadingMessage="Please wait while running command..."
+          successTitle="Ai Execution Successful"
+          errorTitle="Ai Execution Failed"
+        />
       </Card>
     </div>
   );

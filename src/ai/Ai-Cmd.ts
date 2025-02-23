@@ -6,9 +6,8 @@ import * as aptosCli from '../services/Aptos-Cli';
 import { ViewProvider } from '../ViewProvider';
 import { TestArgs } from '../contract/aptos/types';
 import compile from "../contract/aptos/compile";
-import { AiResponse } from './chatbot';
 
-function GetCmd(): string {
+export function GetCmd(): string {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
         throw new Error("Workspace path not found");
@@ -140,7 +139,7 @@ function ProcCompile(webview: vscode.Webview, args: { [key: string]: string } | 
     compile(webview, saveMetadata, fetchDepsOnly, artifacts, packageDir_compile, outputDir, namedAddresses_compile, overrideStd, devMode, skipGitDeps, skipAttributeChecks, checkTestCode, optimization);
 }
 
-function ProcCmdCase(ai_out: string) {
+export function ProcCmdCase(ai_out: string) {
     const webviewView = ViewProvider.getWebviewView();
     const fmtCmd = SplitCmd(ai_out);
 
@@ -179,8 +178,3 @@ function ProcCmdCase(ai_out: string) {
     }
 }
 
-export function AiCmd() {
-    console.log("AiCmd");
-    // ProcCmdCase("aptos.moveinit name=hello_blockchain template=hello-blockchain");
-    AiResponse("key custom network rest-url=http://localhost:8080 faucet-url=http://localhost:8081 private-key=0x");
-}

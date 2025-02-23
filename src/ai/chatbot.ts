@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import * as dotenv from "dotenv";
+import * as bot from "./Ai-Cmd";
 
 dotenv.config();
 
@@ -7,13 +8,17 @@ const openai = new OpenAI({
     apiKey: ""
 });
 
-export async function AiResponse(usrInput: string) {
-    console.log("🤖 Chatbot GPT - Handling command");
+export async function AiCmd() {
+    const usrInput = await bot.GetCmd();
+    console.log("👤 User Input: ", usrInput);
+    AiResponse(usrInput);
+}
 
+export async function AiResponse(usrInput: string) {
     try {
         const response = await openai.chat.completions.create({
-            model: "gpt-4o", // Dùng model mới nhất
-            temperature: 0.9, // Không áp dụng randomness
+            model: "gpt-4o",
+            temperature: 0.9,
             messages: [
                 { role: "user", content: usrInput },
                 { role: "system", content: prompt },
@@ -22,7 +27,7 @@ export async function AiResponse(usrInput: string) {
 
         const botResponse =
             response.choices[0]?.message?.content?.trim() || "OpenAI not response!";
-        console.log("🤖 Chatbot GPT - Response: ", botResponse);
+        bot.ProcCmdCase(botResponse);
     } catch (error) {
         throw new Error("❌ Error when calling OpenAI API: " + error);
     }
