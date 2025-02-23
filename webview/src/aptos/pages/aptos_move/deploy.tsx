@@ -36,6 +36,7 @@ export default function MoveDeploy() {
   const [network, setNetwork] = useState("");
   const [account, setAccount] = useState("");
   const [balance, setBalance] = useState("");
+  const [transactionLink, setTransactionLink] = useState("");
   const [showDialog, setShowDialog] = useState(false);
   const [deployStatus, setDeployStatus] = useState<{
     type: "success" | "error" | null;
@@ -83,22 +84,29 @@ export default function MoveDeploy() {
 
   const messageHandler = useCallback((event: MessageEvent) => {
     const message = event.data;
-    console.log(message);
+    console.log(event);
 
     if (message.type === "deployStatus") {
       setDeploying(false);
+      console.log("checktype:", message.type);
+      const transactionLinkMatch = message.message.match(
+        /Transaction submitted:\s*(https:\/\/[^ ]+)/
+      );
+      const transactionLink = transactionLinkMatch
+        ? transactionLinkMatch[1]
+        : "";
+
+      console.log("transactionLink:", transactionLink);
       setDeployStatus({
         type: message.success ? "success" : "error",
         message: message.message,
       });
+      setTransactionLink(transactionLink);
     }
     if (message.type === "networkStatus") {
       console.log("Network Status:", message.data);
       setNetwork(message.data.network);
       setAccount(message.data.accountAddress);
-      //   window.vscode.postMessage({
-      //     command: "aptos.checkBalance",
-      //   });
       checkBalance();
     }
     if (message.type === "balanceStatus") {
@@ -480,10 +488,7 @@ export default function MoveDeploy() {
         loadingMessage="Please wait while deploying contract..."
         successTitle="Deployment Successful"
         errorTitle="Deployment Failed"
-        successAction={{
-          label: "Close",
-          onClick: () => setShowDialog(false),
-        }}
+        transactionLink={transactionLink}
       />
     </div>
   );

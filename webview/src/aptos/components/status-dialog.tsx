@@ -26,6 +26,7 @@ export interface StatusDialogProps {
     label: string;
     onClick: () => void;
   };
+  transactionLink?: string;
   preventCloseWhileLoading?: boolean;
 }
 
@@ -40,6 +41,7 @@ export function StatusDialog({
   errorTitle = "Operation Failed",
   successAction,
   preventCloseWhileLoading = true,
+  transactionLink,
 }: StatusDialogProps) {
   return (
     <AlertDialog
@@ -85,10 +87,11 @@ export function StatusDialog({
               >
                 <AlertDescription>
                   <pre
-                    className={`font-mono text-sm whitespace-pre-wrap break-all ${status.type === "success"
+                    className={`font-mono text-sm whitespace-pre-wrap break-all ${
+                      status.type === "success"
                         ? "text-green-400"
                         : "text-red-400"
-                      }`}
+                    }`}
                   >
                     {status.message}
                   </pre>
@@ -100,14 +103,22 @@ export function StatusDialog({
               <AlertDialogCancel className="hover:bg-gray-700">
                 Close
               </AlertDialogCancel>
-              {status.type === "success" && successAction && (
-                <AlertDialogAction
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={successAction.onClick}
-                >
-                  {successAction.label}
-                </AlertDialogAction>
-              )}
+              {status.type === "success" &&
+                (successAction || transactionLink) && (
+                  <AlertDialogAction
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (transactionLink) {
+                        window.open(transactionLink, "_blank"); // Open transaction link
+                      } else if (successAction) {
+                        successAction.onClick(); // Execute success action
+                      }
+                    }}
+                  >
+                    {successAction ? successAction.label : "View on Explore"}
+                  </AlertDialogAction>
+                )}
             </AlertDialogFooter>
           </>
         )}
