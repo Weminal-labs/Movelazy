@@ -12,26 +12,15 @@ export class WorkspaceService {
    * Check folder status
    */
   async checkFolder(webview: vscode.Webview): Promise<void> {
-    console.log("check run: ");
     const hasFolder =
       vscode.workspace.workspaceFolders &&
       vscode.workspace.workspaceFolders.length > 0;
 
-    let hasRequiredFolders = false;
-    if (hasFolder && vscode.workspace.workspaceFolders) {
-      const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-      const requiredFolders = ["sources", "tests", "scripts"];
-      hasRequiredFolders = requiredFolders.every((folder) =>
-        fs.existsSync(path.join(workspacePath, folder))
-      );
-    }
-
-    console.log("check open hasRequiredFolders:", hasRequiredFolders);
+    console.log("check hasFolder", hasFolder);
 
     webview.postMessage({
       type: "folderStatus",
       hasFolder,
-      hasRequiredFolders,
     });
   }
 

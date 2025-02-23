@@ -1,38 +1,49 @@
 import { AptosCompilerService } from "./compiler";
-import { AptosTesterService } from "./tester";
 import { WorkspaceService } from "./workspace";
 import { AptosDeployerService } from "./deployer";
-import { CompileSettings } from "./types";
 import * as vscode from "vscode";
 
 export class AptosService {
   private compiler: AptosCompilerService;
-  private tester: AptosTesterService;
   private workspace: WorkspaceService;
   private deployer: AptosDeployerService;
 
   constructor(context: vscode.ExtensionContext) {
     this.workspace = new WorkspaceService(context);
     this.compiler = new AptosCompilerService();
-    this.tester = new AptosTesterService();
     this.deployer = new AptosDeployerService();
   }
 
-  async compile(webview: vscode.Webview) {
-    const settings = this.workspace.getSettings();
-    const compileSettings: CompileSettings = {
-      namedAddresses: settings.namedAddresses,
-      optimizer: settings.optimizer.enabled,
-      optimizerlevel: settings.optimizer.level,
-      network: settings.network,
-    };
-    return this.compiler.compile(webview, compileSettings);
-  }
-
-  async test(webview: vscode.Webview, enabled: boolean, testName: string) {
-    const settings = this.workspace.getSettings();
-    console.log("checksettings", settings);
-    return this.tester.tester(webview, enabled, testName, settings);
+  async compile(
+    webview: vscode.Webview,
+    saveMetadata: boolean,
+    fetchDepsOnly: boolean,
+    artifacts: "none" | "sparse" | "all",
+    packageDir_compile: string,
+    outputDir: string,
+    namedAddresses_compile: string,
+    overrideStd: string | null,
+    devMode: boolean,
+    skipGitDeps: boolean,
+    skipAttributeChecks: boolean,
+    checkTestCode: boolean,
+    optimization: "none" | "default" | "extra"
+  ) {
+    return this.compiler.compile(
+      webview,
+      saveMetadata,
+      fetchDepsOnly,
+      artifacts,
+      packageDir_compile,
+      outputDir,
+      namedAddresses_compile,
+      overrideStd,
+      devMode,
+      skipGitDeps,
+      skipAttributeChecks,
+      checkTestCode,
+      optimization
+    );
   }
 
   async updateConfig(settings: any) {

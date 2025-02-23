@@ -1,6 +1,7 @@
 import { exec, spawn } from 'child_process';
 import * as vscode from 'vscode';
 import { promisify } from 'util';
+import { TestArgs } from '../contract/aptos/types';
 
 const execAsync = promisify(exec);
 
@@ -242,5 +243,84 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
     }
 }
 
+async function MoveTest(webview: vscode.Webview, args: TestArgs) {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+        throw new Error("Workspace path not found");
+    }
 
-export { CheckAptos, CheckAptosInit, AptosInit, AptosMoveInit, AptosInfo };
+    let command = "aptos move test";
+    if (args.namedAddresses !== "") {
+        command += " --named-addresses " + args.namedAddresses + "=default";;
+    }
+    if (args.filter !== "") {
+        command += " --filter " + args.filter;
+    }
+    if (args.ignoreCompileWarnings) {
+        command += " --ignore-compile-warnings";
+    }
+    if (args.packageDir !== "") {
+        command += " --package-dir " + args.packageDir;
+    }
+    if (args.outputDir !== "") {
+        command += " --output-dir " + args.outputDir;
+    }
+    if (args.overrideStd !== "") {
+        command += " --override-std " + args.overrideStd;
+    }
+    if (args.skipFetchLatestGitDeps) {
+        command += " --skip-fetch-latest-git-deps";
+    }
+    if (args.skipAttributeChecks) {
+        command += " --skip-attribute-checks";
+    }
+    if (args.dev) {
+        command += " --dev";
+    }
+    if (args.checkTestCode) {
+        command += " --check-test-code";
+    }
+    if (args.optimize !== "") {
+        command += " --optimize " + args.optimize;
+    }
+    if (args.bytecodeVersion !== "") {
+        command += " --bytecode-version " + args.bytecodeVersion;
+    }
+    if (args.compilerVersion !== "") {
+        command += " --compiler-version " + args.compilerVersion;
+    }
+    if (args.languageVersion !== "") {
+        command += " --language-version " + args.languageVersion;
+    }
+    if (args.moveVersion !== "") {
+        command += " --move-version " + args.moveVersion;
+    }
+    if (args.instructions !== "") {
+        command += " --instructions " + args.instructions;
+    }
+    if (args.coverage) {
+        command += " --coverage";
+    }
+    if (args.dump) {
+        command += " --dump";
+    }
+
+    try {
+        const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+        webview.postMessage({
+            type: "moveTestStatus",
+            success: true,
+            testInfo: stderr + stdout,
+        });
+
+    }
+    catch (error) {
+        webview.postMessage({
+            type: "moveTestStatus",
+            success: false,
+            testInfo: (error as Error).message,
+        });
+    }
+}
+
+export { CheckAptos, CheckAptosInit, AptosInit, AptosMoveInit, AptosInfo, MoveTest };

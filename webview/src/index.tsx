@@ -27,6 +27,7 @@ import MoveHelp from './aptos/pages/aptos_move/help'
 import MoveInit from './aptos/pages/aptos_move/init'
 import MoveCompile from './aptos/pages/aptos_move/compile'
 import AptosInfo from './aptos/pages/aptos_info'
+import MoveTest from './aptos/pages/aptos_move/test'
 
 // Router configuration
 const router = createMemoryRouter([
@@ -107,6 +108,10 @@ const router = createMemoryRouter([
               {
                 path: 'compile',
                 element: <MoveCompile />
+              },
+              {
+                path: 'test',
+                element: <MoveTest />
               }
             ]
           },
