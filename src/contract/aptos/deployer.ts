@@ -208,11 +208,14 @@ export class AptosDeployerService {
       const { stdout, stderr } = await execAsync(command, {
         cwd: workspacePath,
       });
-      webview.postMessage({
-        type: "deployStatus",
-        success: true,
-        message: stderr + stdout,
-      });
+      if (stderr || stdout) {
+        webview.postMessage({
+          type: "deployStatus",
+          success: true,
+          message: stderr + stdout,
+        });
+        return;
+      }
     } catch (error) {
       webview.postMessage({
         type: "deployStatus",
