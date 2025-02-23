@@ -38,7 +38,7 @@ export default function MoveDeploy() {
   const [balance, setBalance] = useState("");
   const [transactionLink, setTransactionLink] = useState("");
   const [showDialog, setShowDialog] = useState(false);
-  const [deployStatus, setDeployStatus] = useState<{
+  const [cliStatus, setcliStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
   }>({ type: "success", message: "" });
@@ -82,58 +82,40 @@ export default function MoveDeploy() {
     }));
   };
 
-  const messageHandler = useCallback((event: MessageEvent) => {
-    const message = event.data;
-    console.log(event);
+  const messageHandler = useCallback(
+    (event: MessageEvent) => {
+      const message = event.data;
 
-    if (message.type === "deployStatus") {
-      setDeploying(false);
-      console.log("checktype:", message.type);
-      const transactionLinkMatch = message.message.match(
-        /Transaction submitted:\s*(https:\/\/[^ ]+)/
-      );
-      const transactionLink = transactionLinkMatch
-        ? transactionLinkMatch[1]
-        : "";
+      if (message.type === "profileStatus") {
+        console.log("Network Status:", message.data);
+        setNetwork(message.message.network);
+        setAccount(message.message.accountAddress);
+        setBalance(message.message.balance);
 
-      console.log("transactionLink:", transactionLink);
-      setDeployStatus({
-        type: message.success ? "success" : "error",
-        message: message.message,
-      });
-      setTransactionLink(transactionLink);
-    }
-    if (message.type === "networkStatus") {
-      console.log("Network Status:", message.data);
-      setNetwork(message.data.network);
-      setAccount(message.data.accountAddress);
-      checkBalance();
-    }
-    if (message.type === "balanceStatus") {
-      console.log("Balance Status:", message.data);
-      setBalance((message.data.balance / (10 * 8)).toString());
-    }
-  }, []);
+        setBalance((message.message.balance / (10 * 8)).toString());
+      }
 
-  const checkBalance = () => {
-    return new Promise((resolve, reject) => {
-      // Gửi yêu cầu kiểm tra số dư
-      window.vscode.postMessage({
-        command: "aptos.checkBalance",
-      });
+      if (message.type === "cliStatus") {
+        setDeploying(false);
+        console.log("checktype:", message.type);
+        const transactionLinkMatch = message.message.match(
+          /Transaction submitted:\s*(https:\/\/[^ ]+)/
+        );
+        const transactionLink = transactionLinkMatch
+          ? transactionLinkMatch[1]
+          : "";
 
-      // Lắng nghe thông điệp trả về
-      const balanceHandler = (event: MessageEvent) => {
-        const message = event.data;
-        if (message.type === "balanceStatus") {
-          resolve(message.balance);
-          window.removeEventListener("message", balanceHandler);
-        }
-      };
-
-      window.addEventListener("message", balanceHandler);
-    });
-  };
+        console.log("transactionLink:", transactionLink);
+        setcliStatus({
+          type: message.success ? "success" : "error",
+          message: message.message,
+        });
+        console.log("check cli mess", cliStatus);
+        setTransactionLink(transactionLink);
+      }
+    },
+    [account, network, balance, transactionLink]
+  );
 
   useEffect(() => {
     console.log("check run");
@@ -144,7 +126,7 @@ export default function MoveDeploy() {
 
   const handleDeploy = async () => {
     setDeploying(true);
-    setDeployStatus({ type: null, message: "" });
+    setcliStatus({ type: null, message: "" });
     setShowDialog(true);
     if (window.vscode) {
       try {
@@ -177,7 +159,7 @@ export default function MoveDeploy() {
         });
       } catch {
         setDeploying(false);
-        setDeployStatus({
+        setcliStatus({
           type: "error",
           message: "Failed to start deployment",
         });
@@ -206,8 +188,8 @@ export default function MoveDeploy() {
             Deploy Contract
           </CardTitle>
         </CardHeader>
-        <Card className="bg-gray-800 border-gray-700 max-w-sm mx-auto">
-          <CardContent className="p-3 space-y-1.5">
+        <Card className="bg-gray-800 border-gray-700 max-w-sm mx-auto mb-4">
+          <CardContent className="p-3 space-y-1.5 ">
             <div className="flex justify-start items-center ">
               <span className="text-sm text-gray-400">Network:</span>
               <Badge
@@ -224,7 +206,7 @@ export default function MoveDeploy() {
                   variant="outline"
                   className="font-medium text-sm border-none"
                 >
-                  {truncateAddress(account)}
+                  0x{truncateAddress(account)}
                 </Badge>
               </div>
             )}
@@ -483,12 +465,12 @@ export default function MoveDeploy() {
         open={showDialog}
         onOpenChange={setShowDialog}
         loading={deploying}
-        status={deployStatus}
+        status={cliStatus}
         loadingTitle="Deploying..."
         loadingMessage="Please wait while deploying contract..."
         successTitle="Deployment Successful"
         errorTitle="Deployment Failed"
-        transactionLink={transactionLink}
+        link={{ label: "View on Explore", transactionLink: transactionLink }}
       />
     </div>
   );

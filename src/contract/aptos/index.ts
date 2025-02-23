@@ -46,14 +46,6 @@ export class AptosService {
     );
   }
 
-  async updateConfig(settings: any) {
-    await this.workspace.saveSettings(settings);
-  }
-
-  getSettings() {
-    return this.workspace.getSettings();
-  }
-
   async deploy(
     webview: vscode.Webview,
     overrideSizeCheck: boolean,
@@ -119,13 +111,4 @@ export class AptosService {
   async checkProfile(webview: vscode.Webview) {
     return this.deployer.checkProfile(webview);
   }
-
-  async checkBalance(webview: vscode.Webview) {
-    return this.deployer.checkBalance(webview);
-  }
-}
-
-function getPackageDir(): string {
-  const config = vscode.workspace.getConfiguration("yourExtension");
-  return config.get<string>("packageDir", "");
 }

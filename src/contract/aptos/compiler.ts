@@ -67,13 +67,13 @@ export class AptosCompilerService {
         cwd: workspacePath,
       });
       webview.postMessage({
-        type: "compileStatus",
+        type: "cliStatus",
         success: true,
         message: stderr + stdout,
       });
     } catch (error) {
       webview.postMessage({
-        type: "compileStatus",
+        type: "cliStatus",
         success: false,
         message: (error as Error).message,
       });

@@ -59,12 +59,12 @@ export class WorkspaceService {
       );
 
       webview.postMessage({
-        type: "workspaceStatus",
+        type: "cliStatus",
         initialized: true,
       });
     } catch (error) {
       webview.postMessage({
-        type: "workspaceStatus",
+        type: "cliStatus",
         initialized: false,
         error: (error as Error).message,
       });

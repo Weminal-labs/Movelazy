@@ -72,19 +72,19 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             break;
           case "solidity.initWorkspace":
             webviewView.webview.postMessage({
-              type: "workspaceStatus",
+              type: "cliStatus",
               loading: true,
             });
             try {
               await this.solidityService.initWorkspace();
               webviewView.webview.postMessage({
-                type: "workspaceStatus",
+                type: "cliStatus",
                 initialized: true,
                 loading: false,
               });
             } catch (error) {
               webviewView.webview.postMessage({
-                type: "workspaceStatus",
+                type: "cliStatus",
                 error: (error as Error).message,
                 loading: false,
               });
@@ -94,7 +94,7 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
             const isHardhatWorkspace =
               await this.solidityService.checkWorkspace();
             webviewView.webview.postMessage({
-              type: "workspaceStatus",
+              type: "cliStatus",
               initialized: isHardhatWorkspace,
               loading: false,
             });
@@ -258,50 +258,13 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
           case "aptos.checkProfile":
             await this.aptosService.checkProfile(webviewView.webview);
             break;
-          case "aptos.checkBalance":
-            await this.aptosService.checkBalance(webviewView.webview);
-            break;
-
-          // case "aptos.getSettings":
-          //   const aptosSettings = this.aptosService.getSettings();
-          //   webviewView.webview.postMessage({
-          //     type: "settings",
-          //     settings: aptosSettings,
-          //   });
-          //   break;
 
           case "aptos.movetest":
             await MoveTest(webviewView.webview, message.testArgs);
             break;
-          // case "aptos.accountAddress":
-          //   const accountAddress = await this.aptosService.getAccountAddress(
-          //     webviewView.webview
-          //   );
-          //   webviewView.webview.postMessage({
-          //     type: "accountAddress",
-          //     address: accountAddress,
-          //   });
-          //   break;
-          // case "aptos.requestFaucet":
-          //   const balance = await this.aptosService.requestFaucet(
-          //     webviewView.webview
-          //   );
-          //   webviewView.webview.postMessage({
-          //     type: "balance",
-          //     balance: balance,
-          //   });
-          //   break;
 
           case "aptos.checkFolder":
             await this.workspace.checkFolder(webviewView.webview);
-            break;
-
-          case "aptos.selectFolder":
-            await this.workspace.selectFolder(webviewView.webview);
-            break;
-
-          case "aptos.createTemplate":
-            await this.workspace.createTemplate(webviewView.webview);
             break;
         }
       } catch (error) {
