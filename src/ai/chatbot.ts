@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import * as dotenv from "dotenv";
 import * as bot from "./Ai-Cmd";
 
-dotenv.config();
+dotenv.config({ path: '/home/huc/Movelazy/.env' });
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY || "",
@@ -99,39 +99,43 @@ Options:
 "benchmark": If this option is set, benchmark the transaction locally.
 "profile-gas": If this option is set, simulate the transaction locally using the debugger and generate flamegraphs.
 Example Requests and Expected Commands:
-User Input: "I want to create a new key" Expected Output: aptos.init private-key=
+User Input: "I want to create a new key {private_key}" Expected Output: "aptos.init private-key={private_key}"
 
-User Input: "I want to init config file" Expected Output: aptos.init network=devnet(Assuming user chooses devnet by default )
+User Input: "I want to init config devnet" Expected Output: "aptos.init network=devnet" (Assuming user chooses devnet by default)
 
-User Input: "I want to initialize the project on testnet with a new key" Expected Output: aptos.init network=testnet private-key=
+User Input: "I want to initialize the project on testnet with a new key {private_key}" Expected Output: "aptos.init network="testnet" private-key={private_key}"
 
-User Input: "I want to initialize with a custom network, I have the endpoint and faucet URL" Expected Output: aptos.init network=custom rest-url=<RPC_URL> faucet-url=<FAUCET_URL>
+User Input: "I want to initialize with a custom network, I have the endpoint {endpoint} and faucet URL {faucet_url}" 
+Expected Output: "aptos.init network=custom rest-url={endpoint} faucet-url={faucet_url}"
 
-User Input: "I want to init config for mainnet" Expected Output: aptos.init network=mainnet
+User Input: "I want to init config for mainnet" 
+Expected Output: "aptos.init network=mainnet"
 
-User Input: "I want to use local network and generate a new key" Expected Output: aptos.init network=local private-key=
+User Input: "I want to use local network and generate a new key {private_key}" 
+Expected Output: "aptos.init network=local private-key={private_key}"
 
-User Input: "I want to compile my Move package" Expected Output: aptos.compile named-addresses=<NAMED_ADDRESSES>
+User Input: "I want to compile my Move package {package_name}" 
+Expected Output: "aptos.compile named-addresses={package_name}"
 
-User Input: "compile" Expected Output: aptos.compile named-addresses=<NAMED_ADDRESSES>
+User Input: "compile {package_name}" 
+Expected Output: "aptos.compile named-addresses={package_name}"
 
-User Input: "I want to compile my project and specify the addresses" Expected Output: aptos.compile named-addresses=<NAMED_ADDRESSES>
+User Input: "I want to compile my project and specify the addresses {named_addresses}" 
+Expected Output: "aptos.compile named-addresses={named_addresses}"
 
-User Input: "compile the Move package with custom addresses" Expected Output: aptos.compile named-addresses=<NAMED_ADDRESSES>
+User Input: "compile the Move package with custom addresses {named_addresses}" 
+Expected Output: "aptos.compile named-addresses={named_addresses}"
 
-User Input: "I want to publish my contract" Expected Output: aptos.deploy named-addresses=<NAMED_ADDRESSES>
+User Input: "I want to publish my contract {named_addresses}" 
+Expected Output: "aptos.deploy named-addresses={named_addresses}"
 
-User Input: "Publish the Move package with chunked publishing" Expected Output: aptos.deploy chunked-publish named-addresses=<NAMED_ADDRESSES>
+User Input: "Publish the Move package with chunked publishing {named_addresses}" 
+Expected Output: "aptos.deploy chunked-publish named-addresses={named_addresses}"
 
-User Input: "I want to publish the Move package and include artifacts" Expected Output: aptos.deploy included-artifacts=all named-addresses=<NAMED_ADDRESSES>
+User Input: "I want to publish the Move package and include artifacts {named_addresses}" 
+Expected Output: "aptos.deploy included-artifacts=all named-addresses={named_addresses}"
 
-User Input: "Publish my contract on testnet with gas optimization" Expected Output: aptos.deploy optimize=default named-addresses=<NAMED_ADDRESSES> override-std=testnet
-
-User Input: "Publish with private key and custom address" Expected Output: aptos.deploy private-key=<PRIVATE_KEY> named-addresses=<NAMED_ADDRESSES>
-
-User Input: "I want to publish the contract and specify chunk size" Expected Output: aptos.deploy chunk-size=55000 named-addresses=<NAMED_ADDRESSES>
-
-User Input: "I want to deploy my contract" Expected Output: aptos.deploy named-addresses=<NAMED_ADDRESSES>
+User Input: "Publish my contract {named_addresses} on testnet with gas optimization"
 
 How to process the user input:
 Identify the command: Determine if the user is asking to use the "compile" command or "init".
