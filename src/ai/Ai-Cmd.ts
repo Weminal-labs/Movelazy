@@ -2,11 +2,11 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import SplitCmd from '../utils/SplitCmd';
-import * as aptosCli from './Aptos-Cli';
+import * as aptosCli from '../services/Aptos-Cli';
 import { ViewProvider } from '../ViewProvider';
 import { TestArgs } from '../contract/aptos/types';
 import compile from "../contract/aptos/compile";
-import { AiResponse } from '../ai/chatbot';
+import { AiResponse } from './chatbot';
 
 function GetCmd(): string {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
@@ -182,5 +182,5 @@ function ProcCmdCase(ai_out: string) {
 export function AiCmd() {
     console.log("AiCmd");
     // ProcCmdCase("aptos.moveinit name=hello_blockchain template=hello-blockchain");
-    console.log("Ai response: ", AiResponse("init project name: hello_blockchain template: hello-blockchain"));
+    AiResponse("key custom network rest-url=http://localhost:8080 faucet-url=http://localhost:8081 private-key=0x");
 }
