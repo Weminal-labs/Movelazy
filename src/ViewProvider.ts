@@ -11,6 +11,7 @@ import {
   AptosInfo,
   MoveTest,
 } from "./services/Aptos-Cli";
+import { AiCmd } from "./services/Ai-Cmd";
 
 export class ViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";
@@ -26,6 +27,9 @@ export class ViewProvider implements vscode.WebviewViewProvider {
     this.deployerService = new DeployerService();
   }
 
+  public static getWebviewView(): vscode.WebviewView | null {
+    return ViewProvider.currentWebviewView;
+  }
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     ViewProvider.currentWebviewView = webviewView;
 
@@ -241,7 +245,7 @@ export class ViewProvider implements vscode.WebviewViewProvider {
             await this.workspace.createTemplate(webviewView.webview);
             break;
           case "ai-command":
-
+            AiCmd();
             break;
         }
       } catch (error) {

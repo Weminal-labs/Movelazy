@@ -111,13 +111,13 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
                 webview.postMessage({
                     type: "initStatus",
                     success: true,
-                    initInfo: outputData,
+                    message: outputData,
                 });
             } else {
                 webview.postMessage({
                     type: "initStatus",
                     success: false,
-                    initInfo: `Aptos initialization failed with exit code ${code}`,
+                    message: `Aptos initialization failed with exit code ${code}`,
                 });
             }
         });
@@ -152,13 +152,13 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
                 webview.postMessage({
                     type: "initStatus",
                     success: true,
-                    initInfo: outputData,
+                    message: outputData,
                 });
             } else {
                 webview.postMessage({
                     type: "initStatus",
                     success: false,
-                    initInfo: `Aptos initialization failed with exit code ${code}`,
+                    message: `Aptos initialization failed with exit code ${code}`,
                 });
             }
         });
@@ -229,15 +229,15 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
     try {
         const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
         webview.postMessage({
-            type: "moveInitStatus",
+            type: "cliStatus",
             success: true,
-            initInfo: stderr + stdout,
+            message: stderr + stdout,
         });
     } catch (error) {
         webview.postMessage({
-            type: "moveInitStatus",
+            type: "cliStatus",
             success: false,
-            initInfo: (error as Error).message,
+            message: (error as Error).message,
         });
 
     }
@@ -308,17 +308,17 @@ async function MoveTest(webview: vscode.Webview, args: TestArgs) {
     try {
         const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
         webview.postMessage({
-            type: "moveTestStatus",
+            type: "cliStatus",
             success: true,
-            testInfo: stderr + stdout,
+            message: stderr + stdout,
         });
 
     }
     catch (error) {
         webview.postMessage({
-            type: "moveTestStatus",
+            type: "cliStatus",
             success: false,
-            testInfo: (error as Error).message,
+            message: (error as Error).message,
         });
     }
 }

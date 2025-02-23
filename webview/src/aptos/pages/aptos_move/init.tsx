@@ -17,7 +17,7 @@ export default function MoveInit() {
     const navigate = useNavigate();
     const [initializing, setInitializing] = useState(false)
     const [showDialog, setShowDialog] = useState(false)
-    const [moveInitStatus, setMoveInitStatus] = useState<{ type: "success" | "error", message: string }>({ type: "success", message: "" })
+    const [cliStatus, setcliStatus] = useState<{ type: "success" | "error", message: string }>({ type: "success", message: "" })
     const [activeTab, setActiveTab] = useState<"simple" | "advanced">("simple")
     const [initArgs, setInitArgs] = useState({
         name: "",
@@ -53,7 +53,7 @@ export default function MoveInit() {
             } catch (error) {
                 console.error(error)
                 setInitializing(false)
-                setMoveInitStatus({ type: "error", message: "Failed to initialize config" })
+                setcliStatus({ type: "error", message: "Failed to initialize config" })
                 setShowDialog(true)
             }
         }
@@ -62,11 +62,11 @@ export default function MoveInit() {
     useEffect(() => {
         const messageHandler = (event: MessageEvent) => {
             const message = event.data
-            if (message.type === "moveInitStatus") {
-                if (message.initInfo) {
-                    setMoveInitStatus({
+            if (message.type === "cliStatus") {
+                if (message.message) {
+                    setcliStatus({
                         type: message.success ? "success" : "error",
-                        message: message.initInfo
+                        message: message.message
                     });
                     setInitializing(false)
                     setShowDialog(true)
@@ -265,7 +265,7 @@ export default function MoveInit() {
                 open={showDialog}
                 onOpenChange={setShowDialog}
                 loading={initializing}
-                status={moveInitStatus}
+                status={cliStatus}
                 loadingTitle="Initializing..."
                 loadingMessage="Please wait while Initialize Project..."
                 successTitle="Initializion Successful"

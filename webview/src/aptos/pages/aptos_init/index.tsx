@@ -63,10 +63,10 @@ export default function AptosInitForm() {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
       if (message.type === "initStatus") {
-        if (message.initInfo) {
+        if (message.message) {
           setInitStatus({
             type: message.success ? "success" : "error",
-            message: message.initInfo,
+            message: message.message,
           });
           setInitializing(false);
           setShowDialog(true);
