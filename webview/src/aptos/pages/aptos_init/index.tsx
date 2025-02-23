@@ -42,6 +42,8 @@ export default function AptosInitForm() {
 
     setInitializing(true);
     if (window.vscode) {
+      setInitializing(true)
+      setShowDialog(true)
       try {
         window.vscode.postMessage({
           command: "aptos.init",

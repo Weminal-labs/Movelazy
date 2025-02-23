@@ -68,7 +68,7 @@ async function CheckAptosInit(): Promise<boolean> {
     });
 }
 
-async function AptosInit(webview: vscode.Webview, network: string, endpoint: string, faucetEndpoint: string, privateKey: string) {
+async function AptosInit(webview: vscode.Webview, network: string = "devnet", endpoint: string, faucetEndpoint: string, privateKey: string) {
     // Get workspace path
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
@@ -124,6 +124,8 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
     }
 
     function notCustom(network: string, privateKey: string) {
+        console.log("initializing");
+
         const aptosProcess = spawn("aptos", ["init"], {
             cwd: workspacePath,
             stdio: ["pipe", "pipe", "pipe"],
@@ -132,6 +134,10 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
         let outputData = "";
         aptosProcess.stderr.on("data", (data) => {
             const output = data.toString();
+            if (output.includes("already", "existing")) {
+                console.log("aptos already initialized");
+                aptosProcess.stdin.write("yes\n");
+            }
 
             if (output.includes("Choose network")) {
                 aptosProcess.stdin.write(`${network}\n`);

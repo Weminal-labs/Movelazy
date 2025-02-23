@@ -2,7 +2,6 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
-  Link,
   ExternalLink,
 } from "lucide-react";
 import {
@@ -50,7 +49,7 @@ export function StatusDialog({
   successTitle = "Operation Successful",
   errorTitle = "Operation Failed",
   successAction,
-  preventCloseWhileLoading = true,
+  preventCloseWhileLoading = false,
   link,
 }: StatusDialogProps) {
   return (
@@ -74,6 +73,9 @@ export function StatusDialog({
             <div className="py-4">
               <p className="text-gray-300">{loadingMessage}</p>
             </div>
+            <AlertDialogCancel className="hover:bg-gray-700">
+              Close
+            </AlertDialogCancel>
           </>
         ) : (
           <>
@@ -97,16 +99,16 @@ export function StatusDialog({
               >
                 <AlertDescription>
                   <pre
-                    className={`font-mono text-sm whitespace-pre-wrap break-all ${
-                      status.type === "success"
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
+                    className={`font-mono text-sm whitespace-pre-wrap break-all ${status.type === "success"
+                      ? "text-green-400"
+                      : "text-red-400"
+                      }`}
                   >
                     {status.message}
                   </pre>
                 </AlertDescription>
               </Alert>
+
             )}
 
             <AlertDialogFooter>
