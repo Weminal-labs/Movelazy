@@ -5,7 +5,7 @@ import * as bot from "./Ai-Cmd";
 dotenv.config();
 
 const openai = new OpenAI({
-    apiKey: ""
+    apiKey: process.env.OPENAI_API_KEY || "",
 });
 
 export async function AiCmd() {
