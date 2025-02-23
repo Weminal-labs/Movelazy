@@ -269,6 +269,10 @@ export class ViewProvider implements vscode.WebviewViewProvider {
           case "aptos.checkFolder":
             await this.workspace.checkFolder(webviewView.webview);
             break;
+
+          case "ai-command":
+            AiCmd();
+            break;
         }
       } catch (error) {
         webviewView.webview.postMessage({
