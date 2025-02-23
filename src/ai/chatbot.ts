@@ -4,15 +4,16 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const chatbot_prompt = "chatbot_prompt.txt";
+const chatbot_prompt = "D:/Source/node/Movelazy/src/ai/chatbot_prompt.txt";
 const systemPrompt = fs.readFileSync(chatbot_prompt, "utf-8");
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY, // Lấy API key từ biến môi trường
+    apiKey: "", // Lấy API key từ biến môi trường
 });
 
 export async function AiResponse(usrInput: string): Promise<string> {
     console.log("🤖 Chatbot GPT - Handling command");
+
     let botResponse = "";
     try {
         const response = await openai.chat.completions.create({
@@ -27,6 +28,7 @@ export async function AiResponse(usrInput: string): Promise<string> {
 
         botResponse =
             response.choices[0]?.message?.content?.trim() || "OpenAI not response!";
+
     } catch (error) {
         throw new Error("❌ Error when calling OpenAI API: " + error);
     }

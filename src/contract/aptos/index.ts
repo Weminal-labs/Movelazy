@@ -1,16 +1,14 @@
-import { AptosCompilerService } from "./compiler";
+import compile from "./compile";
 import { WorkspaceService } from "./workspace";
 import { AptosDeployerService } from "./deployer";
 import * as vscode from "vscode";
 
 export class AptosService {
-  private compiler: AptosCompilerService;
   private workspace: WorkspaceService;
   private deployer: AptosDeployerService;
 
   constructor(context: vscode.ExtensionContext) {
     this.workspace = new WorkspaceService(context);
-    this.compiler = new AptosCompilerService();
     this.deployer = new AptosDeployerService();
   }
 
@@ -29,7 +27,7 @@ export class AptosService {
     checkTestCode: boolean,
     optimization: "none" | "default" | "extra"
   ) {
-    return this.compiler.compile(
+    return compile(
       webview,
       saveMetadata,
       fetchDepsOnly,
