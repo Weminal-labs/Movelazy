@@ -5,10 +5,10 @@ export interface BaseStatus {
   message: string;
 }
 
-export interface DeployStatus extends BaseStatus {
+export interface cliStatus extends BaseStatus {
   stdout: string;
   stderr: string;
 }
 
-export type CompileStatus = BaseStatus;
+export type cliStatus = BaseStatus;
 export type TestStatus = BaseStatus;

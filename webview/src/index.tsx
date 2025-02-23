@@ -13,7 +13,6 @@ import ProjectPageSol from "./sol/pages/project";
 //------------------- Aptos imports --------------------- //
 import AptosPage from "./aptos";
 import TesterAptosPage from "./aptos/pages/tester";
-import DeployerAptosPage from "./aptos/pages/deployer";
 import ProjectPageAptos from "./aptos/pages/project";
 import CliNotFound from "./aptos/pages/installation/cli-not-found";
 import LinuxInstallationGuide from "./aptos/pages/installation/Linux";
@@ -131,10 +130,6 @@ const router = createMemoryRouter([
           {
             path: "tester",
             element: <TesterAptosPage />,
-          },
-          {
-            path: "deployer",
-            element: <DeployerAptosPage />,
           },
         ],
       },

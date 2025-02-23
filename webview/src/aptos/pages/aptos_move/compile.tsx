@@ -31,7 +31,7 @@ export default function MoveCompile() {
   const navigate = useNavigate();
   const [compiling, setCompiling] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const [compileStatus, setCompileStatus] = useState<{
+  const [cliStatus, setcliStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
   }>({ type: "success", message: "" });
@@ -63,9 +63,9 @@ export default function MoveCompile() {
   const messageHandler = (event: MessageEvent) => {
     const message = event.data;
 
-    if (message.type === "compileStatus") {
+    if (message.type === "cliStatus") {
       setCompiling(false);
-      setCompileStatus({
+      setcliStatus({
         type: message.success ? "success" : "error",
         message: message.message,
       });
@@ -79,7 +79,7 @@ export default function MoveCompile() {
 
   const handleCompile = async () => {
     setCompiling(true);
-    setCompileStatus({ type: null, message: "" });
+    setcliStatus({ type: null, message: "" });
     setShowDialog(true);
     if (window.vscode) {
       try {
@@ -103,7 +103,7 @@ export default function MoveCompile() {
         });
       } catch {
         setCompiling(false);
-        setCompileStatus({
+        setcliStatus({
           type: "error",
           message: "Failed to start compilation",
         });
@@ -112,10 +112,10 @@ export default function MoveCompile() {
   };
 
   // useEffect(() => {
-  //   if (compileStatus.type) {
+  //   if (cliStatus.type) {
   //     setShowDialog(true);
   //   }
-  // }, [compileStatus]);
+  // }, [cliStatus]);
 
   return (
     <div>
@@ -348,11 +348,11 @@ export default function MoveCompile() {
         open={showDialog}
         onOpenChange={setShowDialog}
         loading={compiling}
-        status={compileStatus}
-        loadingTitle="Initializing..."
-        loadingMessage="Please wait while Initialize Project..."
-        successTitle="Initializion Successful"
-        errorTitle="Initializion Failed"
+        status={cliStatus}
+        loadingTitle="Compiling..."
+        loadingMessage="Please wait while Compile Project..."
+        successTitle="Compile Successful"
+        errorTitle="Compile Failed"
         successAction={{
           label: "Go to Deploy",
           onClick: () => navigate("/aptos/move/deploy"),

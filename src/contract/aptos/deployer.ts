@@ -1,9 +1,6 @@
 import * as vscode from "vscode";
 import { exec } from "child_process";
 import { promisify } from "util";
-import path from "path";
-import fs from "fs";
-import yaml from "js-yaml";
 const execAsync = promisify(exec);
 
 export class AptosDeployerService {
@@ -13,43 +10,25 @@ export class AptosDeployerService {
       console.error("Workspace path is undefined.");
       return null;
     }
-
-    const configFilePath = path.join(workspacePath, ".aptos", "config.yaml"); // Path to the config file
-
-    if (fs.existsSync(configFilePath)) {
-      try {
-        const fileContents = fs.readFileSync(configFilePath, "utf8");
-        const config: any = yaml.load(fileContents);
-
-        if (config && config.profiles && config.profiles.default) {
-          const accountAddress = config.profiles.default.account;
-          const network = config.profiles.default.network;
-
-          webview.postMessage({
-            type: "networkStatus",
-            data: { accountAddress, network },
-          });
-          return;
-        } else {
-          console.error("Account or network not found in config file.");
-        }
-      } catch (error) {
-        console.error("Error parsing config file:", error);
-      }
-    } else {
-      console.error(`Config file ${configFilePath} does not exist.`);
+    try {
+      const accountAddress = await this.getAccount();
+      const network = await this.getNetWork();
+      const balance = await this.checkBalance();
+      console.log("check3", accountAddress, network, balance);
+      webview.postMessage({
+        type: "profileStatus",
+        message: { accountAddress, network, balance },
+      });
+      return;
+    } catch (error) {
+      console.error("Error parsing config file:", error);
     }
     return Promise.reject("Failed to read account from config");
   }
-  async checkBalance(webview: vscode.Webview) {
+  async checkBalance() {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
-      console.log("No workspace folder found.");
-      webview.postMessage({
-        type: "deployStatus",
-        success: false,
-        message: "No workspace folder found.",
-      });
+      console.log("No workspace");
       return;
     }
 
@@ -62,34 +41,55 @@ export class AptosDeployerService {
     }
     const result = JSON.parse(stdout);
     const balance = result.Result[0].balance;
-    webview.postMessage({
-      type: "balanceStatus",
-      balance: balance,
-    });
-    return;
+    return balance;
   }
   catch(error: any) {
     console.error("Error executing command:", error);
     return null;
   }
 
-  async getBalance(webview: vscode.Webview) {
+  async getAccount() {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+      console.log("No workspace");
+      return;
+    }
     try {
-      const { stdout, stderr } = await execAsync(`aptos account balance`, {
+      const { stdout, stderr } = await execAsync(`aptos config show-profiles`, {
         cwd: workspacePath,
       });
       if (stderr) {
-        console.error("Error getting account balance:", stderr);
+        console.error("Error getting account:", stderr);
         return null;
       }
-      console.log("Balance command output:", stdout);
       const result = JSON.parse(stdout);
-      const balance = result.Result[0].balance;
-      console.log("Parsed balance:", balance);
-      return balance;
+      const account = result.Result.default.account;
+      return account;
     } catch (error) {
-      console.error("Error executing balance command:", error);
+      console.error("Error executing account command:", error);
+      return null;
+    }
+  }
+
+  async getNetWork() {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+      console.log("No workspace");
+      return;
+    }
+    try {
+      const { stdout, stderr } = await execAsync(`aptos config show-profiles`, {
+        cwd: workspacePath,
+      });
+      if (stderr) {
+        console.error("Error getting network:", stderr);
+        return null;
+      }
+      const result = JSON.parse(stdout);
+      const network = result.Result.default.rest_url;
+      return network;
+    } catch (error) {
+      console.error("Error executing network command:", error);
       return null;
     }
   }
@@ -210,7 +210,7 @@ export class AptosDeployerService {
       });
       if (stderr || stdout) {
         webview.postMessage({
-          type: "deployStatus",
+          type: "cliStatus",
           success: true,
           message: stderr + stdout,
         });
@@ -218,7 +218,7 @@ export class AptosDeployerService {
       }
     } catch (error) {
       webview.postMessage({
-        type: "deployStatus",
+        type: "cliStatus",
         success: false,
         message: (error as Error).message,
       });

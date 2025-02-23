@@ -203,8 +203,8 @@ export default function AptosInitForm() {
           successTitle="Initialization Successful"
           errorTitle="Initialization Failed"
           successAction={{
-            label: "Go to Compile",
-            onClick: () => navigate("/aptos/compiler"),
+            label: "Go to init",
+            onClick: () => navigate("/aptos/move/init"),
           }}
         />
       </div>

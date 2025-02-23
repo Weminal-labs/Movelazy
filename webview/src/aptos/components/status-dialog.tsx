@@ -1,4 +1,10 @@
-import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Link,
+  ExternalLink,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Alert, AlertDescription } from "./ui/alert";
+import { Button } from "./ui/button";
 
 export interface StatusDialogProps {
   open: boolean;
@@ -26,7 +33,10 @@ export interface StatusDialogProps {
     label: string;
     onClick: () => void;
   };
-  transactionLink?: string;
+  link?: {
+    label: string;
+    transactionLink?: string;
+  };
   preventCloseWhileLoading?: boolean;
 }
 
@@ -41,7 +51,7 @@ export function StatusDialog({
   errorTitle = "Operation Failed",
   successAction,
   preventCloseWhileLoading = true,
-  transactionLink,
+  link,
 }: StatusDialogProps) {
   return (
     <AlertDialog
@@ -103,22 +113,27 @@ export function StatusDialog({
               <AlertDialogCancel className="hover:bg-gray-700">
                 Close
               </AlertDialogCancel>
-              {status.type === "success" &&
-                (successAction || transactionLink) && (
-                  <AlertDialogAction
-                    className="bg-blue-600 hover:bg-blue-700"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (transactionLink) {
-                        window.open(transactionLink, "_blank"); // Open transaction link
-                      } else if (successAction) {
-                        successAction.onClick(); // Execute success action
-                      }
-                    }}
+              {status.type === "success" && successAction && (
+                <AlertDialogAction
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={successAction.onClick}
+                >
+                  {successAction.label}
+                </AlertDialogAction>
+              )}
+              {status.type === "success" && link && (
+                <Button asChild>
+                  <a
+                    href={link.transactionLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center gap-2"
                   >
-                    {successAction ? successAction.label : "View on Explore"}
-                  </AlertDialogAction>
-                )}
+                    {link.label}
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </Button>
+              )}
             </AlertDialogFooter>
           </>
         )}

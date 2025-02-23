@@ -32,7 +32,7 @@ const CompilerPage = () => {
   });
 
   const [compiling, setCompiling] = useState(false);
-  const [compileStatus, setCompileStatus] = useState<{
+  const [cliStatus, setcliStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
   }>({ type: null, message: "" });
@@ -43,24 +43,24 @@ const CompilerPage = () => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.type === "compileStatus") {
+      if (message.type === "cliStatus") {
         setCompiling(false);
-        setCompileStatus({
+        setcliStatus({
           type: message.success ? "success" : "error",
           message: message.message,
         });
       } else if (message.type === "cleanStatus") {
         setCleaning(false);
-        setCompileStatus({
+        setcliStatus({
           type: message.success ? "success" : "error",
           message: message.message,
         });
       }
 
       // Clear status after 5 seconds
-      if (message.type === "compileStatus" || message.type === "cleanStatus") {
+      if (message.type === "cliStatus" || message.type === "cleanStatus") {
         setTimeout(() => {
-          setCompileStatus({ type: null, message: "" });
+          setcliStatus({ type: null, message: "" });
         }, 5000);
       }
     };
@@ -71,7 +71,7 @@ const CompilerPage = () => {
 
   const handleCompile = async () => {
     setCompiling(true);
-    setCompileStatus({ type: null, message: "" });
+    setcliStatus({ type: null, message: "" });
     try {
       window.vscode.postMessage({
         command: "solidity.compile",
@@ -79,7 +79,7 @@ const CompilerPage = () => {
       });
     } catch {
       setCompiling(false);
-      setCompileStatus({
+      setcliStatus({
         type: "error",
         message: "Failed to start compilation",
       });
@@ -88,7 +88,7 @@ const CompilerPage = () => {
 
   const handleClean = async () => {
     setCleaning(true);
-    setCompileStatus({ type: null, message: "" });
+    setcliStatus({ type: null, message: "" });
 
     try {
       window.vscode.postMessage({
@@ -96,7 +96,7 @@ const CompilerPage = () => {
       });
     } catch {
       setCleaning(false);
-      setCompileStatus({
+      setcliStatus({
         type: "error",
         message: "Failed to clean artifacts",
       });
@@ -210,16 +210,16 @@ const CompilerPage = () => {
       </div>
 
       {/* Compilation Status Bar */}
-      {compileStatus.type && (
+      {cliStatus.type && (
         <div
           className={`p-4 border-t border-border transition-all ${
-            compileStatus.type === "success"
+            cliStatus.type === "success"
               ? "bg-green-500/5 text-green-500 border-green-500/20"
               : "bg-red-500/5 text-red-500 border-red-500/20"
           }`}
         >
           <pre className="font-mono text-sm whitespace-pre-wrap">
-            {compileStatus.message}
+            {cliStatus.message}
           </pre>
         </div>
       )}
