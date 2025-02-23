@@ -3,9 +3,28 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
+import { useEffect } from "react";
 
 export default function AptosHelp() {
   const navigate = useNavigate();
+
+  const handleAiCommand = () => {
+    if (!window.vscode) {
+      return;
+    }
+    window.vscode.postMessage({
+      command: "ai-command",
+    });
+  };
+
+  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+
+    }
+
+    window.addEventListener("message", messageHandler)
+    return () => window.removeEventListener("message", messageHandler)
+  }, []);
 
   return (
     <div className="min-h-screen bg-black">
@@ -20,6 +39,17 @@ export default function AptosHelp() {
               Back
             </Button>
           </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+            <Button
+              onClick={() => { handleAiCommand() }}
+              variant="outline"
+              className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+            >
+              AI Command
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -29,6 +59,7 @@ export default function AptosHelp() {
               Aptos account
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -38,6 +69,7 @@ export default function AptosHelp() {
               Aptos config
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -47,6 +79,7 @@ export default function AptosHelp() {
               Aptos genesis
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -56,6 +89,7 @@ export default function AptosHelp() {
               Aptos governance
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos/info")}
@@ -65,6 +99,7 @@ export default function AptosHelp() {
               Aptos info
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos/init")}
@@ -74,6 +109,7 @@ export default function AptosHelp() {
               Aptos init
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -83,6 +119,7 @@ export default function AptosHelp() {
               Aptos key
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos/move")}
@@ -92,6 +129,7 @@ export default function AptosHelp() {
               Aptos move
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -101,6 +139,7 @@ export default function AptosHelp() {
               Aptos multisig
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -110,6 +149,7 @@ export default function AptosHelp() {
               Aptos node
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -119,6 +159,7 @@ export default function AptosHelp() {
               Aptos stake
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Button
               onClick={() => navigate("/aptos")}
@@ -128,6 +169,7 @@ export default function AptosHelp() {
               Aptos update
             </Button>
           </div>
+
         </CardContent>
       </Card>
     </div>

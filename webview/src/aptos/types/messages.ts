@@ -22,7 +22,8 @@ export type AptosMessage = {
   | "aptos.balance"
   | "aptos.checkFolder"
   | "aptos.selectFolder"
-  | "aptos.createTemplate";
+  | "aptos.createTemplate"
+  | "ai-command";
   initConfig?: [string, string, string, string];
   initArgs?: [
     string,

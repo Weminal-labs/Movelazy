@@ -27,8 +27,6 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
-    context: vscode.WebviewViewResolveContext,
-    token: vscode.CancellationToken
   ) {
     webviewView.webview.options = {
       enableScripts: true,
@@ -240,6 +238,9 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
           case "aptos.createTemplate":
             await this.workspace.createTemplate(webviewView.webview);
+            break;
+          case "ai-command":
+
             break;
         }
       } catch (error) {
