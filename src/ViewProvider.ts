@@ -197,41 +197,103 @@ export class ViewProvider implements vscode.WebviewViewProvider {
               optimization
             );
             break;
-          case "aptos.updateConfig":
-            await this.aptosService.updateConfig(message.settings);
+          case "aptos.deploy":
+            const [
+              overrideSizeCheck,
+              chunkedPublish,
+              largePackagesModuleAddress,
+              chunkSize,
+              includedArtifacts,
+              packageDir_deploy,
+              outputDir_deploy,
+              namedAddresses_deploy,
+              overrideStd_deploy,
+              skipGitDeps_deploy,
+              skipAttributeChecks_deploy,
+              checkTestCode_deploy,
+              optimize,
+              bytecodeVersion,
+              compilerVersion,
+              languageVersion,
+              senderAccount,
+              privateKey_deploy,
+              encoding,
+              gasUnitPrice,
+              maxGas,
+              expirationSecs,
+              assume_yes,
+              assume_no,
+              local,
+              benmark,
+              profile_gas,
+            ] = message.deployArgs;
+            await this.aptosService.deploy(
+              webviewView.webview,
+              overrideSizeCheck,
+              chunkedPublish,
+              largePackagesModuleAddress,
+              chunkSize,
+              includedArtifacts,
+              packageDir_deploy,
+              outputDir_deploy,
+              namedAddresses_deploy,
+              overrideStd_deploy,
+              skipGitDeps_deploy,
+              skipAttributeChecks_deploy,
+              checkTestCode_deploy,
+              optimize,
+              bytecodeVersion,
+              compilerVersion,
+              languageVersion,
+              senderAccount,
+              privateKey_deploy,
+              encoding,
+              gasUnitPrice,
+              maxGas,
+              expirationSecs,
+              assume_yes,
+              assume_no,
+              local,
+              benmark,
+              profile_gas
+            );
             break;
-          case "aptos.getSettings":
-            const aptosSettings = this.aptosService.getSettings();
-            webviewView.webview.postMessage({
-              type: "settings",
-              settings: aptosSettings,
-            });
+          case "aptos.checkProfile":
+            await this.aptosService.checkProfile(webviewView.webview);
             break;
+          case "aptos.checkBalance":
+            await this.aptosService.checkBalance(webviewView.webview);
+            break;
+
+          // case "aptos.getSettings":
+          //   const aptosSettings = this.aptosService.getSettings();
+          //   webviewView.webview.postMessage({
+          //     type: "settings",
+          //     settings: aptosSettings,
+          //   });
+          //   break;
 
           case "aptos.movetest":
             await MoveTest(webviewView.webview, message.testArgs);
             break;
-          case "aptos.deploy":
-            await this.aptosService.deploy(webviewView.webview);
-            break;
-          case "aptos.accountAddress":
-            const accountAddress = await this.aptosService.getAccountAddress(
-              webviewView.webview
-            );
-            webviewView.webview.postMessage({
-              type: "accountAddress",
-              address: accountAddress,
-            });
-            break;
-          case "aptos.requestFaucet":
-            const balance = await this.aptosService.requestFaucet(
-              webviewView.webview
-            );
-            webviewView.webview.postMessage({
-              type: "balance",
-              balance: balance,
-            });
-            break;
+          // case "aptos.accountAddress":
+          //   const accountAddress = await this.aptosService.getAccountAddress(
+          //     webviewView.webview
+          //   );
+          //   webviewView.webview.postMessage({
+          //     type: "accountAddress",
+          //     address: accountAddress,
+          //   });
+          //   break;
+          // case "aptos.requestFaucet":
+          //   const balance = await this.aptosService.requestFaucet(
+          //     webviewView.webview
+          //   );
+          //   webviewView.webview.postMessage({
+          //     type: "balance",
+          //     balance: balance,
+          //   });
+          //   break;
 
           case "aptos.checkFolder":
             await this.workspace.checkFolder(webviewView.webview);

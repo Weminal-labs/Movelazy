@@ -52,20 +52,74 @@ export class AptosService {
     return this.workspace.getSettings();
   }
 
-  async deploy(webview: vscode.Webview) {
-    const settings = this.workspace.getSettings();
-    const { packageDir, namedAddresses } = settings;
-    console.log("Named Addresses:", namedAddresses);
-    console.log("checkk>>>", packageDir, namedAddresses);
-    return this.deployer.deploy(webview, namedAddresses);
+  async deploy(
+    webview: vscode.Webview,
+    overrideSizeCheck: boolean,
+    chunkedPublish: boolean,
+    largePackagesModuleAddress: string,
+    chunkSize: string,
+    includedArtifacts: string,
+    packageDir_deploy: string,
+    outputDir: string,
+    namedAddresses_deploy: string,
+    overrideStd_deploy: string,
+    skipGitDeps_deploy: boolean,
+    skipAttributeChecks_deploy: boolean,
+    checkTestCode_deploy: boolean,
+    optimize: string,
+    bytecodeVersion: string,
+    compilerVersion: string,
+    languageVersion: string,
+    senderAccount: string,
+    privateKey_deploy: string,
+    encoding: string,
+    gasUnitPrice: string,
+    maxGas: string,
+    expirationSecs: string,
+    assume_yes: boolean,
+    assume_no: boolean,
+    local: boolean,
+    benmark: boolean,
+    profile_gas: boolean
+  ) {
+    return this.deployer.deploy(
+      webview,
+      overrideSizeCheck,
+      chunkedPublish,
+      largePackagesModuleAddress,
+      chunkSize,
+      includedArtifacts,
+      packageDir_deploy,
+      outputDir,
+      namedAddresses_deploy,
+      overrideStd_deploy,
+      skipGitDeps_deploy,
+      skipAttributeChecks_deploy,
+      checkTestCode_deploy,
+      optimize,
+      bytecodeVersion,
+      compilerVersion,
+      languageVersion,
+      senderAccount,
+      privateKey_deploy,
+      encoding,
+      gasUnitPrice,
+      maxGas,
+      expirationSecs,
+      assume_yes,
+      assume_no,
+      local,
+      benmark,
+      profile_gas
+    );
   }
 
-  async getAccountAddress(webview: vscode.Webview) {
-    return this.deployer.getAccountAddress(webview);
+  async checkProfile(webview: vscode.Webview) {
+    return this.deployer.checkProfile(webview);
   }
 
-  async requestFaucet(webview: vscode.Webview) {
-    return this.deployer.requestFaucet(webview);
+  async checkBalance(webview: vscode.Webview) {
+    return this.deployer.checkBalance(webview);
   }
 }
 

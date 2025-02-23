@@ -50,6 +50,30 @@ export type AptosMessage = {
     boolean,
     string
   ];
+  deployArgs?: [
+    boolean,
+    boolean,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    boolean,
+    boolean,
+    boolean,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string
+  ];
   testArgs?: TestArgs;
   settings?: CompilerSettings | DeployerSettings;
   flags?: Flags;
