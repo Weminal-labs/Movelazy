@@ -32,11 +32,12 @@ function ProcInit(args: { [key: string]: string } | null) {
         faucetEndpoint = args.faucetEndpoint;
         privateKey = args.privateKey;
     }
-    aptosCli.AptosInit(network, endpoint, faucetEndpoint, privateKey);
+    // aptosCli.AptosInit(network, endpoint, faucetEndpoint, privateKey);
 }
 
 function ProcCmdCase(ai_out: string) {
     const fmtCmd = SplitCmd(ai_out);
+    
     const cmd = fmtCmd.cmd;
     try {
         switch (cmd) {

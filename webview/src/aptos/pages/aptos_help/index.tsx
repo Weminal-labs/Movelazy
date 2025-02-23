@@ -3,7 +3,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
-import { useEffect } from "react";
 
 export default function AptosHelp() {
   const navigate = useNavigate();
@@ -16,15 +15,6 @@ export default function AptosHelp() {
       command: "ai-command",
     });
   };
-
-  useEffect(() => {
-    const messageHandler = (event: MessageEvent) => {
-
-    }
-
-    window.addEventListener("message", messageHandler)
-    return () => window.removeEventListener("message", messageHandler)
-  }, []);
 
   return (
     <div className="min-h-screen bg-black">

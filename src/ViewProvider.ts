@@ -12,10 +12,11 @@ import {
   MoveTest,
 } from "./services/Aptos-Cli";
 
-export class MovelazyViewProvider implements vscode.WebviewViewProvider {
+export class ViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";
   private readonly solidityService: SolidityService;
   private readonly aptosService: AptosService;
+  private static currentWebviewView: vscode.WebviewView | null = null;
   private workspace: WorkspaceService;
   private deployerService: DeployerService;
   constructor(private readonly context: vscode.ExtensionContext) {
@@ -25,9 +26,9 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
     this.deployerService = new DeployerService();
   }
 
-  public resolveWebviewView(
-    webviewView: vscode.WebviewView,
-  ) {
+  public resolveWebviewView(webviewView: vscode.WebviewView) {
+    ViewProvider.currentWebviewView = webviewView;
+
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [
