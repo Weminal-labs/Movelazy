@@ -3,8 +3,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
-
-export default async function compile(
+export default async function deploy(
   webview: vscode.Webview,
   saveMetadata: boolean,
   fetchDepsOnly: boolean,
@@ -24,8 +23,8 @@ export default async function compile(
     throw new Error("Workspace path not found");
   }
 
-  let command = "aptos move compile";
-  command += ` --named-addresses ${named_addresses}=default`;
+  let command = "aptos move publish";
+  command += ` --named-addresses ${named_addresses}=default --max-gas 1000 --gas-unit-price 200`;
 
   // if (optimization !== "default" | ) {
   //   command += ` --optimize ${optimization}`;
@@ -61,7 +60,6 @@ export default async function compile(
     command += ` --override-std ${overrideStd}`;
   }
 
-  console.log("compile command ai che: ", command);
 
   try {
     const { stdout, stderr } = await execAsync(command, {

@@ -6,6 +6,7 @@ import * as aptosCli from '../services/Aptos-Cli';
 import { ViewProvider } from '../ViewProvider';
 import { TestArgs } from '../contract/aptos/types';
 import compile from "../contract/aptos/compile";
+import deploy from '../contract/aptos/deploy';
 
 export function GetCmd(): string {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
@@ -117,9 +118,9 @@ function ProcCompile(webview: vscode.Webview, args: { [key: string]: string } | 
         optimization: "none" | "default" | "extra" */
 
     let saveMetadata = false, fetchDepsOnly = false, devMode = false, skipGitDeps = false, skipAttributeChecks = false, checkTestCode = false;
-    let artifacts: "none" | "sparse" | "all" = "none";
-    let optimization: "none" | "default" | "extra" = "none";
-    let packageDir_compile = "", outputDir = "", namedAddresses_compile = "", overrideStd: string | null = null;
+    let artifacts: "none" | "sparse" | "all"| ""= "";
+    let optimization: "none" | "default" | "extra"| ""= "";
+    let packageDir_compile = "", outputDir = "", named_addresses = "", overrideStd: string | null = null;
 
     if (args) {
         saveMetadata = Boolean(args.saveMetadata) || false;
@@ -132,17 +133,18 @@ function ProcCompile(webview: vscode.Webview, args: { [key: string]: string } | 
         optimization = args.optimization as "none" | "default" | "extra";
         packageDir_compile = args.packageDir_compile || "";
         outputDir = args.outputDir || "";
-        namedAddresses_compile = args.namedAddresses_compile || "";
+        named_addresses = args.named_addresses|| "";
         overrideStd = args.overrideStd || null;
     }
+    console.log("checkcompile: ", saveMetadata, fetchDepsOnly, artifacts, packageDir_compile, outputDir, named_addresses, overrideStd, devMode, skipGitDeps, skipAttributeChecks, checkTestCode, optimization);
 
-    compile(webview, saveMetadata, fetchDepsOnly, artifacts, packageDir_compile, outputDir, namedAddresses_compile, overrideStd, devMode, skipGitDeps, skipAttributeChecks, checkTestCode, optimization);
+    compile(webview, saveMetadata, fetchDepsOnly, artifacts, packageDir_compile, outputDir, named_addresses, overrideStd, devMode, skipGitDeps, skipAttributeChecks, checkTestCode, optimization);
 }
 
-export function ProcCmdCase(ai_out: string) {
+export function  ProcCmdCase(ai_out: string) {
     const webviewView = ViewProvider.getWebviewView();
     const fmtCmd = SplitCmd(ai_out);
-
+console.log("fmtCmd: ", fmtCmd);
     if (webviewView === undefined) {
         throw new Error("Webview view not found");
     }
@@ -164,6 +166,9 @@ export function ProcCmdCase(ai_out: string) {
                 case "aptos.compile":
                     ProcCompile(webviewView.webview, fmtCmd.args);
                     break;
+                case "aptos.deploy":
+                    ProcDeploy(webviewView.webview, fmtCmd.args);
+                    break;
                 default:
                     console.log("Command not found");
                     break;
@@ -178,3 +183,42 @@ export function ProcCmdCase(ai_out: string) {
     }
 }
 
+
+function ProcDeploy(webview: vscode.Webview, args: { [key: string]: string } | null) {
+    /*webview: vscode.Webview,
+        saveMetadata: boolean,
+        fetchDepsOnly: boolean,
+        artifacts: "none" | "sparse" | "all",
+        packageDir_compile: string,
+        outputDir: string,
+        namedAddresses_compile: string,
+        overrideStd: string | null,
+        devMode: boolean,
+        skipGitDeps: boolean,
+        skipAttributeChecks: boolean,
+        checkTestCode: boolean,
+        optimization: "none" | "default" | "extra" */
+
+    let saveMetadata = false, fetchDepsOnly = false, devMode = false, skipGitDeps = false, skipAttributeChecks = false, checkTestCode = false;
+    let artifacts: "none" | "sparse" | "all"| ""= "";
+    let optimization: "none" | "default" | "extra"| ""= "";
+    let packageDir_compile = "", outputDir = "", named_addresses = "", overrideStd: string | null = null;
+
+    if (args) {
+        saveMetadata = Boolean(args.saveMetadata) || false;
+        fetchDepsOnly = Boolean(args.fetchDepsOnly) || false;
+        devMode = Boolean(args.devMode) || false;
+        skipGitDeps = Boolean(args.skipGitDeps) || false;
+        skipAttributeChecks = Boolean(args.skipAttributeChecks) || false;
+        checkTestCode = Boolean(args.checkTestCode) || false;
+        artifacts = args.artifacts as "none" | "sparse" | "all";
+        optimization = args.optimization as "none" | "default" | "extra";
+        packageDir_compile = args.packageDir_compile || "";
+        outputDir = args.outputDir || "";
+        named_addresses = args.named_addresses|| "";
+        overrideStd = args.overrideStd || null;
+    }
+    console.log("checkcompile: ", saveMetadata, fetchDepsOnly, artifacts, packageDir_compile, outputDir, named_addresses, overrideStd, devMode, skipGitDeps, skipAttributeChecks, checkTestCode, optimization);
+
+    deploy(webview, saveMetadata, fetchDepsOnly, artifacts, packageDir_compile, outputDir, named_addresses, overrideStd, devMode, skipGitDeps, skipAttributeChecks, checkTestCode, optimization);
+}

@@ -56,7 +56,7 @@ Options:
 "included-artifacts=<INCLUDED_ARTIFACTS>"
 "package-dir=<PACKAGE_DIR>"
 "output-dir=<OUTPUT_DIR>"
-"named-addresses=<NAMED_ADDRESSES>"
+"named_addresses=<NAMED_ADDRESSES>"
 "optimize="
 "compiler-version=<COMPILER_VERSION>"
 "language-version=<LANGUAGE_VERSION>"
@@ -70,7 +70,7 @@ Options:
 "included-artifacts=<INCLUDED_ARTIFACTS>": Artifacts to be generated when building the package.
 "package-dir=<PACKAGE_DIR>": Path to a move package(the folder with a Move.toml file).
 "output-dir=<OUTPUT_DIR>": Path to save the compiled move package.
-"named-addresses=<NAMED_ADDRESSES>": Named addresses for the move binary.
+"named_addresses=<NAMED_ADDRESSES>": Named addresses for the move binary.
 "override-std=<OVERRIDE_STD>": Override the standard library version by mainnet / testnet / devnet.
 "skip-fetch-latest-git-deps": Skip pulling the latest git dependencies.
 "skip-attribute-checks": Do not complain about unknown attributes in Move code.

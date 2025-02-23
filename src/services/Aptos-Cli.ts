@@ -124,51 +124,49 @@ async function AptosInit(webview: vscode.Webview, network: string = "devnet", en
     }
 
     function notCustom(network: string, privateKey: string) {
-        console.log("initializing");
+    console.log("Initializing Aptos CLI...");
 
-        const aptosProcess = spawn("aptos", ["init"], {
-            cwd: workspacePath,
-            stdio: ["pipe", "pipe", "pipe"],
-        });
+    const aptosProcess = spawn("aptos", ["init"], {
+        cwd: workspacePath,
+        stdio: ["pipe", "pipe", "pipe"],
+    });
 
-        let outputData = "";
-        aptosProcess.stderr.on("data", (data) => {
-            const output = data.toString();
-            if (output.includes("already", "existing")) {
-                console.log("aptos already initialized");
-                aptosProcess.stdin.write("yes\n");
-            }
+    let outputData = "";
 
-            if (output.includes("Choose network")) {
-                aptosProcess.stdin.write(`${network}\n`);
-            }
+    aptosProcess.stderr.on("data", (data) => {
+        const output = data.toString();
+        console.log("CLI Output:", output);
 
-            if (output.includes("Enter your private key as a hex literal")) {
-                aptosProcess.stdin.write(`${privateKey || ""}\n`);
-            }
+        if (output.includes("already initialized")) {
+            console.log("Aptos already initialized, confirming overwrite...");
+            aptosProcess.stdin.write("yes\n");
+        } else if (output.includes("Choose network")) {
+            console.log(`Selecting network: ${network}`);
+            aptosProcess.stdin.write(`${network}\n`);
+        } else if (output.includes("Enter your private key as a hex literal")) {
+            console.log("Entering private key...");
+            aptosProcess.stdin.write(`${privateKey || ""}\n`);
+        } else if (output.match(/Account\s0x[a-fA-F0-9]+/)) {
+            outputData += output;
+        }
+    });
 
-            if (output.includes("account") || output.includes("Account")) {
-                outputData += output;
-            }
-        });
-
-
-        aptosProcess.on("close", (code) => {
-            if (code === 0) {
-                webview.postMessage({
-                    type: "cliStatus",
-                    success: true,
-                    message: outputData,
-                });
-            } else {
-                webview.postMessage({
-                    type: "cliStatus",
-                    success: false,
-                    message: `Aptos initialization failed with exit code ${code}`,
-                });
-            }
-        });
-    }
+    aptosProcess.on("close", (code) => {
+        if (code === 0) {
+            webview.postMessage({
+                type: "cliStatus",
+                success: true,
+                message: outputData.trim(),
+            });
+        } else {
+            webview.postMessage({
+                type: "cliStatus",
+                success: false,
+                message: `Aptos initialization failed with exit code ${code}`,
+            });
+        }
+    });
+}
 
     if (network === 'custom') {
         custom(network, endpoint, faucetEndpoint, privateKey);

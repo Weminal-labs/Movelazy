@@ -33,6 +33,7 @@ export default function AptosHelp() {
             message: message.message,
           });
           setIsLoading(false);
+          console.log("cliStatus: ", message.message);
           setShowDialog(true);
         }
       }
