@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../../assets/logo.svg";
-import { AlertTriangle, CheckCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -9,141 +8,133 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Alert, AlertDescription } from "../../components/ui/alert";
+import { StatusDialog } from "../../components/status-dialog";
 
-const ProjectPageAptos = () => {
+export default function ProjectPageAptos() {
   const navigate = useNavigate();
-  const [isAptosInitialized, setIsAptosInitialized] = useState<boolean | null>(
-    null
-  );
-  const [isWorkspace, setIsWorkspace] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [cliStatus, setcliStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
+  const [showDialog, setShowDialog] = useState(false);
+
+  const handleAiCommand = () => {
+    if (!window.vscode) {
+      return;
+    }
+    setIsLoading(true)
+    setShowDialog(true)
+    window.vscode.postMessage({
+      command: "ai-command",
+    });
+  };
 
   useEffect(() => {
-    console.log("🔹 Sending message to VS Code to check Aptos is init...");
-    window.vscode.postMessage({ command: "aptos.checkFolder" });
-
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
-      console.log("checkWorkspace:", message);
-      if (message.type === "folderStatus") {
-        // Handle folder status here if needed
-        setIsWorkspace(message.hasFolder);
-        console.log("checkWorkspace:", message.hasFolder);
+      if (message.type === "cliStatus" && message.message) {
+        let finalMessage = message.message;
 
-        // If the folder exists, continue to check Aptos initialization
-        if (message.hasFolder) {
-          console.log(
-            "🔹 Sending message to VS Code to check Aptos is init..."
-          );
-          window.vscode.postMessage({ command: "aptos.checkInit" });
-        } else {
-          // Handle the case where the folder does not exist
-          setIsAptosInitialized(false);
+        if (typeof message.message === "string") {
+          const jsonMatch = message.message.match(/{[\s\S]*}$/);
+          if (jsonMatch) {
+            try {
+              finalMessage = JSON.parse(jsonMatch[0]);
+            } catch (error) {
+              console.error("Không parse được JSON:", error);
+            }
+          }
         }
-      }
 
-      if (message.type === "CliStatus" || message.type === "error") {
-        console.log(
-          "✅ Aptos CLI Status:",
-          message.initialized ? "Initialized" : "Not Initialized"
-        );
-        setIsAptosInitialized(message.initialized);
+        if (typeof finalMessage === "object" && finalMessage.out) {
+          finalMessage = finalMessage.out;
+        } else if (typeof finalMessage === "object") {
+          // Nếu không có thuộc tính .out, chuyển thành chuỗi để đảm bảo an toàn khi render
+          finalMessage = JSON.stringify(finalMessage, null, 2);
+        }
+
+        setcliStatus({
+          type: message.success ? "success" : "error",
+          message: finalMessage,
+        });
+
+        setIsLoading(false);
+        console.log("cliStatus: ", finalMessage);
+        setShowDialog(true);
       }
     };
 
     window.addEventListener("message", messageHandler);
     return () => window.removeEventListener("message", messageHandler);
   }, []);
-
-  useEffect(() => {
-    if (isAptosInitialized) {
-      navigate("/aptos/help"); // Chuyển hướng đến /aptos/help
-    }
-  }, [isAptosInitialized, navigate]);
-
-  const handleSelectFolder = () => {
-    if (window.vscode) {
-      window.vscode.postMessage({ command: "aptos.selectFolder" });
-    }
-  };
-
-  // Project initialized
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-screen p-4 bg-black border-none">
-      <Card className="w-full max-w-md border-none">
-        <CardHeader className="text-center">
-          <div className="flex flex-col items-center mb-4">
-            <img src={logo} alt="Logo" className="w-24 h-24" />
-            <h1 className="font-pacifico text-3xl mt-4">Movelazy</h1>
+    <div className="min-h-screen bg-black">
+      <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
+        <CardHeader className="space-y-2 text-center">
+          <div className="flex flex-col items-center">
+            <img src={logo} alt="Logo" className="h-16 w-16" />
+            <CardTitle className="mt-4 font-pacifico text-2xl">
+              Movelazy
+            </CardTitle>
           </div>
-          <CardTitle className="text-2xl font-bold">
-            Workspace for Aptos
-          </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col items-center gap-4">
-          {!isWorkspace && (
-            <Alert className="border-red-600/20 bg-red-600/10">
-              <AlertTriangle className="h-4 w-4 text-yellow-400" />
-              <AlertDescription className="text-yellow-200">
-                No workspace found. Please open a folder.
-              </AlertDescription>
-            </Alert>
-          )}
-          {!isAptosInitialized && isWorkspace && (
-            <Alert className="border-yellow-600/20 bg-yellow-600/10">
-              <AlertTriangle className="h-4 w-4 text-yellow-400" />
-              <AlertDescription className="text-yellow-200">
-                Aptos has not been initialized! Run the command `aptos init` or
-                select other folder.
-              </AlertDescription>
-            </Alert>
-          )}
-          {isAptosInitialized && isWorkspace && (
-            <Alert className="border-green-600/20 bg-green-600/10">
-              <CheckCircle className="h-4 w-4 text-green-400" />
-              <AlertDescription className="text-green-200">
-                You already have a folder Aptos initialized. If you want, you
-                can select a different folder or Run the command `aptos help`
-              </AlertDescription>
-            </Alert>
-          )}
-          <Card className="w-full border-gray-800 bg-gray-900/50">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Button
-                  onClick={handleSelectFolder}
-                  variant="outline"
-                  className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                  size="sm"
-                >
-                  Select Other Folder
-                </Button>
+        <CardContent className="p-4">
 
-                {!isAptosInitialized && isWorkspace && (
-                  <Button
-                    onClick={() => navigate("/aptos/init")}
-                    variant="outline"
-                    className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                  >
-                    Aptos Init
-                  </Button>
-                )}
 
-                {isAptosInitialized && (
-                  <Button
-                    onClick={() => navigate("/aptos/help")}
-                    variant="outline"
-                    className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-                  >
-                    Aptos help
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+            <Button
+              onClick={() => { handleAiCommand() }}
+              variant="outline"
+              className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+            >
+              AI Command
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+            <Button
+              onClick={() => navigate("/aptos/help")}
+              variant="outline"
+              className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+            >
+              Aptos Commands
+            </Button>
+          </div>
+
+          <div className="flex flex-row justify-center gap-4 mb-2">
+            <a
+              href="https://aptos.dev/en/build/get-started"
+              className="flex-1 h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+            >
+              Documents
+            </a>
+            <a
+              href="https://movelazy-landing-page-six.vercel.app/"
+              className="flex-1 h-10 flex items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+            >
+              Movelazy
+            </a>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+            <Button
+              onClick={() => navigate("/")}
+              variant="outline"
+              className="h-14 flex flex-col items-center justify-center gap-2 border-gray-700 bg-white-800/50 hover:bg-red-800"
+            >
+              Back
+            </Button>
+          </div>
         </CardContent>
+        <StatusDialog
+          open={showDialog}
+          onOpenChange={setShowDialog}
+          loading={isLoading}
+          status={cliStatus}
+          loadingTitle="Ai Executing..."
+          loadingMessage="Please wait while running command..."
+          successTitle="Ai Execution Successful"
+          errorTitle="Ai Execution Failed"
+        />
       </Card>
     </div>
   );
 };
-export default ProjectPageAptos;
