@@ -1,3 +1,5 @@
+
+
 export type DeployArgs = {
   overrideSizeCheck: boolean;
   chunkedPublish: boolean;
@@ -6,7 +8,7 @@ export type DeployArgs = {
   includedArtifacts: string;
   packageDir_deploy: string;
   outputDir_deploy: string;
-  namedAddresses_deploy: string;
+  named_addresses: string;
   overrideStd_deploy: string;
   skipGitDeps_deploy: boolean;
   skipAttributeChecks_deploy: boolean;

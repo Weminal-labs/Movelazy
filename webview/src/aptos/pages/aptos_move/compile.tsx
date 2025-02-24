@@ -26,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+import { CompileArgs } from "../../types/compileArgs";
 
 // interface CompileArgs {
 //   namedAddresses: string;
@@ -57,7 +58,7 @@ export default function MoveCompile() {
     artifacts: "sparse",
     packageDir_compile: "",
     outputDir: "",
-    namedAddresses_compile: "",
+    named_addresses: "",
     overrideStd: "",
     devMode: false,
     skipGitDeps: false,
@@ -148,9 +149,9 @@ export default function MoveCompile() {
               </Label>
               <Input
                 id="namedAddresses"
-                value={compileArgs.namedAddresses_compile}
+                value={compileArgs.named_addresses}
                 onChange={(e) =>
-                  handleChange("namedAddresses_compile", e.target.value)
+                  handleChange("named_addresses", e.target.value)
                 }
                 placeholder="e.g. alice=0x1234, bob=0x5678"
                 className="bg-gray-800 border-gray-700 text-white"

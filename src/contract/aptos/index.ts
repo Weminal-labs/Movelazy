@@ -14,7 +14,7 @@ export class AptosService {
   }
 
   async compile(webview: vscode.Webview, args: CompileArgs) {
-    return this.compiler.compile(webview, args);
+    return compile(webview, args);
   }
 
   async deploy(webview: vscode.Webview, agrs: DeployArgs) {

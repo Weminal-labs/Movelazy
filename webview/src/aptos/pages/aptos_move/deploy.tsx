@@ -52,7 +52,7 @@ export default function MoveDeploy() {
     includedArtifacts: "sparse",
     packageDir_deploy: "",
     outputDir_deploy: "",
-    namedAddresses_deploy: "",
+    named_addresses: "",
     overrideStd_deploy: "",
     skipGitDeps_deploy: false,
     skipAttributeChecks_deploy: false,
@@ -244,9 +244,9 @@ export default function MoveDeploy() {
                 </Label>
                 <Input
                   id="namedAddresses"
-                  value={deployArgs.namedAddresses_deploy}
+                  value={deployArgs.named_addresses}
                   onChange={(e) =>
-                    handleChange("namedAddresses_deploy", e.target.value)
+                    handleChange("named_addresses", e.target.value)
                   }
                   placeholder="e.g. alice=0x1234, bob=0x5678"
                   className="bg-gray-800 border-gray-700 text-white"

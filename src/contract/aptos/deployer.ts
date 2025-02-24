@@ -49,21 +49,6 @@ export class AptosDeployerService {
     console.error("Error executing command:", error);
     return null;
   }
-    const { stdout, stderr } = await execAsync(`aptos account balance`, {
-      cwd: workspacePath,
-    });
-    if (stderr) {
-      console.error("Error getting account balance:", stderr);
-      return null;
-    }
-    const result = JSON.parse(stdout);
-    const balance = result.Result[0].balance;
-    return balance;
-  }
-  catch(error: any) {
-    console.error("Error executing command:", error);
-    return null;
-  }
 
   async getAccount() {
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
@@ -117,7 +102,7 @@ export class AptosDeployerService {
     }
     let command = "aptos move publish";
 
-    command += ` --named-addresses ${args.namedAddresses_deploy}=default --gas-unit-price ${args.gasUnitPrice} --max-gas ${args.maxGas}`;
+    command += ` --named-addresses ${args.named_addresses}=default --gas-unit-price ${args.gasUnitPrice} --max-gas ${args.maxGas}`;
 
     if (args.overrideSizeCheck) {
       command += " --override-size-check";
@@ -209,4 +194,3 @@ export class AptosDeployerService {
     }
   }
 }
-

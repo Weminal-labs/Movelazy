@@ -1,36 +1,38 @@
 import OpenAI from "openai";
-import * as dotenv from "dotenv";
 import * as bot from "./Ai-Cmd";
-
-dotenv.config({ path: '/home/huc/Movelazy/.env' });
+import * as dotenv from "dotenv";
+dotenv.config();
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || "",
+  apiKey:
+    process.env.VITE_OPENAI_API_KEY ||
+    "",
 });
 
+console.log("check apikey:", openai);
 export async function AiCmd() {
-    const usrInput = await bot.GetCmd();
-    AiResponse(usrInput);
+  const usrInput = await bot.GetCmd();
+  AiResponse(usrInput);
 }
 
 export async function AiResponse(usrInput: string) {
-    try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            temperature: 0.9,
-            messages: [
-                { role: "user", content: usrInput },
-                { role: "system", content: prompt },
-            ],
-        });
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      temperature: 0.9,
+      messages: [
+        { role: "user", content: usrInput },
+        { role: "system", content: prompt },
+      ],
+    });
 
-        const botResponse =
-            response.choices[0]?.message?.content?.trim() || "OpenAI not response!";
-        console.log("bot: ", botResponse);
-        bot.ProcCmdCase(botResponse);
-    } catch (error) {
-        throw new Error("❌ Error when calling OpenAI API: " + error);
-    }
+    const botResponse =
+      response.choices[0]?.message?.content?.trim() || "OpenAI not response!";
+    console.log("bot: ", botResponse);
+    bot.ProcCmdCase(botResponse);
+  } catch (error) {
+    throw new Error("❌ Error when calling OpenAI API: " + error);
+  }
 }
 
 const prompt = `
@@ -115,25 +117,25 @@ User Input: "I want to use local network and generate a new key {private_key}"
 Expected Output: "aptos.init network=local private-key={private_key}"
 
 User Input: "I want to compile my Move package {package_name}" 
-Expected Output: "aptos.compile named-addresses={package_name}"
+Expected Output: "aptos.compile named_addresses={package_name}"
 
 User Input: "compile {package_name}" 
-Expected Output: "aptos.compile named-addresses={package_name}"
+Expected Output: "aptos.compile named_addresses={package_name}"
 
 User Input: "I want to compile my project and specify the addresses {named_addresses}" 
-Expected Output: "aptos.compile named-addresses={named_addresses}"
+Expected Output: "aptos.compile named_addresses={named_addresses}"
 
 User Input: "compile the Move package with custom addresses {named_addresses}" 
-Expected Output: "aptos.compile named-addresses={named_addresses}"
+Expected Output: "aptos.compile named_addresses={named_addresses}"
 
 User Input: "I want to publish my contract {named_addresses}" 
-Expected Output: "aptos.deploy named-addresses={named_addresses}"
+Expected Output: "aptos.deploy named_addresses={named_addresses}"
 
 User Input: "Publish the Move package with chunked publishing {named_addresses}" 
-Expected Output: "aptos.deploy chunked-publish named-addresses={named_addresses}"
+Expected Output: "aptos.deploy chunked-publish named_addresses={named_addresses}"
 
 User Input: "I want to publish the Move package and include artifacts {named_addresses}" 
-Expected Output: "aptos.deploy included-artifacts=all named-addresses={named_addresses}"
+Expected Output: "aptos.deploy included-artifacts=all named_addresses={named_addresses}"
 
 User Input: "Publish my contract {named_addresses} on testnet with gas optimization"
 
@@ -142,10 +144,10 @@ Identify the command: Determine if the user is asking to use the "compile" comma
 Network selection: Check if the user specifies a network(devnet, testnet, mainnet, local, or custom).If no network is specified, assume default values based on the request.
 Private key handling: If the user doesn't mention a private key, use the default empty private key (meaning generate a new key).
 Custom network handling: If the network is custom, ensure the user provides both "rest-url"(RPC endpoint) and optionally a "faucet-url".
-compile requests: If the user mentions "compile", map the request to "compile" and ask for "named-addresses" to identify module addresses.
+compile requests: If the user mentions "compile", map the request to "compile" and ask for "named_addresses" to identify module addresses.
     Default behavior: If no further specifications are made(e.g., faucet URL for custom network), use the default or optional values.
 Identify the command: Check if the user mentions keywords like "publish", "deploy", or "publish my contract".These should map to the "deploy" command.
-Named addresses: Always ensure that "named-addresses" is included in the command.
+Named addresses: Always ensure that "named_addresses" is included in the command.
 Additional options: If the user asks for chunked publishing, optimization, private key, or any other specific options, include them in the command as per the input.
 Default behavior: If no specific options are mentioned, use default values for optional parameters like "included-artifacts sparse" or "chunk-size 55000".Your job is to analyze the user's input, extract the network type (if applicable), private key (or generate a new one), any additional configurations such as custom network endpoints, and then generate the appropriate Aptos CLI command based on the user's specifications.
 

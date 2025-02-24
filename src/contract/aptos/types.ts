@@ -34,7 +34,7 @@ export type DeployArgs = {
   includedArtifacts: string;
   packageDir_deploy: string;
   outputDir_deploy: string;
-  namedAddresses_deploy: string;
+  named_addresses: string;
   overrideStd_deploy: string;
   skipGitDeps_deploy: boolean;
   skipAttributeChecks_deploy: boolean;
@@ -58,16 +58,16 @@ export type DeployArgs = {
 export type CompileArgs = {
   saveMetadata: boolean;
   fetchDepsOnly: boolean;
-  artifacts: "none" | "sparse" | "all";
+  artifacts: "none" | "sparse" | "all"|"";
   packageDir_compile: string;
   outputDir: string;
-  namedAddresses_compile: string;
+  named_addresses: string;
   overrideStd: string | null;
   devMode: boolean;
   skipGitDeps: boolean;
   skipAttributeChecks: boolean;
   checkTestCode: boolean;
-  optimization: "none" | "default" | "extra";
+  optimization: "none" | "default" | "extra" | "";
 };
 
 export type CompileSettings = Settings;

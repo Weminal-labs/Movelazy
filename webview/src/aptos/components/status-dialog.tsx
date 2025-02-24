@@ -2,7 +2,6 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
-  ExternalLink,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -14,7 +13,6 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Alert, AlertDescription } from "./ui/alert";
-import { Button } from "./ui/button";
 import { Button } from "./ui/button";
 
 export interface StatusDialogProps {
@@ -37,10 +35,7 @@ export interface StatusDialogProps {
     label: string;
     transactionLink?: string;
   };
-  link?: {
-    label: string;
-    transactionLink?: string;
-  };
+
   preventCloseWhileLoading?: boolean;
 }
 
@@ -106,8 +101,8 @@ export function StatusDialog({
                 <AlertDescription>
                   <pre
                     className={`font-mono text-sm whitespace-pre-wrap break-all ${status.type === "success"
-                        ? "text-green-400"
-                        : "text-red-400"
+                      ? "text-green-400"
+                      : "text-red-400"
                       }`}
                   >
                     {status.message}

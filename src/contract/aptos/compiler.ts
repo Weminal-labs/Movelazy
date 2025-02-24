@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { CompileSettings } from "./types";
+import { CompileArgs } from "./types";
 
 const execAsync = promisify(exec);
 
@@ -13,7 +13,7 @@ export class AptosCompilerService {
     }
 
     let command = "aptos move compile";
-    command += ` --named-addresses ${args.namedAddresses_compile}=default`;
+    command += ` --named-addresses ${args.named_addresses}=default`;
 
     if (args.optimization !== "default") {
       command += ` --optimize ${args.optimization}`;

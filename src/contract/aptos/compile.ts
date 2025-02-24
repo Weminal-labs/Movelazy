@@ -1,23 +1,13 @@
 import * as vscode from "vscode";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { CompileArgs } from "./types";
 
 const execAsync = promisify(exec);
 
 export default async function compile(
   webview: vscode.Webview,
-  saveMetadata: boolean,
-  fetchDepsOnly: boolean,
-  artifacts: "none" | "sparse" | "all"| ""= "",
-  packageDir_compile: string,
-  outputDir: string,
-  named_addresses: string,
-  overrideStd: string | null,
-  devMode: boolean,
-  skipGitDeps: boolean,
-  skipAttributeChecks: boolean,
-  checkTestCode: boolean,
-  optimization: "none" | "default" | "extra"| ""= ""
+  args: CompileArgs
 ) {
   const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
   if (!workspacePath) {
@@ -25,7 +15,7 @@ export default async function compile(
   }
 
   let command = "aptos move compile";
-  command += ` --named-addresses ${named_addresses}=default`;
+  command += ` --named-addresses ${args.named_addresses}=default`;
 
   // if (optimization !== "default" | ) {
   //   command += ` --optimize ${optimization}`;
@@ -33,32 +23,32 @@ export default async function compile(
   // if (artifacts !== "sparse") {
   //   command += ` --included-artifacts ${artifacts}`;
   // }
-  if (saveMetadata) {
+  if (args.saveMetadata) {
     command += " --save-metadata";
   }
-  if (devMode) {
+  if (args.devMode) {
     command += " --dev";
   }
-  if (skipGitDeps) {
+  if (args.skipGitDeps) {
     command += " --skip-fetch-latest-git-deps";
   }
-  if (skipAttributeChecks) {
+  if (args.skipAttributeChecks) {
     command += " --skip-attribute-checks";
   }
-  if (checkTestCode) {
+  if (args.checkTestCode) {
     command += " --check-test-code";
   }
-  if (packageDir_compile) {
-    command += ` --package-dir ${packageDir_compile}`;
+  if (args.packageDir_compile) {
+    command += ` --package-dir ${args.packageDir_compile}`;
   }
-  if (outputDir) {
-    command += ` --output-dir ${outputDir}`;
+  if (args.outputDir) {
+    command += ` --output-dir ${args.outputDir}`;
   }
-  if (fetchDepsOnly) {
+  if (args.fetchDepsOnly) {
     command += " --fetch-deps-only";
   }
-  if (overrideStd) {
-    command += ` --override-std ${overrideStd}`;
+  if (args.overrideStd) {
+    command += ` --override-std ${args.overrideStd}`;
   }
 
   console.log("compile command ai che: ", command);
