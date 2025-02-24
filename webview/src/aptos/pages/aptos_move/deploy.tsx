@@ -53,10 +53,10 @@ export default function MoveDeploy() {
     packageDir_deploy: "",
     outputDir_deploy: "",
     namedAddresses_deploy: "",
-    overrideStd_deploy: "", // Ensure this is included
-    skipGitDeps_deploy: false, // Ensure this is included
-    skipAttributeChecks_deploy: false, // Ensure this is included
-    checkTestCode_deploy: false, // Ensure this is included
+    overrideStd_deploy: "",
+    skipGitDeps_deploy: false,
+    skipAttributeChecks_deploy: false,
+    checkTestCode_deploy: false,
     optimize: "default",
     bytecodeVersion: "7",
     compilerVersion: "2.0",

@@ -37,7 +37,7 @@ const InfoItem = ({ icon, label, value }: { icon: React.ReactNode; label: string
 
 export default function AptosInfo() {
     const navigate = useNavigate()
-    const [aptosInfo, setAptosInfo] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" })
+    const [cliStatus, setcliStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" })
     const [info, setInfo] = useState<BuildInfo>();
     const [isLoading, setIsLoading] = useState(true);
 
@@ -50,13 +50,13 @@ export default function AptosInfo() {
     useEffect(() => {
         const messageHandler = (event: MessageEvent) => {
             const message = event.data
-            if (message.type === "aptosInfo") {
-                if (message.aptosInfo) {
-                    setAptosInfo({
+            if (message.type === "cliStatus") {
+                if (message.message) {
+                    setcliStatus({
                         type: message.success ? "success" : "error",
-                        message: message.aptosInfo
+                        message: message.message
                     });
-                    setInfo(JSON.parse(message.aptosInfo).Result);
+                    setInfo(JSON.parse(message.message).Result);
                 }
                 setIsLoading(false);
             }
@@ -79,9 +79,9 @@ export default function AptosInfo() {
                             <div className="text-white text-lg font-semibold">
                                 Loading...
                             </div>
-                        ) : aptosInfo.type === "error" ? (
+                        ) : cliStatus.type === "error" ? (
                             <div className="text-red-500 text-lg font-semibold">
-                                Error: {aptosInfo.message}
+                                Error: {cliStatus.message}
                             </div>
                         ) : (
                             <>

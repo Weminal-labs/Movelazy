@@ -3,10 +3,45 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
+import { useEffect, useState } from "react";
+import { StatusDialog } from "../../components/status-dialog";
 
 export default function AptosHelp() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [cliStatus, setcliStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
+  const [showDialog, setShowDialog] = useState(false);
 
+  const handleAiCommand = () => {
+    if (!window.vscode) {
+      return;
+    }
+    setIsLoading(true)
+    setShowDialog(true)
+    window.vscode.postMessage({
+      command: "ai-command",
+    });
+  };
+
+  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      const message = event.data;
+      if (message.type === "cliStatus") {
+        if (message.message) {
+          setcliStatus({
+            type: message.success ? "success" : "error",
+            message: message.message,
+          });
+          setIsLoading(false);
+          console.log("cliStatus: ", message.message);
+          setShowDialog(true);
+        }
+      }
+    };
+
+    window.addEventListener("message", messageHandler);
+    return () => window.removeEventListener("message", messageHandler);
+  }, []);
   return (
     <div className="min-h-screen bg-black">
       <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
@@ -20,6 +55,17 @@ export default function AptosHelp() {
               Back
             </Button>
           </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+            <Button
+              onClick={() => { handleAiCommand() }}
+              variant="outline"
+              className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+            >
+              AI Command
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -29,6 +75,7 @@ export default function AptosHelp() {
               Aptos account
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -38,6 +85,7 @@ export default function AptosHelp() {
               Aptos config
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -47,6 +95,7 @@ export default function AptosHelp() {
               Aptos genesis
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -56,6 +105,7 @@ export default function AptosHelp() {
               Aptos governance
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos/info")}
@@ -65,6 +115,7 @@ export default function AptosHelp() {
               Aptos info
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos/init")}
@@ -74,6 +125,7 @@ export default function AptosHelp() {
               Aptos init
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -83,6 +135,7 @@ export default function AptosHelp() {
               Aptos key
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos/move")}
@@ -92,6 +145,7 @@ export default function AptosHelp() {
               Aptos move
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -101,6 +155,7 @@ export default function AptosHelp() {
               Aptos multisig
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -110,6 +165,7 @@ export default function AptosHelp() {
               Aptos node
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
@@ -119,6 +175,7 @@ export default function AptosHelp() {
               Aptos stake
             </Button>
           </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Button
               onClick={() => navigate("/aptos")}
@@ -128,7 +185,18 @@ export default function AptosHelp() {
               Aptos update
             </Button>
           </div>
+
         </CardContent>
+        <StatusDialog
+          open={showDialog}
+          onOpenChange={setShowDialog}
+          loading={isLoading}
+          status={cliStatus}
+          loadingTitle="Ai Executing..."
+          loadingMessage="Please wait while running command..."
+          successTitle="Ai Execution Successful"
+          errorTitle="Ai Execution Failed"
+        />
       </Card>
     </div>
   );

@@ -68,7 +68,7 @@ async function CheckAptosInit(): Promise<boolean> {
     });
 }
 
-async function AptosInit(webview: vscode.Webview, network: string, endpoint: string, faucetEndpoint: string, privateKey: string) {
+async function AptosInit(webview: vscode.Webview, network: string = "devnet", endpoint: string, faucetEndpoint: string, privateKey: string) {
     // Get workspace path
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
@@ -109,60 +109,64 @@ async function AptosInit(webview: vscode.Webview, network: string, endpoint: str
         aptosProcess.on("close", (code) => {
             if (code === 0) {
                 webview.postMessage({
-                    type: "initStatus",
+                    type: "cliStatus",
                     success: true,
-                    initInfo: outputData,
+                    message: outputData,
                 });
             } else {
                 webview.postMessage({
-                    type: "initStatus",
+                    type: "cliStatus",
                     success: false,
-                    initInfo: `Aptos initialization failed with exit code ${code}`,
+                    message: `Aptos initialization failed with exit code ${code}`,
                 });
             }
         });
     }
 
     function notCustom(network: string, privateKey: string) {
-        const aptosProcess = spawn("aptos", ["init"], {
-            cwd: workspacePath,
-            stdio: ["pipe", "pipe", "pipe"],
-        });
+    console.log("Initializing Aptos CLI...");
 
-        let outputData = "";
-        aptosProcess.stderr.on("data", (data) => {
-            const output = data.toString();
+    const aptosProcess = spawn("aptos", ["init"], {
+        cwd: workspacePath,
+        stdio: ["pipe", "pipe", "pipe"],
+    });
 
-            if (output.includes("Choose network")) {
-                aptosProcess.stdin.write(`${network}\n`);
-            }
+    let outputData = "";
 
-            if (output.includes("Enter your private key as a hex literal")) {
-                aptosProcess.stdin.write(`${privateKey || ""}\n`);
-            }
+    aptosProcess.stderr.on("data", (data) => {
+        const output = data.toString();
+        console.log("CLI Output:", output);
 
-            if (output.includes("account") || output.includes("Account")) {
-                outputData += output;
-            }
-        });
+        if (output.includes("already initialized")) {
+            console.log("Aptos already initialized, confirming overwrite...");
+            aptosProcess.stdin.write("yes\n");
+        } else if (output.includes("Choose network")) {
+            console.log(`Selecting network: ${network}`);
+            aptosProcess.stdin.write(`${network}\n`);
+        } else if (output.includes("Enter your private key as a hex literal")) {
+            console.log("Entering private key...");
+            aptosProcess.stdin.write(`${privateKey || ""}\n`);
+        } else if (output.match(/Account\s0x[a-fA-F0-9]+/)) {
+            outputData += output;
+        }
+    });
 
-
-        aptosProcess.on("close", (code) => {
-            if (code === 0) {
-                webview.postMessage({
-                    type: "initStatus",
-                    success: true,
-                    initInfo: outputData,
-                });
-            } else {
-                webview.postMessage({
-                    type: "initStatus",
-                    success: false,
-                    initInfo: `Aptos initialization failed with exit code ${code}`,
-                });
-            }
-        });
-    }
+    aptosProcess.on("close", (code) => {
+        if (code === 0) {
+            webview.postMessage({
+                type: "cliStatus",
+                success: true,
+                message: outputData.trim(),
+            });
+        } else {
+            webview.postMessage({
+                type: "cliStatus",
+                success: false,
+                message: `Aptos initialization failed with exit code ${code}`,
+            });
+        }
+    });
+}
 
     if (network === 'custom') {
         custom(network, endpoint, faucetEndpoint, privateKey);
@@ -181,15 +185,15 @@ async function AptosInfo(webview: vscode.Webview) {
     try {
         const { stdout, stderr } = await execAsync("aptos info", { cwd: workspacePath });
         webview.postMessage({
-            type: "aptosInfo",
+            type: "cliStatus",
             success: true,
-            aptosInfo: stderr + stdout,
+            message: stderr + stdout,
         });
     } catch (error) {
         webview.postMessage({
-            type: "aptosInfo",
+            type: "cliStatus",
             success: false,
-            aptosInfo: (error as Error).message,
+            message: (error as Error).message,
         });
     }
 }
@@ -229,15 +233,15 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
     try {
         const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
         webview.postMessage({
-            type: "moveInitStatus",
+            type: "cliStatus",
             success: true,
-            initInfo: stderr + stdout,
+            message: stderr + stdout,
         });
     } catch (error) {
         webview.postMessage({
-            type: "moveInitStatus",
+            type: "cliStatus",
             success: false,
-            initInfo: (error as Error).message,
+            message: (error as Error).message,
         });
 
     }
@@ -308,17 +312,17 @@ async function MoveTest(webview: vscode.Webview, args: TestArgs) {
     try {
         const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
         webview.postMessage({
-            type: "moveTestStatus",
+            type: "cliStatus",
             success: true,
-            testInfo: stderr + stdout,
+            message: stderr + stdout,
         });
 
     }
     catch (error) {
         webview.postMessage({
-            type: "moveTestStatus",
+            type: "cliStatus",
             success: false,
-            testInfo: (error as Error).message,
+            message: (error as Error).message,
         });
     }
 }

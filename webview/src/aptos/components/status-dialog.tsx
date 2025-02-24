@@ -1,4 +1,9 @@
-import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  ExternalLink,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Alert, AlertDescription } from "./ui/alert";
+import { Button } from "./ui/button";
 import { Button } from "./ui/button";
 
 export interface StatusDialogProps {
@@ -26,6 +32,10 @@ export interface StatusDialogProps {
   successAction?: {
     label: string;
     onClick: () => void;
+  };
+  link?: {
+    label: string;
+    transactionLink?: string;
   };
   link?: {
     label: string;
@@ -69,6 +79,9 @@ export function StatusDialog({
             <div className="py-4">
               <p className="text-gray-300">{loadingMessage}</p>
             </div>
+            <AlertDialogCancel className="hover:bg-gray-700">
+              Close
+            </AlertDialogCancel>
           </>
         ) : (
           <>
@@ -92,16 +105,16 @@ export function StatusDialog({
               >
                 <AlertDescription>
                   <pre
-                    className={`font-mono text-sm whitespace-pre-wrap break-all ${
-                      status.type === "success"
+                    className={`font-mono text-sm whitespace-pre-wrap break-all ${status.type === "success"
                         ? "text-green-400"
                         : "text-red-400"
-                    }`}
+                      }`}
                   >
                     {status.message}
                   </pre>
                 </AlertDescription>
               </Alert>
+
             )}
 
             <AlertDialogFooter>

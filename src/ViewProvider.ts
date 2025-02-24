@@ -11,11 +11,13 @@ import {
   AptosInfo,
   MoveTest,
 } from "./services/Aptos-Cli";
+import { AiCmd } from "./ai/chatbot";
 
-export class MovelazyViewProvider implements vscode.WebviewViewProvider {
+export class ViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";
   private readonly solidityService: SolidityService;
   private readonly aptosService: AptosService;
+  private static currentWebviewView: vscode.WebviewView | null = null;
   private workspace: WorkspaceService;
   private deployerService: DeployerService;
   constructor(private readonly context: vscode.ExtensionContext) {
@@ -25,11 +27,12 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
     this.deployerService = new DeployerService();
   }
 
-  public resolveWebviewView(
-    webviewView: vscode.WebviewView,
-    context: vscode.WebviewViewResolveContext,
-    token: vscode.CancellationToken
-  ) {
+  public static getWebviewView(): vscode.WebviewView | null {
+    return ViewProvider.currentWebviewView;
+  }
+  public resolveWebviewView(webviewView: vscode.WebviewView) {
+    ViewProvider.currentWebviewView = webviewView;
+
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [
@@ -192,6 +195,8 @@ export class MovelazyViewProvider implements vscode.WebviewViewProvider {
 
           case "aptos.selectFolder":
             await this.workspace.selectFolder(webviewView.webview);
+          case "ai-command":
+            AiCmd();
             break;
         }
       } catch (error) {

@@ -26,7 +26,22 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { CompileArgs } from "../../types/compileArgs";
+
+// interface CompileArgs {
+//   namedAddresses: string;
+//   template: string;
+//   artifacts: "none" | "sparse" | "all";
+//   optimization: "none" | "default" | "extra";
+//   saveMetadata: boolean;
+//   devMode: boolean;
+//   skipGitDeps: boolean;
+//   skipAttributeChecks: boolean;
+//   checkTestCode: boolean;
+//   packageDir: string;
+//   outputDir: string;
+//   fetchDepsOnly: boolean;
+//   overrideStd: "mainnet" | "testnet" | "devnet" | null;
+// }
 
 export default function MoveCompile() {
   const navigate = useNavigate();

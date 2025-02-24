@@ -75,11 +75,11 @@ export default function MoveTest() {
     useEffect(() => {
         const messageHandler = (event: MessageEvent) => {
             const message = event.data
-            if (message.type === "moveTestStatus") {
-                if (message.testInfo) {
+            if (message.type === "cliStatus") {
+                if (message.message) {
                     setTestStatus({
                         type: message.success ? "success" : "error",
-                        message: message.testInfo
+                        message: message.message
                     });
                     setTesting(false)
                     setShowDialog(true)
