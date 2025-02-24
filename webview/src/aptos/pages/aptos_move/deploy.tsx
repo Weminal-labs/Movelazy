@@ -108,12 +108,11 @@ export default function MoveDeploy() {
 
         const newMessage =
           message.message.out.split("Transaction submitted:")[1]?.trim() || "";
-
         console.log("transactionLink:", transactionLink);
         setcliStatus({
           type: message.success ? "success" : "error",
           message: {
-            out: "Transaction submitted: " + newMessage,
+            out: newMessage ? `Transaction submitted: ${newMessage}` : message.message.out,
             isProfile: false,
           },
         });
@@ -248,7 +247,7 @@ export default function MoveDeploy() {
                   onChange={(e) =>
                     handleChange("named_addresses", e.target.value)
                   }
-                  placeholder="e.g. alice=0x1234, bob=0x5678"
+                  placeholder="e.g. alice, bob"
                   className="bg-gray-800 border-gray-700 text-white"
                 />
               </div>

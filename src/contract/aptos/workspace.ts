@@ -45,62 +45,62 @@ export class WorkspaceService {
   /**
    * Create template project
    */
-  async createTemplate(webview: vscode.Webview): Promise<void> {
-    try {
-      const workspacePath = this.getWorkspacePath();
-      if (!workspacePath) {
-        throw new Error("No workspace folder found");
-      }
+  // async createTemplate(webview: vscode.Webview): Promise<void> {
+  //   try {
+  //     const workspacePath = this.getWorkspacePath();
+  //     if (!workspacePath) {
+  //       throw new Error("No workspace folder found");
+  //     }
 
-      // Create project from template
-      await execAsync(
-        "aptos move init --name hello_blockchain --template hello-blockchain",
-        { cwd: workspacePath }
-      );
+  //     // Create project from template
+  //     await execAsync(
+  //       "aptos move init --name hello_blockchain --template hello-blockchain",
+  //       { cwd: workspacePath }
+  //     );
 
-      webview.postMessage({
-        type: "cliStatus",
-        initialized: true,
-      });
-    } catch (error) {
-      webview.postMessage({
-        type: "cliStatus",
-        initialized: false,
-        error: (error as Error).message,
-      });
-    }
-  }
+  //     webview.postMessage({
+  //       type: "cliStatus",
+  //       initialized: true,
+  //     });
+  //   } catch (error) {
+  //     webview.postMessage({
+  //       type: "cliStatus",
+  //       initialized: false,
+  //       error: (error as Error).message,
+  //     });
+  //   }
+  // }
 
   /**
    * Save settings
    */
-  public async saveSettings(settings: any) {
-    console.log("Saving settings:", settings);
-    await this.context.workspaceState.update(this.stateKey, settings);
-  }
+  // public async saveSettings(settings: any) {
+  //   console.log("Saving settings:", settings);
+  //   await this.context.workspaceState.update(this.stateKey, settings);
+  // }
 
   /**
    * Get settings
    */
-  public getSettings(): any {
-    const settings = this.context.workspaceState.get(this.stateKey, {
-      optimizer: {
-        enabled: false,
-        level: "default",
-      },
-      metadata: {
-        bytecodeHash: "6",
-      },
-      packageDir: "",
-      namedAddresses: "",
-      network: "https://api.testnet.aptoslabs.com/v1",
-    });
+  // public getSettings(): any {
+  //   const settings = this.context.workspaceState.get(this.stateKey, {
+  //     optimizer: {
+  //       enabled: false,
+  //       level: "default",
+  //     },
+  //     metadata: {
+  //       bytecodeHash: "6",
+  //     },
+  //     packageDir: "",
+  //     namedAddresses: "",
+  //     network: "https://api.testnet.aptoslabs.com/v1",
+  //   });
 
-    console.log("Retrieved settings:", settings);
-    return settings;
-  }
+  //   console.log("Retrieved settings:", settings);
+  //   return settings;
+  // }
 
-  private getWorkspacePath(): string | undefined {
-    return vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  }
+//   private getWorkspacePath(): string | undefined {
+//     return vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+//   }
 }

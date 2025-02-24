@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { SolidityService } from "./contract/solidity";
-import { AptosService } from "./contract/aptos";
+// import { AptosService } from "./contract/aptos";
 import { WorkspaceService } from "./contract/aptos/workspace";
 import { DeployerService } from "./contract/solidity/deployer";
 import {
@@ -12,18 +12,20 @@ import {
   MoveTest,
 } from "./services/Aptos-Cli";
 import { AiCmd } from "./ai/chatbot";
+import compile from "./contract/aptos/compile";
+import { checkProfile, deploy } from "./contract/aptos/deploy";
 
 export class ViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";
   private readonly solidityService: SolidityService;
-  private readonly aptosService: AptosService;
+  // private readonly aptosService: AptosService;
   private static currentWebviewView: vscode.WebviewView | null = null;
   private workspace: WorkspaceService;
   private deployerService: DeployerService;
   constructor(private readonly context: vscode.ExtensionContext) {
     this.workspace = new WorkspaceService(context);
     this.solidityService = new SolidityService(context);
-    this.aptosService = new AptosService(context);
+    // this.aptosService = new AptosService(context);
     this.deployerService = new DeployerService();
   }
 
@@ -167,19 +169,19 @@ export class ViewProvider implements vscode.WebviewViewProvider {
             break;
 
           case "aptos.compile":
-            await this.aptosService.compile(
+            await compile(
               webviewView.webview,
               message.compileArgs
             );
             break;
           case "aptos.deploy":
-            await this.aptosService.deploy(
+            await deploy(
               webviewView.webview,
               message.deployArgs
             );
             break;
           case "aptos.checkProfile":
-            await this.aptosService.checkProfile(webviewView.webview);
+            await checkProfile(webviewView.webview);
             break;
 
           case "aptos.movetest":

@@ -2,10 +2,32 @@ import * as vscode from "vscode";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { DeployArgs } from "./types";
-
+import { spawn } from "child_process";
 const execAsync = promisify(exec);
+function deployWithSpawn(command: string, args: string[], cwd: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(command, args, { cwd });
+    let output = "";
 
-export default async function deploy(
+    proc.stdout.on("data", (data) => {
+      output += data.toString();
+    });
+
+    proc.stderr.on("data", (data) => {
+      output += data.toString();
+    });
+
+    proc.on("close", (code) => {
+      if (code !== 0) {
+        return reject(output);
+      }
+      console.log("chekc: ", output);
+      resolve(output);
+    });
+  });
+}
+
+async function deploy(
   webview: vscode.Webview,
   args: DeployArgs
 ) {
@@ -15,100 +37,191 @@ export default async function deploy(
   }
   console.log("deploychekc: ");
 
-  let command = "aptos move publish";
-  command += ` --named-addresses ${args.named_addresses}=default --max-gas 1000 --gas-unit-price 200`;
+   const command = "aptos";
+  const cmdArgs: string[] = ["move", "publish"];
 
-  console.log("deploy command ai che2: ", command);
+  // Các tùy chọn bắt buộc
+  cmdArgs.push("--named-addresses", `${args.named_addresses}=default`, "--max-gas", "1000", "--gas-unit-price", "200");
 
+  // Các tùy chọn bổ sung:
   if (args.overrideSizeCheck) {
-    command += " --override-size-check";
+    cmdArgs.push("--override-size-check");
   }
-  console.log("deploy command ai che3: ", command);
-
   if (args.chunkedPublish) {
-    command += " --chunked-publish";
+    cmdArgs.push("--chunked-publish");
   }
-  if (
-    args.largePackagesModuleAddress &&
-    args.largePackagesModuleAddress !==
-    "0x0e1ca3011bdd07246d4d16d909dbb2d6953a86c4735d5acf5865d962c630cce7"
-  ) {
-    command += ` --large-packages-module-address ${args.largePackagesModuleAddress}`;
+  if (args.largePackagesModuleAddress && args.largePackagesModuleAddress !== "0x0e1ca3011bdd07246d4d16d909dbb2d6953a86c4735d5acf5865d962c630cce7") {
+    cmdArgs.push("--large-packages-module-address", args.largePackagesModuleAddress);
   }
   if (args.chunkSize && args.chunkSize !== "55000") {
-    command += ` --chunk-size ${args.chunkSize}`;
+    cmdArgs.push("--chunk-size", args.chunkSize);
   }
   if (args.includedArtifacts && args.includedArtifacts !== "sparse") {
-    command += ` --included-artifacts ${args.includedArtifacts}`;
+    cmdArgs.push("--included-artifacts", args.includedArtifacts);
   }
   if (args.packageDir_deploy) {
-    command += ` --package-dir ${args.packageDir_deploy}`;
+    cmdArgs.push("--package-dir", args.packageDir_deploy);
   }
   if (args.outputDir_deploy) {
-    command += ` --output-dir ${args.outputDir_deploy}`;
+    cmdArgs.push("--output-dir", args.outputDir_deploy);
   }
   if (args.overrideStd_deploy) {
-    command += ` --override-std ${args.overrideStd_deploy}`;
+    cmdArgs.push("--override-std", args.overrideStd_deploy);
   }
   if (args.skipGitDeps_deploy) {
-    command += " --skip-git-deps";
+    cmdArgs.push("--skip-git-deps");
   }
   if (args.skipAttributeChecks_deploy) {
-    command += " --skip-attribute-checks";
+    cmdArgs.push("--skip-attribute-checks");
   }
   if (args.checkTestCode_deploy) {
-    command += " --check-test-code";
+    cmdArgs.push("--check-test-code");
   }
   if (args.optimize && args.optimize !== "default") {
-    command += ` --optimize ${args.optimize}`;
+    cmdArgs.push("--optimize", args.optimize);
   }
   if (args.compilerVersion && args.compilerVersion !== "2.0") {
-    command += ` --compiler-version ${args.compilerVersion}`;
+    cmdArgs.push("--compiler-version", args.compilerVersion);
   }
   if (args.languageVersion && args.languageVersion !== "2.1") {
-    command += ` --language-version ${args.languageVersion}`;
+    cmdArgs.push("--language-version", args.languageVersion);
   }
   if (args.senderAccount) {
-    command += ` --sender-account ${args.senderAccount}`;
+    cmdArgs.push("--sender-account", args.senderAccount);
   }
   if (args.privateKey_deploy) {
-    command += ` --private-key ${args.privateKey_deploy}`;
+    cmdArgs.push("--private-key", args.privateKey_deploy);
   }
   if (args.encoding && args.encoding !== "hex") {
-    command += ` --encoding ${args.encoding}`;
+    cmdArgs.push("--encoding", args.encoding);
   }
   if (args.expirationSecs && args.expirationSecs !== "30") {
-    command += ` --expiration-secs ${args.expirationSecs}`;
+    cmdArgs.push("--expiration-secs", args.expirationSecs);
   }
   if (args.assume_yes) {
-    command += " --assume-yes";
+    cmdArgs.push("--assume-yes");
   }
   if (args.assume_no) {
-    command += " --assume-no";
+    cmdArgs.push("--assume-no");
   }
   if (args.local) {
-    command += " --local";
+    cmdArgs.push("--local");
   }
   if (args.benmark) {
-    command += " --benmark";
+    cmdArgs.push("--benmark");
   }
-  console.log("deploy command ai che: ", command);
 
+  console.log("Deploy command:", command, cmdArgs.join(" "));
+let output = ""
   try {
-    const { stdout, stderr } = await execAsync(command, {
-      cwd: workspacePath,
-    });
+    output = await deployWithSpawn(command, cmdArgs, workspacePath);
+    console.log("Deploy output:", output);
     webview.postMessage({
       type: "cliStatus",
       success: true,
-      message: stderr + stdout,
+      message: {out:output, isProfile: false},
     });
-    return;
   } catch (error) {
+    // const errorMessage = (error instanceof Error) ? error.message : String(error);
     webview.postMessage({
       type: "cliStatus",
       success: false,
-      message: (error as Error).message,
+      message: {out:`${error}\n{${output ? `Output: ${output}` : ""}}`, isProfile: false },
     });
   }
 }
+
+async function checkProfile(webview: vscode.Webview) {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+      console.error("Workspace path is undefined.");
+      return null;
+    }
+    try {
+      const isProfile = true;
+      const accountAddress = await getAccount();
+      const network = await getNetWork();
+      const balance = await checkBalance();
+      console.log("check3", accountAddress, network, balance);
+      webview.postMessage({
+        type: "cliStatus",
+        message: { accountAddress, network, balance, isProfile },
+      });
+      return;
+    } catch (error) {
+      console.error("Error parsing config file:", error);
+    }
+    return Promise.reject("Failed to read account from config");
+  }
+async function checkBalance() {
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  if (!workspacePath) {
+    console.log("No workspace");
+    return;
+  }
+  try {
+    const { stdout, stderr } = await execAsync(`aptos account balance`, {
+      cwd: workspacePath,
+    });
+    if (stderr) {
+      console.error("Error getting account balance:", stderr);
+      return null;
+    }
+    const result = JSON.parse(stdout);
+    const balance = result.Result[0].balance;
+    return balance;
+  }
+  catch (error: any) {
+    console.error("Error executing command:", error);
+    return null;
+  }
+}
+
+  async function getAccount() {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+      console.log("No workspace");
+      return;
+    }
+    try {
+      const { stdout, stderr } = await execAsync(`aptos config show-profiles`, {
+        cwd: workspacePath,
+      });
+      if (stderr) {
+        console.error("Error getting account:", stderr);
+        return null;
+      }
+      const result = JSON.parse(stdout);
+      const account = result.Result.default.account;
+      return account;
+    } catch (error) {
+      console.error("Error executing account command:", error);
+      return null;
+    }
+  }
+
+  async function getNetWork() {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspacePath) {
+      console.log("No workspace");
+      return;
+    }
+    try {
+      const { stdout, stderr } = await execAsync(`aptos config show-profiles`, {
+        cwd: workspacePath,
+      });
+      if (stderr) {
+        console.error("Error getting network:", stderr);
+        return null;
+      }
+      const result = JSON.parse(stdout);
+      const network = result.Result.default.rest_url;
+      return network;
+    } catch (error) {
+      console.error("Error executing network command:", error);
+      return null;
+    }
+  }
+
+
+export { deploy, checkProfile, checkBalance, getAccount, getNetWork };

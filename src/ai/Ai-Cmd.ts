@@ -6,7 +6,7 @@ import * as aptosCli from "../services/Aptos-Cli";
 import { ViewProvider } from "../ViewProvider";
 import { CompileArgs, DeployArgs, TestArgs } from "../contract/aptos/types";
 import compile from "../contract/aptos/compile";
-import deploy from "../contract/aptos/deploy";
+import { deploy } from "../contract/aptos/deploy";
 
 export function GetCmd(): string {
   const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
@@ -180,21 +180,6 @@ function ProcCompile(
     checkTestCode: Boolean(args?.checkTestCode) || false,
     optimization: args?.optimization as "none" | "default" | "extra" | "",
   };
-  console.log(
-    "checkcompile: ",
-    saveMetadata,
-    fetchDepsOnly,
-    artifacts,
-    packageDir_compile,
-    outputDir,
-    named_addresses,
-    overrideStd,
-    devMode,
-    skipGitDeps,
-    skipAttributeChecks,
-    checkTestCode,
-    optimization
-  );
 
   compile(webview, compileArgs);
 }
@@ -209,7 +194,7 @@ export function ProcCmdCase(ai_out: string) {
 
   if (webviewView) {
     const cmd = fmtCmd.cmd;
-    console.log("Cmd: ", fmtCmd);
+    console.log("Cmd: ", fmtCmd.cmd);
     try {
       switch (cmd) {
         case "aptos.init":
@@ -229,13 +214,15 @@ export function ProcCmdCase(ai_out: string) {
           break;
         default:
           console.log("Command not found");
-          break;
+          throw new Error("Command not found in switch case with cmd: " + cmd);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to process AI output: ${error.message}`);
-      }
-    }
+    webviewView.webview.postMessage({
+      type: "cliStatus",
+      success: false,
+      message: (error as Error).message,
+    });
+  }
   } else {
     throw new Error("Webview view is null");
   }
@@ -301,10 +288,6 @@ function ProcDeploy(
     local: Boolean(args?.local) || false,
     benmark: Boolean(args?.benmark) || false,
   };
-  console.log(
-    "checkcompdeploy: ",
-deployArgs
-  );
 
   deploy(
     webview,

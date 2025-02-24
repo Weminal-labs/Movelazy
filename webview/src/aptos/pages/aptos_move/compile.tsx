@@ -153,7 +153,7 @@ export default function MoveCompile() {
                 onChange={(e) =>
                   handleChange("named_addresses", e.target.value)
                 }
-                placeholder="e.g. alice=0x1234, bob=0x5678"
+                placeholder="e.g. alice, bob"
                 className="bg-gray-800 border-gray-700 text-white"
               />
             </div>

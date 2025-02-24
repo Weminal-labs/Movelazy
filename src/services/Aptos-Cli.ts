@@ -204,7 +204,10 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
         throw new Error("Workspace path not found");
     }
 
-    let command = "aptos move init --name " + name;
+    let command = "aptos move init";
+    if (name) {
+        command += " --name " + name;
+    }
     if (packageDir !== "") {
         command += " --package-dir " + packageDir;
     }

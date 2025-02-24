@@ -1,15 +1,15 @@
 import OpenAI from "openai";
 import * as bot from "./Ai-Cmd";
 import * as dotenv from "dotenv";
-dotenv.config();
+import * as path from "path";
+import * as vscode from "vscode";
+dotenv.config({ path: path.join(__dirname, "..", "..", ".env") });
 
 const openai = new OpenAI({
-  apiKey:
-    process.env.VITE_OPENAI_API_KEY ||
-    "",
+  apiKey: process.env.VITE_OPENAI_API_KEY || "",
 });
 
-console.log("check apikey:", openai);
+
 export async function AiCmd() {
   const usrInput = await bot.GetCmd();
   AiResponse(usrInput);
@@ -37,6 +37,7 @@ export async function AiResponse(usrInput: string) {
 
 const prompt = `
 You are a blockchain assistant for Aptos CLI.Your task is to analyze the user's input, interpret their request, and generate the exact Aptos CLI command and options that fulfill their request. Do not add any extra explanations or words. You must return only the command and options in the correct format.
+
 
 Here are the available Aptos commands and their options:
 
@@ -150,6 +151,8 @@ Identify the command: Check if the user mentions keywords like "publish", "deplo
 Named addresses: Always ensure that "named_addresses" is included in the command.
 Additional options: If the user asks for chunked publishing, optimization, private key, or any other specific options, include them in the command as per the input.
 Default behavior: If no specific options are mentioned, use default values for optional parameters like "included-artifacts sparse" or "chunk-size 55000".Your job is to analyze the user's input, extract the network type (if applicable), private key (or generate a new one), any additional configurations such as custom network endpoints, and then generate the appropriate Aptos CLI command based on the user's specifications.
+Please answer my questions without using any triple backticks. Instead, if you need to format code or text, use al
+
 
 User Input: "{user_input}" Your Response:
 `;

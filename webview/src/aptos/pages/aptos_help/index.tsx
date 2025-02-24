@@ -26,16 +26,35 @@ export default function AptosHelp() {
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
-      if (message.type === "cliStatus") {
-        if (message.message) {
-          setcliStatus({
-            type: message.success ? "success" : "error",
-            message: message.message,
-          });
-          setIsLoading(false);
-          console.log("cliStatus: ", message.message);
-          setShowDialog(true);
+      if (message.type === "cliStatus" && message.message) {
+        let finalMessage = message.message;
+
+        if (typeof message.message === "string") {
+          const jsonMatch = message.message.match(/{[\s\S]*}$/);
+          if (jsonMatch) {
+            try {
+              finalMessage = JSON.parse(jsonMatch[0]);
+            } catch (error) {
+              console.error("Không parse được JSON:", error);
+            }
+          }
         }
+
+        if (typeof finalMessage === "object" && finalMessage.out) {
+          finalMessage = finalMessage.out;
+        } else if (typeof finalMessage === "object") {
+          // Nếu không có thuộc tính .out, chuyển thành chuỗi để đảm bảo an toàn khi render
+          finalMessage = JSON.stringify(finalMessage, null, 2);
+        }
+
+        setcliStatus({
+          type: message.success ? "success" : "error",
+          message: finalMessage,
+        });
+
+        setIsLoading(false);
+        console.log("cliStatus: ", finalMessage);
+        setShowDialog(true);
       }
     };
 
@@ -48,7 +67,7 @@ export default function AptosHelp() {
         <CardContent className="p-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/aptos/project")}
               variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-white-800/50 hover:bg-red-800"
             >

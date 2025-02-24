@@ -102,32 +102,19 @@ export default function MoveInit() {
                         </TabsList>
                         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
                             <TabsContent value="simple">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name" className="text-white">
-                                            Name (required)
-                                        </Label>
-                                        <Input
-                                            id="name"
-                                            name="name"
-                                            value={initArgs.name}
-                                            onChange={handleInputChange}
-                                            className="bg-gray-800 border-gray-700 text-white"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="template" className="text-white">
-                                            Template (Optional)
-                                        </Label>
-                                        <Input
-                                            id="template"
-                                            name="template"
-                                            value={initArgs.template}
-                                            onChange={handleInputChange}
-                                            className="bg-gray-800 border-gray-700 text-white"
-                                        />
-                                    </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="template" className="text-white">
+                                        Template (Optional)
+                                    </Label>
+                                    <Input
+                                        id="template"
+                                        name="template"
+                                        value={initArgs.template}
+                                        onChange={handleInputChange}
+                                        placeholder="[possible values: hello-blockchain]"
+                                        className="bg-gray-800 border-gray-700 text-white"
+                                    />
                                 </div>
                             </TabsContent>
                             <TabsContent value="advanced">

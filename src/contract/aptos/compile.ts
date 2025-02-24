@@ -17,12 +17,12 @@ export default async function compile(
   let command = "aptos move compile";
   command += ` --named-addresses ${args.named_addresses}=default`;
 
-  // if (optimization !== "default" | ) {
-  //   command += ` --optimize ${optimization}`;
-  // }
-  // if (artifacts !== "sparse") {
-  //   command += ` --included-artifacts ${artifacts}`;
-  // }
+  if (args.optimization !== "default" && args.optimization) {
+    command += ` --optimize ${args.optimization}`;
+  }
+  if (args.artifacts !== "sparse" && args.artifacts) {
+    command += ` --included-artifacts ${args.artifacts}`;
+  }
   if (args.saveMetadata) {
     command += " --save-metadata";
   }

@@ -1,8 +1,4 @@
-import {
-  Loader2,
-  AlertCircle,
-  CheckCircle,
-} from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,32 +7,31 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "./ui/alert-dialog";
-import { Alert, AlertDescription } from "./ui/alert";
-import { Button } from "./ui/button";
+} from "./ui/alert-dialog"
+import { Alert, AlertDescription } from "./ui/alert"
+import { Button } from "./ui/button"
 
 export interface StatusDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  loading: boolean;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  loading: boolean
   status: {
-    type: "success" | "error" | null;
-    message: string;
-  };
-  loadingTitle?: string;
-  loadingMessage?: string;
-  successTitle?: string;
-  errorTitle?: string;
+    type: "success" | "error" | null
+    message: string
+  }
+  loadingTitle?: string
+  loadingMessage?: string
+  successTitle?: string
+  errorTitle?: string
   successAction?: {
-    label: string;
-    onClick: () => void;
-  };
+    label: string
+    onClick: () => void
+  }
   link?: {
-    label: string;
-    transactionLink?: string;
-  };
-
-  preventCloseWhileLoading?: boolean;
+    label: string
+    transactionLink?: string
+  }
+  preventCloseWhileLoading?: boolean
 }
 
 export function StatusDialog({
@@ -52,17 +47,20 @@ export function StatusDialog({
   preventCloseWhileLoading = true,
   link,
 }: StatusDialogProps) {
-  console.log("status:", status);
+  const handleClose = () => {
+    onOpenChange(false)
+  }
+
   return (
     <AlertDialog
       open={open}
       onOpenChange={(open: boolean) => {
         if (!loading || !preventCloseWhileLoading) {
-          onOpenChange(open);
+          onOpenChange(open)
         }
       }}
     >
-      <AlertDialogContent className="bg-gray-800 border border-gray-700">
+      <AlertDialogContent className="bg-gray-800 border border-gray-700 max-h-[85vh] overflow-hidden flex flex-col p-6">
         {loading ? (
           <>
             <AlertDialogHeader>
@@ -71,12 +69,14 @@ export function StatusDialog({
                 <span>{loadingTitle}</span>
               </AlertDialogTitle>
             </AlertDialogHeader>
-            <div className="py-4">
+            <div className="py-4 overflow-y-auto">
               <p className="text-gray-300">{loadingMessage}</p>
             </div>
-            <AlertDialogCancel className="hover:bg-gray-700">
-              Close
-            </AlertDialogCancel>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleClose} className="hover:bg-gray-700">
+                Close
+              </AlertDialogCancel>
+            </AlertDialogFooter>
           </>
         ) : (
           <>
@@ -87,40 +87,32 @@ export function StatusDialog({
                 ) : (
                   <AlertCircle className="h-5 w-5 text-red-400" />
                 )}
-                <span>
-                  {status.type === "success" ? successTitle : errorTitle}
-                </span>
+                <span>{status.type === "success" ? successTitle : errorTitle}</span>
               </AlertDialogTitle>
             </AlertDialogHeader>
 
             {status.message && (
-              <Alert
-                variant={status.type === "success" ? "default" : "destructive"}
-                className="bg-gray-900 border border-gray-700"
-              >
-                <AlertDescription>
-                  <pre
-                    className={`font-mono text-sm whitespace-pre-wrap break-all ${status.type === "success"
-                      ? "text-green-400"
-                      : "text-red-400"
-                      }`}
-                  >
-                    {status.message}
-                  </pre>
-                </AlertDescription>
-              </Alert>
-
+              <div className="flex-1 overflow-y-auto my-4">
+                <Alert
+                  variant={status.type === "success" ? "default" : "destructive"}
+                  className="bg-gray-900 border border-gray-700"
+                >
+                  <AlertDescription>
+                    <pre
+                      className={`font-mono text-sm whitespace-pre-wrap break-all ${status.type === "success" ? "text-green-400" : "text-red-400"
+                        }`}
+                    >
+                      {status.message}
+                    </pre>
+                  </AlertDescription>
+                </Alert>
+              </div>
             )}
 
             <AlertDialogFooter>
-              <AlertDialogCancel className="hover:bg-gray-700">
-                Close
-              </AlertDialogCancel>
+              <AlertDialogCancel className="hover:bg-gray-700">Close</AlertDialogCancel>
               {status.type === "success" && successAction && (
-                <AlertDialogAction
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={successAction.onClick}
-                >
+                <AlertDialogAction className="bg-blue-600 hover:bg-blue-700" onClick={successAction.onClick}>
                   {successAction.label}
                 </AlertDialogAction>
               )}
@@ -157,5 +149,6 @@ export function StatusDialog({
         )}
       </AlertDialogContent>
     </AlertDialog>
-  );
+  )
 }
+
