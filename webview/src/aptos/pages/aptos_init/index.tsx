@@ -21,6 +21,8 @@ import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { StatusDialog } from "../../components/status-dialog";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 export default function AptosInitForm() {
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ export default function AptosInitForm() {
   }>({ type: null, message: "" });
   const [showDialog, setShowDialog] = useState(false);
   const [initializing, setInitializing] = useState(false);
+  const [initTialized, setInitTialized] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +64,22 @@ export default function AptosInitForm() {
     }
   };
 
+  //Check Aptos is initialized
+  useEffect(() => {
+    if (window.vscode) {
+      setInitTialized(false);
+
+      try {
+        window.vscode.postMessage({
+          command: "aptos.checkInit",
+        });
+      }
+      catch {
+        console.error("Failed to check Aptos initialization");
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
@@ -73,6 +92,9 @@ export default function AptosInitForm() {
           setInitializing(false);
           setShowDialog(true);
         }
+        if (message.initialized) {
+          setInitTialized(message.initialized);
+        }
       }
     };
 
@@ -84,7 +106,7 @@ export default function AptosInitForm() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto">
         <Card className="min-h-screen border-gray-800 bg-gray-900/50">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-white">
@@ -92,6 +114,14 @@ export default function AptosInitForm() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {initTialized &&
+              <Alert className="border-yellow-600/20 bg-yellow-600/10 mt-2">
+                <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                <AlertDescription className="text-yellow-200">
+                  Your Aptos has already been initialized. Do you want to reinitialize?
+                </AlertDescription>
+              </Alert>}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="network" className="text-white">
@@ -105,7 +135,7 @@ export default function AptosInitForm() {
                     <SelectValue placeholder="Select network" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-700">
-                    {["devnet", "testnet", "mainnet", "local", "custom"].map(
+                    {["devnet", "testnet", "mainnet", "custom"].map(
                       (net) => (
                         <SelectItem
                           key={net}

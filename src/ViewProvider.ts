@@ -117,7 +117,7 @@ export class ViewProvider implements vscode.WebviewViewProvider {
           case "aptos.check":
             const isAptosInstalled = await CheckAptos();
             webviewView.webview.postMessage({
-              type: "CliStatus",
+              type: "cliStatus",
               installed: isAptosInstalled,
             });
             break;
@@ -127,7 +127,7 @@ export class ViewProvider implements vscode.WebviewViewProvider {
           case "aptos.checkInit":
             const isAptosInitialized = await CheckAptosInit();
             webviewView.webview.postMessage({
-              type: "CliStatus",
+              type: "cliStatus",
               initialized: isAptosInitialized,
             });
             break;

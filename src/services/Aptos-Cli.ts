@@ -2,6 +2,9 @@ import { exec, spawn } from 'child_process';
 import * as vscode from 'vscode';
 import { promisify } from 'util';
 import { TestArgs } from '../contract/aptos/types';
+import path from 'path';
+import * as fs from 'fs';
+import { stderr } from 'process';
 
 const execAsync = promisify(exec);
 
@@ -68,11 +71,37 @@ async function CheckAptosInit(): Promise<boolean> {
     });
 }
 
+async function deleteAptosFolder() {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+
+    if (!workspacePath) {
+        vscode.window.showErrorMessage("Workspace path not found.");
+        return;
+    }
+
+    const aptosFolderPath = path.join(workspacePath, '.aptos');
+
+    try {
+        // Kiểm tra xem thư mục .aptos có tồn tại không
+        if (fs.existsSync(aptosFolderPath)) {
+            // Xóa thư mục .aptos nếu tồn tại
+            await fs.promises.rm(aptosFolderPath, { recursive: true, force: true });
+        }
+    } catch (error) {
+        throw new Error("Failed to delete .aptos folder: " + error);
+    }
+}
+
 async function AptosInit(webview: vscode.Webview, network: string = "devnet", endpoint: string, faucetEndpoint: string, privateKey: string) {
     // Get workspace path
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
         throw new Error("Workspace path not found");
+    }
+
+    const isAptosInit = await CheckAptosInit();
+    if (isAptosInit) {
+        await deleteAptosFolder();
     }
 
     function custom(network: string, endpoint: string, faucetEndpoint: string, privateKey: string) {
@@ -124,49 +153,70 @@ async function AptosInit(webview: vscode.Webview, network: string = "devnet", en
     }
 
     function notCustom(network: string, privateKey: string) {
-    console.log("Initializing Aptos CLI...");
+        console.log("Initializing Aptos CLI...");
 
-    const aptosProcess = spawn("aptos", ["init"], {
-        cwd: workspacePath,
-        stdio: ["pipe", "pipe", "pipe"],
-    });
+        let isDevnet = network === "devnet";
 
-    let outputData = "";
+        const aptosProcess = spawn("aptos", ["init"], {
+            cwd: workspacePath,
+            stdio: ["pipe", "pipe", "pipe"],
+        });
 
-    aptosProcess.stderr.on("data", (data) => {
-        const output = data.toString();
-        console.log("CLI Output:", output);
+        let outputData = "";
 
-        if (output.includes("already initialized")) {
-            console.log("Aptos already initialized, confirming overwrite...");
-            aptosProcess.stdin.write("yes\n");
-        } else if (output.includes("Choose network")) {
-            console.log(`Selecting network: ${network}`);
-            aptosProcess.stdin.write(`${network}\n`);
-        } else if (output.includes("Enter your private key as a hex literal")) {
-            console.log("Entering private key...");
-            aptosProcess.stdin.write(`${privateKey || ""}\n`);
-        } else if (output.match(/Account\s0x[a-fA-F0-9]+/)) {
-            outputData += output;
-        }
-    });
+        aptosProcess.stderr.on("data", (data) => {
+            const output = data.toString();
+            console.log("CLI Output:", output);
 
-    aptosProcess.on("close", (code) => {
-        if (code === 0) {
-            webview.postMessage({
-                type: "cliStatus",
-                success: true,
-                message: outputData.trim(),
+            if (output.includes("already initialized")) {
+                console.log("Aptos already initialized, confirming overwrite...");
+                aptosProcess.stdin.write("yes\n");
+            } else if (output.includes("Choose network")) {
+                console.log(`Selecting network: ${network}`);
+                aptosProcess.stdin.write(`${network}\n`);
+            } else if (output.includes("Enter your private key as a hex literal")) {
+                console.log("Entering private key...");
+                aptosProcess.stdin.write(`${privateKey || ""}\n`);
+            } else if (output.includes("The account has not been created on chain yet")) {
+                if (network === "testnet") {
+                    webview.postMessage({
+                        type: "cliStatus",
+                        success: true,
+                        message: "Success initialized with network " + network + output,
+                    });
+                }
+                else if (network === "mainnet") {
+                    webview.postMessage({
+                        type: "cliStatus",
+                        success: true,
+                        message: "Success initialized with network " + network,
+                    });
+                }
+
+                aptosProcess.kill();
+            } else if (output.match(/Account\s0x[a-fA-F0-9]+/)) {
+                outputData += output;
+            }
+        });
+
+        if (isDevnet) {
+            aptosProcess.on("close", (code) => {
+                if (code === 0) {
+                    webview.postMessage({
+                        type: "cliStatus",
+                        success: true,
+                        message: outputData.trim(),
+                    });
+                } else {
+                    webview.postMessage({
+                        type: "cliStatus",
+                        success: false,
+                        message: `Aptos initialization failed with exit code ${code}`,
+                    });
+                }
             });
-        } else {
-            webview.postMessage({
-                type: "cliStatus",
-                success: false,
-                message: `Aptos initialization failed with exit code ${code}`,
-            });
         }
-    });
-}
+    }
 
     if (network === 'custom') {
         custom(network, endpoint, faucetEndpoint, privateKey);

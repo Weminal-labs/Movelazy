@@ -15,7 +15,7 @@ const AptosPage = () => {
       //console.log("📩 Received message from VS Code:", event.data);
       const message = event.data;
 
-      if (message.type === "CliStatus" || message.type === "error") {
+      if (message.type === "cliStatus" || message.type === "error") {
         //console.log("✅ Aptos CLI Status:", message.installed ? "Installed" : "Not Installed");
         setIsAptosInstalled(message.installed);
       }
