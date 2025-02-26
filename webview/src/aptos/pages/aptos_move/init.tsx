@@ -100,6 +100,20 @@ export default function MoveInit() {
                                 Advanced
                             </TabsTrigger>
                         </TabsList>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className="text-white">
+                                Name (required)
+                            </Label>
+                            <Input
+                                id="name"
+                                name="name"
+                                value={initArgs.name}
+                                onChange={handleInputChange}
+                                className="bg-gray-800 border-gray-700 text-white"
+                                required
+                            />
+                        </div>
                         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
                             <TabsContent value="simple">
 
@@ -119,19 +133,7 @@ export default function MoveInit() {
                             </TabsContent>
                             <TabsContent value="advanced">
                                 <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name" className="text-white">
-                                            Name (required)
-                                        </Label>
-                                        <Input
-                                            id="name"
-                                            name="name"
-                                            value={initArgs.name}
-                                            onChange={handleInputChange}
-                                            className="bg-gray-800 border-gray-700 text-white"
-                                            required
-                                        />
-                                    </div>
+
                                     <div className="space-y-2">
                                         <Label htmlFor="packageDir" className="text-white">
                                             Package Directory

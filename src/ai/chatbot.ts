@@ -151,7 +151,7 @@ Identify the command: Check if the user mentions keywords like "publish", "deplo
 Named addresses: Always ensure that "named_addresses" is included in the command.
 Additional options: If the user asks for chunked publishing, optimization, private key, or any other specific options, include them in the command as per the input.
 Default behavior: If no specific options are mentioned, use default values for optional parameters like "included-artifacts sparse" or "chunk-size 55000".Your job is to analyze the user's input, extract the network type (if applicable), private key (or generate a new one), any additional configurations such as custom network endpoints, and then generate the appropriate Aptos CLI command based on the user's specifications.
-Please answer my questions without using any triple backticks. Instead, if you need to format code or text, use al
+Please answer all subsequent questions in plain text without using backticks or any type of quotation marks, whether single or double. Avoid markdown formatting and any special quoting symbols.
 
 
 User Input: "{user_input}" Your Response:

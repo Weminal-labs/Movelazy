@@ -67,6 +67,7 @@ export default function MoveCompile() {
     optimization: "default",
   });
 
+  const [selectTab, setSelectTab] = useState("simple");
   const handleChange = (
     field: keyof typeof compileArgs,
     value: string | boolean | null
@@ -137,7 +138,23 @@ export default function MoveCompile() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="simple" className="mb-6">
+          <Tabs defaultValue="simple" className="mb-6" value={selectTab} onValueChange={(value) => {
+            setSelectTab(value);
+            setCompileArgs({
+              saveMetadata: false,
+              fetchDepsOnly: false,
+              artifacts: "sparse",
+              packageDir_compile: "",
+              outputDir: "",
+              named_addresses: "",
+              overrideStd: "",
+              devMode: false,
+              skipGitDeps: false,
+              skipAttributeChecks: false,
+              checkTestCode: false,
+              optimization: "default",
+            });
+          }}>
             <TabsList className="grid w-full grid-cols-2 bg-gray-800 mb-6">
               <TabsTrigger value="simple">Simple</TabsTrigger>
               <TabsTrigger value="advanced">Advanced</TabsTrigger>
@@ -145,7 +162,7 @@ export default function MoveCompile() {
 
             <div className="space-y-2">
               <Label htmlFor="namedAddresses" className="text-white">
-                Named Addresses (required)
+                Named Addresses
               </Label>
               <Input
                 id="namedAddresses"

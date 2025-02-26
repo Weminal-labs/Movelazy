@@ -3,30 +3,8 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { DeployArgs } from "./types";
 import { spawn } from "child_process";
+import processCLI from "./excute";
 const execAsync = promisify(exec);
-function deployWithSpawn(command: string, args: string[], cwd: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(command, args, { cwd });
-    let output = "";
-
-    proc.stdout.on("data", (data) => {
-      output += data.toString();
-    });
-
-    proc.stderr.on("data", (data) => {
-      output += data.toString();
-    });
-
-    proc.on("close", (code) => {
-      if (code !== 0) {
-        return reject(output);
-      }
-      console.log("chekc: ", output);
-      resolve(output);
-    });
-  });
-}
-
 async function deploy(
   webview: vscode.Webview,
   args: DeployArgs
@@ -40,10 +18,8 @@ async function deploy(
    const command = "aptos";
   const cmdArgs: string[] = ["move", "publish"];
 
-  // Các tùy chọn bắt buộc
   cmdArgs.push("--named-addresses", `${args.named_addresses}=default`, "--max-gas", "1000", "--gas-unit-price", "200");
 
-  // Các tùy chọn bổ sung:
   if (args.overrideSizeCheck) {
     cmdArgs.push("--override-size-check");
   }
@@ -114,7 +90,7 @@ async function deploy(
   console.log("Deploy command:", command, cmdArgs.join(" "));
 let output = ""
   try {
-    output = await deployWithSpawn(command, cmdArgs, workspacePath);
+    output = await processCLI(command, cmdArgs, workspacePath);
     console.log("Deploy output:", output);
     webview.postMessage({
       type: "cliStatus",
@@ -122,7 +98,6 @@ let output = ""
       message: {out:output, isProfile: false},
     });
   } catch (error) {
-    // const errorMessage = (error instanceof Error) ? error.message : String(error);
     webview.postMessage({
       type: "cliStatus",
       success: false,
