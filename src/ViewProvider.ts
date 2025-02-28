@@ -22,6 +22,8 @@ export class ViewProvider implements vscode.WebviewViewProvider {
   private static currentWebviewView: vscode.WebviewView | null = null;
   private workspace: WorkspaceService;
   private deployerService: DeployerService;
+  private currentPath: string = "/";
+
   constructor(private readonly context: vscode.ExtensionContext) {
     this.workspace = new WorkspaceService(context);
     this.solidityService = new SolidityService(context);
@@ -29,12 +31,10 @@ export class ViewProvider implements vscode.WebviewViewProvider {
     this.deployerService = new DeployerService();
   }
 
-  public static getWebviewView(): vscode.WebviewView | null {
-    return ViewProvider.currentWebviewView;
-  }
+  public static getWebviewView(): vscode.WebviewView | null { return ViewProvider.currentWebviewView; }
+
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     ViewProvider.currentWebviewView = webviewView;
-
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [
@@ -196,6 +196,18 @@ export class ViewProvider implements vscode.WebviewViewProvider {
             await this.workspace.selectFolder(webviewView.webview);
           case "ai-command":
             AiCmd();
+            break;
+          case "updatePath":
+            if (message.path !== "/") {
+              this.currentPath = message.path;
+              // console.log("Changed path to: ", this.currentPath);
+            } else {
+              webviewView.webview.postMessage({
+                type: "pathChanged",
+                path: this.currentPath,
+              });
+            }
+
             break;
         }
       } catch (error) {

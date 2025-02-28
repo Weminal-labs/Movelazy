@@ -35,7 +35,7 @@ export default function AptosHelp() {
             try {
               finalMessage = JSON.parse(jsonMatch[0]);
             } catch (error) {
-              console.error("Không parse được JSON:", error);
+              console.error("Can not parse JSON:", error);
             }
           }
         }

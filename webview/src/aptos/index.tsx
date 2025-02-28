@@ -26,10 +26,7 @@ const AptosPage = () => {
   }, []);
 
   useEffect(() => {
-    if (isAptosInstalled === true) {
-      navigate("/aptos/project");
-    }
-    else if (isAptosInstalled === false) {
+    if (isAptosInstalled === false) {
       console.log("🚨 Aptos CLI is not installed. Redirecting to installation page...");
       navigate("/aptos/cli-not-found");
     }

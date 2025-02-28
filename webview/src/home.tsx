@@ -45,7 +45,7 @@ const HomePage = () => {
             variant="outline"
             className="w-full"
             size="lg"
-            onClick={() => navigate("/aptos")}
+            onClick={() => navigate("/aptos/project")}
           >
             <span>Aptos</span>
             <ArrowRight className="ml-2 h-4 w-4" />
