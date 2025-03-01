@@ -22,5 +22,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../src/services"]
+  "include": [
+    "src",
+    "../src/services",
+    "../src/lib/prism.ts",
+    "../src/lib/filesystem.ts"
+  ]
 }

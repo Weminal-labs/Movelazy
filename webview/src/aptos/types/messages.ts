@@ -26,8 +26,10 @@ export type AptosMessage = {
     | "aptos.selectFolder"
     | "aptos.createTemplate"
     | "aptos.checkProfile"
-  | "aptos.checkBalance"
-  |"ai-command";
+    | "aptos.checkBalance"
+    | "ai-command"
+    | "getFiles"
+    | "openMarkdown";
   initConfig?: [string, string, string, string];
   initArgs?: [
     string,
@@ -45,4 +47,5 @@ export type AptosMessage = {
   testArgs?: TestArgs;
   settings?: CompilerSettings | DeployerSettings;
   flags?: Flags;
+  path?: string;
 };

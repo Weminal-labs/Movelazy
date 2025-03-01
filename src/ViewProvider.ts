@@ -14,11 +14,13 @@ import {
 import { AiCmd } from "./ai/chatbot";
 import compile from "./contract/aptos/compile";
 import { checkProfile, deploy } from "./contract/aptos/deploy";
+import { createFileSystem } from "./lib/filesystem"; // Import FileSystem
+import * as path from "path";
 
 export class ViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";
   private readonly solidityService: SolidityService;
-  // private readonly aptosService: AptosService;
+  // private readonly aptosService: SolidityService;
   private static currentWebviewView: vscode.WebviewView | null = null;
   private workspace: WorkspaceService;
   private deployerService: DeployerService;
@@ -32,6 +34,7 @@ export class ViewProvider implements vscode.WebviewViewProvider {
   public static getWebviewView(): vscode.WebviewView | null {
     return ViewProvider.currentWebviewView;
   }
+
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     ViewProvider.currentWebviewView = webviewView;
 
@@ -39,6 +42,7 @@ export class ViewProvider implements vscode.WebviewViewProvider {
       enableScripts: true,
       localResourceRoots: [
         vscode.Uri.joinPath(this.context.extensionUri, "webview", "build"),
+        vscode.Uri.joinPath(this.context.extensionUri, "media"),
       ],
     };
 
@@ -113,7 +117,30 @@ export class ViewProvider implements vscode.WebviewViewProvider {
           case "solidity.stopLocalNode":
             await this.solidityService.stopLocalNode();
             break;
-
+          case "getFiles": {
+            // Lấy danh sách file Markdown từ file system
+            const fileSystem = createFileSystem(this.context.extensionUri); // Truyền extensionUri
+            const allFiles = fileSystem.getAllFiles(); // Get all markdown files
+            webviewView.webview.postMessage({
+              type: "cliStatus",
+              files: allFiles,
+            });
+            break;
+          }
+          case "openMarkdown": // Mở file Markdown khi người dùng click vào file trong danh sách
+            {
+              if (vscode.workspace.workspaceFolders && message.path) {
+                const workspacePath =
+                  vscode.workspace.workspaceFolders[0].uri.fsPath;
+                const fileUri = vscode.Uri.file(
+                  path.join(workspacePath, message.path)
+                );
+                vscode.workspace.openTextDocument(fileUri).then((doc) => {
+                  vscode.window.showTextDocument(doc);
+                });
+              }
+            }
+            break;
           case "aptos.check":
             const isAptosInstalled = await CheckAptos();
             webviewView.webview.postMessage({
@@ -167,33 +194,24 @@ export class ViewProvider implements vscode.WebviewViewProvider {
               skipFetchLatestGitDeps
             );
             break;
-
           case "aptos.compile":
-            await compile(
-              webviewView.webview,
-              message.compileArgs
-            );
+            await compile(webviewView.webview, message.compileArgs);
             break;
           case "aptos.deploy":
-            await deploy(
-              webviewView.webview,
-              message.deployArgs
-            );
+            await deploy(webviewView.webview, message.deployArgs);
             break;
           case "aptos.checkProfile":
             await checkProfile(webviewView.webview);
             break;
-
           case "aptos.movetest":
             await MoveTest(webviewView.webview, message.testArgs);
             break;
-
           case "aptos.checkFolder":
             await this.workspace.checkFolder(webviewView.webview);
             break;
-
           case "aptos.selectFolder":
             await this.workspace.selectFolder(webviewView.webview);
+            break;
           case "ai-command":
             AiCmd();
             break;
@@ -227,32 +245,53 @@ export class ViewProvider implements vscode.WebviewViewProvider {
       )
     );
 
+    const monacoPath = vscode.Uri.joinPath(
+      this.context.extensionUri,
+      "media",
+      "monaco",
+      "min",
+      "vs"
+    );
+    const monacoUri = webview.asWebviewUri(monacoPath);
+
+    console.log("Monaco URI:", monacoUri.toString());
+
+    // Thêm container để hiển thị danh sách markdown
     return `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https:; script-src ${webview.cspSource} 'unsafe-inline'; style-src ${webview.cspSource} 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src ${webview.cspSource} https://fullnode.devnet.aptoslabs.com;">
-                <title>MoveLazy</title>
-                <link href="${styleUri}" rel="stylesheet">
-                <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-            </head>
-            <body>
-                <div id="root"></div>
-                <script>
-                    (function() {
-                        try {
-                            const vscode = acquireVsCodeApi();
-                            window.vscode = vscode;
-                            console.log('VSCode API initialized successfully');
-                        } catch (error) {
-                            console.error('Failed to initialize VSCode API:', error);
-                        }
-                    })();
-                </script>
-                <script type="module" src="${scriptUri}"></script>
-            </body>
-            </html>`;
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src ${webview.cspSource} 'unsafe-inline'; style-src ${webview.cspSource} 'unsafe-inline' https://fonts.googleapis.com; font-src ${webview.cspSource} https://fonts.gstatic.com; connect-src ${webview.cspSource} https://fullnode.devnet.aptoslabs.com;">
+      <title>MoveLazy</title>
+      <link href="${styleUri}" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  </head>
+  <body>
+      <div id="root"></div>
+      <script>
+        require.config({ paths: { 'vs': '${monacoUri}' } });
+        require(['vs/editor/editor.main'], function() {
+            monaco.editor.create(document.getElementById('root'), {
+                value: 'function hello() {\\n    console.log("Hello, Monaco!");\\n}',
+                language: 'aim'
+            });
+        });
+      </script>
+      <script>
+          (function() {
+              try {
+                  const vscode = acquireVsCodeApi();
+                  window.vscode = vscode;
+                  console.log('VSCode API initialized successfully');
+              } catch (error) {
+                  console.error('Failed to initialize VSCode API:', error);
+              }
+          })();
+      </script>
+      <script type="module" src="${scriptUri}"></script>
+  </body>
+  </html>`;
   }
 }
