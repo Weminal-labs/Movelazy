@@ -245,16 +245,16 @@ export class ViewProvider implements vscode.WebviewViewProvider {
       )
     );
 
-    const monacoPath = vscode.Uri.joinPath(
-      this.context.extensionUri,
-      "media",
-      "monaco",
-      "min",
-      "vs"
-    );
-    const monacoUri = webview.asWebviewUri(monacoPath);
+    // const monacoPath = vscode.Uri.joinPath(
+    //   this.context.extensionUri,
+    //   "media",
+    //   "monaco",
+    //   "min",
+    //   "vs"
+    // );
+    // const monacoUri = webview.asWebviewUri(monacoPath);
 
-    console.log("Monaco URI:", monacoUri.toString());
+    // console.log("Monaco URI:", monacoUri.toString());
 
     // Thêm container để hiển thị danh sách markdown
     return `
@@ -263,22 +263,21 @@ export class ViewProvider implements vscode.WebviewViewProvider {
   <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src ${webview.cspSource} 'unsafe-inline'; style-src ${webview.cspSource} 'unsafe-inline' https://fonts.googleapis.com; font-src ${webview.cspSource} https://fonts.gstatic.com; connect-src ${webview.cspSource} https://fullnode.devnet.aptoslabs.com;">
+      <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none'; 
+    img-src ${webview.cspSource} https: data:; 
+    script-src ${webview.cspSource} 'unsafe-inline' https://cdn.jsdelivr.net; 
+    style-src ${
+      webview.cspSource
+    } 'unsafe-inline' https://fonts.googleapis.com; 
+    font-src ${webview.cspSource} https://fonts.gstatic.com; 
+    connect-src ${webview.cspSource} https://fullnode.devnet.aptoslabs.com;">
       <title>MoveLazy</title>
       <link href="${styleUri}" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   </head>
   <body>
       <div id="root"></div>
-      <script>
-        require.config({ paths: { 'vs': '${monacoUri}' } });
-        require(['vs/editor/editor.main'], function() {
-            monaco.editor.create(document.getElementById('root'), {
-                value: 'function hello() {\\n    console.log("Hello, Monaco!");\\n}',
-                language: 'aim'
-            });
-        });
-      </script>
       <script>
           (function() {
               try {
@@ -290,6 +289,30 @@ export class ViewProvider implements vscode.WebviewViewProvider {
               }
           })();
       </script>
+      <script>
+    var require = { paths: { vs: "${webview.asWebviewUri(
+      vscode.Uri.joinPath(this.context.extensionUri, "media", "monaco", "vs")
+    )}" } };
+</script>
+<script src="${webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        "media",
+        "monaco",
+        "vs",
+        "loader.js"
+      )
+    )}"></script>
+<script src="${webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        "media",
+        "monaco",
+        "vs",
+        "editor",
+        "editor.main.js"
+      )
+    )}"></script>
       <script type="module" src="${scriptUri}"></script>
   </body>
   </html>`;

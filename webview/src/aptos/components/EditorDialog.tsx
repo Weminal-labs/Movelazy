@@ -1,10 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { CodeFile } from "../lib/types";
-// import { configurePrismSyntax } from "../lib/prism";
-import MonacoEditor from "@monaco-editor/react";
+import { configurePrismSyntax } from "../lib/prism";
+// import MonacoEditor from "@monaco-editor/react";
 import React from "react";
 import yaml from "yaml";
+
+import MonacoEditor, { loader } from "@monaco-editor/react";
+
+import * as monaco from "monaco-editor";
+loader.config({ monaco });
 
 interface EditorDialogProps {
   file: CodeFile | null;
@@ -117,16 +124,14 @@ export function EditorDialog({
     <>
       <Dialog open={file !== null} onOpenChange={(open) => !open && onClose()}>
         <DialogContent
-          className={`max-w-4xl bg-gray-900/95 ${
-            isRunning ? "shadow-lg" : "border-purple-500/30"
-          }`}
+          className={`max-w-4xl bg-gray-900/95 ${isRunning ? "shadow-lg" : "border-purple-500/30"
+            }`}
         >
           <DialogTitle className="text-white mb-4">{file.path}</DialogTitle>
 
           <div
-            className={`relative h-[70vh] ${
-              isRunning ? "bg-purple-500/5 transition-colors duration-1000" : ""
-            }`}
+            className={`relative h-[70vh] ${isRunning ? "bg-purple-500/5 transition-colors duration-1000" : ""
+              }`}
           >
             {!result ? (
               <MonacoEditor
@@ -137,14 +142,15 @@ export function EditorDialog({
                 options={{
                   minimap: { enabled: false },
                   fontSize: 14,
-                  wordWrap: "on",
+                  wordWrap: 'on',
                   automaticLayout: true,
                   scrollBeyondLastLine: false,
-                  lineNumbers: "on",
+                  lineNumbers: 'on',
                   padding: { top: 8 },
-                  fontFamily: "JetBrains Mono, monospace",
-                  readOnly: true,
+                  fontFamily: 'JetBrains Mono, monospace',
+                  readOnly: true
                 }}
+                beforeMount={configurePrismSyntax}
               />
             ) : (
               <div
@@ -331,9 +337,8 @@ export function EditorDialog({
               <Button
                 onClick={handleRunClick}
                 disabled={isRunning}
-                className={`bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 ${
-                  isRunning ? "animate-pulse" : ""
-                }`}
+                className={`bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 ${isRunning ? "animate-pulse" : ""
+                  }`}
               >
                 {isRunning ? (
                   <>
