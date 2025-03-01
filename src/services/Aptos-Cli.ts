@@ -378,11 +378,11 @@ async function MoveTest(webview: vscode.Webview, args: TestArgs) {
     }
 
     try {
-        const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+        const { stdout } = await execAsync(command, { cwd: workspacePath });
         webview.postMessage({
             type: "cliStatus",
             success: true,
-            message: stderr + stdout,
+            message: stdout,
         });
 
     }
