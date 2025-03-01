@@ -130,6 +130,11 @@ async function AptosInit(webview: vscode.Webview, network: string = "devnet", en
                 aptosProcess.stdin.write(`${privateKey || ""}\n`);
             }
 
+            if (output.includes("creating it and funding it")) {
+                console.log("Creating and funding account...");
+                aptosProcess.stdin.write(`\n`);
+            }
+
             if (output.includes("account") || output.includes("Account")) {
                 outputData += output;
             }
@@ -194,7 +199,17 @@ async function AptosInit(webview: vscode.Webview, network: string = "devnet", en
                 }
 
                 aptosProcess.kill();
-            } else if (output.match(/Account\s0x[a-fA-F0-9]+/)) {
+            } else {
+                console.log("Skip init...");
+                aptosProcess.stdin.write("\n");
+                webview.postMessage({
+                    type: "cliStatus",
+                    success: true,
+                    message: outputData.trim(),
+                });
+            }
+
+            if (output.match(/Account\s0x[a-fA-F0-9]+/)) {
                 outputData += output;
             }
         });
