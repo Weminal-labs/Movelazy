@@ -13,6 +13,9 @@
     "Other"
   ],
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
     "commands": [
       {
@@ -22,6 +25,10 @@
       {
         "command": "movelazy.openWebview",
         "title": "open webview"
+      },
+      {
+        "command": "extension.runMoveLazy",
+        "title": "Run Movelazy"
       }
     ],
     "viewsContainers": {
