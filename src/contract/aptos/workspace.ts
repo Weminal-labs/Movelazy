@@ -42,6 +42,24 @@ export class WorkspaceService {
     }
   }
 
+  // public createPublicContentFolder(workspacePath: string) {
+  //   const contentPath = path.join(workspacePath, "public", "content");
+  //   const filePath = path.join(contentPath, "file.md"); // Or 'file.mmd'
+
+  //   // Check and create the directory if it doesn't exist
+  //   if (!fs.existsSync(contentPath)) {
+  //     fs.mkdirSync(contentPath, { recursive: true });
+  //     console.log(`Created directory: ${contentPath}`);
+  //   }
+
+  //   // Check and create the file if it doesn't exist
+  //   if (!fs.existsSync(filePath)) {
+  //     const content = `# This is a Markdown file\n\nContent created automatically.`;
+  //     fs.writeFileSync(filePath, content);
+  //     console.log(`Created file: ${filePath}`);
+  //   }
+  // }
+
   /**
    * Create template project
    */
@@ -100,7 +118,7 @@ export class WorkspaceService {
   //   return settings;
   // }
 
-//   private getWorkspacePath(): string | undefined {
-//     return vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-//   }
+  //   private getWorkspacePath(): string | undefined {
+  //     return vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  //   }
 }

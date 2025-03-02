@@ -9,27 +9,47 @@ import {
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { StatusDialog } from "../../components/status-dialog";
+import { FileEditor } from "../../components/FileEditor";
+
+interface MarkdownFile {
+  path: string;
+  content: string;
+}
 
 export default function ProjectPageAptos() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [cliStatus, setcliStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
+  const [cliStatus, setcliStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
   const [showDialog, setShowDialog] = useState(false);
+
+  const [fileList, setFileList] = useState<MarkdownFile[]>([]);
+  // const [selectedFileContent, setSelectedFileContent] = useState<string>("");
 
   const handleAiCommand = () => {
     if (!window.vscode) {
       return;
     }
-    setIsLoading(true)
-    setShowDialog(true)
+    setIsLoading(true);
+    setShowDialog(true);
     window.vscode.postMessage({
       command: "ai-command",
+    });
+  };
+
+  const handleGetFiles = () => {
+    if (!window.vscode) return;
+    window.vscode.postMessage({
+      command: "getFiles",
     });
   };
 
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
+      console.log("check message file", message);
       if (message.type === "cliStatus" && message.message) {
         let finalMessage = message.message;
 
@@ -60,6 +80,12 @@ export default function ProjectPageAptos() {
         console.log("cliStatus: ", finalMessage);
         setShowDialog(true);
       }
+
+      if (message.type === "cliStatus" && message.files) {
+        console.log("check run");
+        setFileList(message.files);
+      }
+      console.log("check filelist", fileList);
     };
 
     window.addEventListener("message", messageHandler);
@@ -77,17 +103,27 @@ export default function ProjectPageAptos() {
           </div>
         </CardHeader>
         <CardContent className="p-4">
-
-
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
-              onClick={() => { handleAiCommand() }}
+              onClick={() => {
+                handleAiCommand();
+              }}
               variant="outline"
               className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
             >
               AI Command
             </Button>
+
+            <Button
+              onClick={handleGetFiles}
+              variant="outline"
+              className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
+            >
+              Get Files
+            </Button>
           </div>
+
+          <FileEditor files={fileList} />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
@@ -137,4 +173,4 @@ export default function ProjectPageAptos() {
       </Card>
     </div>
   );
-};
+}

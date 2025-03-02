@@ -76,6 +76,8 @@
     "glob": "^11.0.0",
     "hardhat": "^2.22.15",
     "lru-cache": "^11.0.1",
+    "monaco-editor": "^0.52.2",
+    "monaco-editor-webpack-plugin": "^7.1.0",
     "openai": "^4.85.4"
   }
 }
