@@ -15,10 +15,10 @@ async function deploy(
   }
   console.log("deploychekc: ");
 
-   const command = "aptos";
+  const command = "aptos";
   const cmdArgs: string[] = ["move", "publish"];
 
-  cmdArgs.push("--named-addresses", `${args.named_addresses}=default`, "--max-gas", "1000", "--gas-unit-price", "200");
+  cmdArgs.push("--named-addresses", `${args.named_addresses}=default`, "--assume-yes");
 
   if (args.overrideSizeCheck) {
     cmdArgs.push("--override-size-check");
@@ -88,46 +88,46 @@ async function deploy(
   }
 
   console.log("Deploy command:", command, cmdArgs.join(" "));
-let output = ""
+  let output = "";
   try {
     output = await processCLI(command, cmdArgs, workspacePath);
     console.log("Deploy output:", output);
     webview.postMessage({
       type: "cliStatus",
       success: true,
-      message: {out:output, isProfile: false},
+      message: { out: output, isProfile: false },
     });
   } catch (error) {
     webview.postMessage({
       type: "cliStatus",
       success: false,
-      message: {out:`${error}\n{${output ? `Output: ${output}` : ""}}`, isProfile: false },
+      message: { out: `${error}\n{${output ? `Output: ${output}` : ""}}`, isProfile: false },
     });
   }
 }
 
 async function checkProfile(webview: vscode.Webview) {
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    if (!workspacePath) {
-      console.error("Workspace path is undefined.");
-      return null;
-    }
-    try {
-      const isProfile = true;
-      const accountAddress = await getAccount();
-      const network = await getNetWork();
-      const balance = await checkBalance();
-      console.log("check3", accountAddress, network, balance);
-      webview.postMessage({
-        type: "cliStatus",
-        message: { accountAddress, network, balance, isProfile },
-      });
-      return;
-    } catch (error) {
-      console.error("Error parsing config file:", error);
-    }
-    return Promise.reject("Failed to read account from config");
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  if (!workspacePath) {
+    console.error("Workspace path is undefined.");
+    return null;
   }
+  try {
+    const isProfile = true;
+    const accountAddress = await getAccount();
+    const network = await getNetWork();
+    const balance = await checkBalance();
+    console.log("check3", accountAddress, network, balance);
+    webview.postMessage({
+      type: "cliStatus",
+      message: { accountAddress, network, balance, isProfile },
+    });
+    return;
+  } catch (error) {
+    console.error("Error parsing config file:", error);
+  }
+  return Promise.reject("Failed to read account from config");
+}
 async function checkBalance() {
   const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
   if (!workspacePath) {
@@ -152,51 +152,51 @@ async function checkBalance() {
   }
 }
 
-  async function getAccount() {
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    if (!workspacePath) {
-      console.log("No workspace");
-      return;
-    }
-    try {
-      const { stdout, stderr } = await execAsync(`aptos config show-profiles`, {
-        cwd: workspacePath,
-      });
-      if (stderr) {
-        console.error("Error getting account:", stderr);
-        return null;
-      }
-      const result = JSON.parse(stdout);
-      const account = result.Result.default.account;
-      return account;
-    } catch (error) {
-      console.error("Error executing account command:", error);
+async function getAccount() {
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  if (!workspacePath) {
+    console.log("No workspace");
+    return;
+  }
+  try {
+    const { stdout, stderr } = await execAsync(`aptos config show-profiles`, {
+      cwd: workspacePath,
+    });
+    if (stderr) {
+      console.error("Error getting account:", stderr);
       return null;
     }
+    const result = JSON.parse(stdout);
+    const account = result.Result.default.account;
+    return account;
+  } catch (error) {
+    console.error("Error executing account command:", error);
+    return null;
   }
+}
 
-  async function getNetWork() {
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    if (!workspacePath) {
-      console.log("No workspace");
-      return;
-    }
-    try {
-      const { stdout, stderr } = await execAsync(`aptos config show-profiles`, {
-        cwd: workspacePath,
-      });
-      if (stderr) {
-        console.error("Error getting network:", stderr);
-        return null;
-      }
-      const result = JSON.parse(stdout);
-      const network = result.Result.default.rest_url;
-      return network;
-    } catch (error) {
-      console.error("Error executing network command:", error);
+async function getNetWork() {
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  if (!workspacePath) {
+    console.log("No workspace");
+    return;
+  }
+  try {
+    const { stdout, stderr } = await execAsync(`aptos config show-profiles`, {
+      cwd: workspacePath,
+    });
+    if (stderr) {
+      console.error("Error getting network:", stderr);
       return null;
     }
+    const result = JSON.parse(stdout);
+    const network = result.Result.default.rest_url;
+    return network;
+  } catch (error) {
+    console.error("Error executing network command:", error);
+    return null;
   }
+}
 
 
 export { deploy, checkProfile, checkBalance, getAccount, getNetWork };
