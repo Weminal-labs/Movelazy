@@ -3,64 +3,10 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
-import { useEffect, useState } from "react";
-import { StatusDialog } from "../../components/status-dialog";
 
 export default function AptosHelp() {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [cliStatus, setcliStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
-  const [showDialog, setShowDialog] = useState(false);
 
-  const handleAiCommand = () => {
-    if (!window.vscode) {
-      return;
-    }
-    setIsLoading(true)
-    setShowDialog(true)
-    window.vscode.postMessage({
-      command: "ai-command",
-    });
-  };
-
-  useEffect(() => {
-    const messageHandler = (event: MessageEvent) => {
-      const message = event.data;
-      if (message.type === "cliStatus" && message.message) {
-        let finalMessage = message.message;
-
-        if (typeof message.message === "string") {
-          const jsonMatch = message.message.match(/{[\s\S]*}$/);
-          if (jsonMatch) {
-            try {
-              finalMessage = JSON.parse(jsonMatch[0]);
-            } catch (error) {
-              console.error("Can not parse JSON:", error);
-            }
-          }
-        }
-
-        if (typeof finalMessage === "object" && finalMessage.out) {
-          finalMessage = finalMessage.out;
-        } else if (typeof finalMessage === "object") {
-          // Nếu không có thuộc tính .out, chuyển thành chuỗi để đảm bảo an toàn khi render
-          finalMessage = JSON.stringify(finalMessage, null, 2);
-        }
-
-        setcliStatus({
-          type: message.success ? "success" : "error",
-          message: finalMessage,
-        });
-
-        setIsLoading(false);
-        console.log("cliStatus: ", finalMessage);
-        setShowDialog(true);
-      }
-    };
-
-    window.addEventListener("message", messageHandler);
-    return () => window.removeEventListener("message", messageHandler);
-  }, []);
   return (
     <div className="min-h-screen bg-black">
       <Card className="w-full min-h-screen border-gray-800 bg-gray-900/50">
@@ -75,17 +21,7 @@ export default function AptosHelp() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
-            <Button
-              onClick={() => { handleAiCommand() }}
-              variant="outline"
-              className="h-16 flex flex-col items-center justify-center gap-2 border-gray-700 bg-gray-800/50 hover:bg-gray-800"
-            >
-              AI Command
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
               variant="outline"
@@ -93,9 +29,9 @@ export default function AptosHelp() {
             >
               Aptos account
             </Button>
-          </div>
+          </div> */}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
               variant="outline"
@@ -103,9 +39,9 @@ export default function AptosHelp() {
             >
               Aptos config
             </Button>
-          </div>
+          </div> */}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
               variant="outline"
@@ -113,9 +49,9 @@ export default function AptosHelp() {
             >
               Aptos genesis
             </Button>
-          </div>
+          </div> */}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
               variant="outline"
@@ -123,7 +59,7 @@ export default function AptosHelp() {
             >
               Aptos governance
             </Button>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
@@ -145,7 +81,7 @@ export default function AptosHelp() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
               variant="outline"
@@ -153,7 +89,7 @@ export default function AptosHelp() {
             >
               Aptos key
             </Button>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
@@ -165,7 +101,7 @@ export default function AptosHelp() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
               variant="outline"
@@ -173,9 +109,9 @@ export default function AptosHelp() {
             >
               Aptos multisig
             </Button>
-          </div>
+          </div> */}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
               variant="outline"
@@ -183,9 +119,9 @@ export default function AptosHelp() {
             >
               Aptos node
             </Button>
-          </div>
+          </div> */}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+          {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
             <Button
               onClick={() => navigate("/aptos")}
               variant="outline"
@@ -193,8 +129,8 @@ export default function AptosHelp() {
             >
               Aptos stake
             </Button>
-          </div>
-
+          </div> */}
+          {/* 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Button
               onClick={() => navigate("/aptos")}
@@ -203,19 +139,9 @@ export default function AptosHelp() {
             >
               Aptos update
             </Button>
-          </div>
+          </div> */}
 
         </CardContent>
-        <StatusDialog
-          open={showDialog}
-          onOpenChange={setShowDialog}
-          loading={isLoading}
-          status={cliStatus}
-          loadingTitle="Ai Executing..."
-          loadingMessage="Please wait while running command..."
-          successTitle="Ai Execution Successful"
-          errorTitle="Ai Execution Failed"
-        />
       </Card>
     </div>
   );
