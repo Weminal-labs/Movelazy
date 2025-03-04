@@ -21,8 +21,10 @@ export function activate(context: vscode.ExtensionContext) {
 	const hoverProvider = vscode.languages.registerHoverProvider("markdown", {
 		provideHover(document, position) {
 			const range = document.getWordRangeAtPosition(position);
-			if (!range) return;
+			if (!range) { return; }
 			const word = document.getText(range);
+
+			// console.log(word);
 			if (word === "move_lazy") {
 				lastHoveredMoveLazyPosition = position;
 				const editor = vscode.window.activeTextEditor;
@@ -36,6 +38,12 @@ export function activate(context: vscode.ExtensionContext) {
 				markdownHover.appendMarkdown(`✅ Click **[Here](command:extension.runMoveLazy)** to execute.`);
 				return new vscode.Hover(markdownHover, range);
 			}
+			if (word === "output") {
+				const markdownHover = new vscode.MarkdownString();
+				markdownHover.appendMarkdown(`🗑 **Click to delete this output**`);
+				markdownHover.isTrusted = true;
+				return new vscode.Hover(markdownHover, range);
+			}
 		},
 	});
 
@@ -43,15 +51,60 @@ export function activate(context: vscode.ExtensionContext) {
 		provideDocumentLinks(document) {
 			const text = document.getText();
 			const links: vscode.DocumentLink[] = [];
-			const regex = /move_lazy/g;
+			const movelazyRegex = /move_lazy/g;
 			let match;
-			while ((match = regex.exec(text)) !== null) {
+			while ((match = movelazyRegex.exec(text)) !== null) {
 				const startPos = document.positionAt(match.index);
 				const endPos = document.positionAt(match.index + match[0].length);
 				links.push(new vscode.DocumentLink(new vscode.Range(startPos, endPos), vscode.Uri.parse("command:extension.runMoveLazy")));
 			}
+
+			const outputRegex = /```output/g;
+			while ((match = outputRegex.exec(text)) !== null) {
+				const startPos = document.positionAt(match.index);
+				const endPos = document.positionAt(match.index + match[0].length);
+				links.push(new vscode.DocumentLink(new vscode.Range(startPos, endPos), vscode.Uri.parse("command:extension.removeOutput")));
+			}
+
 			return links;
 		},
+	});
+
+	function deleteOutputBlock(document: vscode.TextDocument, position: vscode.Position) {
+		const text = document.getText();
+		const outputBlockRegex = /```output\r?\n([\s\S]*?)```/g;
+		let match;
+		let edit = new vscode.WorkspaceEdit();
+
+		while ((match = outputBlockRegex.exec(text)) !== null) {
+
+			const start = document.positionAt(match.index);
+			const end = document.positionAt(match.index + match[0].length);
+
+			console.log(`Block found from line ${start.line} to ${end.line}`);
+			console.log(`Clicked on line ${position.line}`);
+
+			// Kiểm tra nếu vị trí click nằm trong phạm vi block output
+			if (position.line >= start.line && position.line <= end.line) {
+				console.log("Deleting output block...");
+				edit.delete(document.uri, new vscode.Range(start, end));
+				vscode.workspace.applyEdit(edit);
+				vscode.window.showInformationMessage("✅ Output block deleted!");
+				return;
+			}
+		}
+
+		console.log("No matching output block found.");
+	}
+
+
+	const removeOutputCommand = vscode.commands.registerCommand("extension.removeOutput", async () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			vscode.window.showErrorMessage("❌ No active editor.");
+			return;
+		}
+		deleteOutputBlock(editor.document, editor.selection.active);
 	});
 
 	function insertOutputIntoMarkdown(document: vscode.TextDocument, insertPosition: vscode.Position, outputText: string) {
@@ -66,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	async function deleteTempFile(filePath: string) {
 		try {
-			if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+			if (fs.existsSync(filePath)) { await fs.promises.unlink(filePath); }
 		} catch (err) {
 			console.error(`❌ Error deleting file: ${filePath}`, err);
 		}
@@ -119,7 +172,7 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 	});
 
-	context.subscriptions.push(hoverProvider, linkProvider, runMoveLazyCommand);
+	context.subscriptions.push(hoverProvider, linkProvider, runMoveLazyCommand, removeOutputCommand);
 }
 
 export function deactivate() {

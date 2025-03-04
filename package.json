@@ -28,7 +28,11 @@
       },
       {
         "command": "extension.runMoveLazy",
-        "title": "Run Movelazy"
+        "title": "Movelazy execute command block"
+      },
+      {
+        "command": "extension.removeOutput",
+        "title": "Movelazy remove markdown output"
       }
     ],
     "viewsContainers": {
