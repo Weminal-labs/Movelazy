@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { ViewProvider } from './ViewProvider';
 import path from 'path';
 import fs from 'fs';
-import { exec } from 'child_process';
-
+import { spawnSync, exec } from 'child_process';
+import os from 'os';
 
 export function activate(context: vscode.ExtensionContext) {
 	let lastHoveredMoveLazyPosition: vscode.Position | null = null;
@@ -11,44 +11,33 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "movelazy" is now active!');
 
 	const provider = new ViewProvider(context);
+	context.subscriptions.push(vscode.window.registerWebviewViewProvider(ViewProvider.viewType, provider));
 
-	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(ViewProvider.viewType, provider)
-	);
+	const hoverDecorationType = vscode.window.createTextEditorDecorationType({
+		textDecoration: "underline",
+		backgroundColor: "rgba(255, 255, 0, 0.3)",
+	});
 
 	const hoverProvider = vscode.languages.registerHoverProvider("markdown", {
 		provideHover(document, position) {
 			const range = document.getWordRangeAtPosition(position);
-			if (!range) { return; }
-
+			if (!range) return;
 			const word = document.getText(range);
 			if (word === "move_lazy") {
-				// 🔹 Lưu vị trí của move_lazy khi hover vào
 				lastHoveredMoveLazyPosition = position;
-
-				// 🎨 Hiệu ứng highlight
-				const decorationType = vscode.window.createTextEditorDecorationType({
-					textDecoration: "underline",
-					backgroundColor: "rgba(255, 255, 0, 0.3)",
-				});
-
 				const editor = vscode.window.activeTextEditor;
 				if (editor) {
-					editor.setDecorations(decorationType, [range]);
-					setTimeout(() => editor.setDecorations(decorationType, []), 1500);
+					editor.setDecorations(hoverDecorationType, [range]);
+					setTimeout(() => editor.setDecorations(hoverDecorationType, []), 3000);
 				}
-
-				// 🔹 Tạo tooltip khi hover
 				const markdownHover = new vscode.MarkdownString();
 				markdownHover.appendMarkdown(`### 🚀 Movelazy\n`);
 				markdownHover.appendMarkdown(`🔹 Click to run the code in the block.\n\n`);
 				markdownHover.appendMarkdown(`✅ Click **[Here](command:extension.runMoveLazy)** to execute.`);
-
 				return new vscode.Hover(markdownHover, range);
 			}
 		},
 	});
-
 
 	const linkProvider = vscode.languages.registerDocumentLinkProvider("markdown", {
 		provideDocumentLinks(document) {
@@ -56,143 +45,79 @@ export function activate(context: vscode.ExtensionContext) {
 			const links: vscode.DocumentLink[] = [];
 			const regex = /move_lazy/g;
 			let match;
-
 			while ((match = regex.exec(text)) !== null) {
 				const startPos = document.positionAt(match.index);
 				const endPos = document.positionAt(match.index + match[0].length);
-				const range = new vscode.Range(startPos, endPos);
-
-				// 📌 Tạo liên kết để chạy lệnh
-				const link = new vscode.DocumentLink(
-					range,
-					vscode.Uri.parse("command:extension.runMoveLazy")
-				);
-				links.push(link);
+				links.push(new vscode.DocumentLink(new vscode.Range(startPos, endPos), vscode.Uri.parse("command:extension.runMoveLazy")));
 			}
-
 			return links;
 		},
 	});
 
-
 	function insertOutputIntoMarkdown(document: vscode.TextDocument, insertPosition: vscode.Position, outputText: string) {
 		const edit = new vscode.WorkspaceEdit();
-		const outputMarkdown = `\n\`\`\`output\n${outputText.trim()}\n\`\`\`\n`;
+		edit.insert(document.uri, insertPosition, `\n\`\`\`output\n${outputText.trim()}\n\`\`\`\n`);
+		vscode.workspace.applyEdit(edit);
+	}
 
-		// console.log("Chèn output vào vị trí:", insertPosition);
-		// console.log("🔹 Output:\n", outputMarkdown);
+	function checkRustInstalled(): boolean {
+		return !spawnSync("rustc", ["--version"], { encoding: "utf-8" }).error;
+	}
 
-		edit.insert(document.uri, insertPosition, outputMarkdown);
-		vscode.workspace.applyEdit(edit).then(success => {
-			if (success) {
-				// console.log("✅ Edit applied successfully");
-			} else {
-				vscode.window.showErrorMessage("❌ Failed to apply edit");
-			}
-		}, error => {
-			vscode.window.showErrorMessage("❌ Error applying edit:", error);
-		});
+	async function deleteTempFile(filePath: string) {
+		try {
+			if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+		} catch (err) {
+			console.error(`❌ Error deleting file: ${filePath}`, err);
+		}
 	}
 
 	const runMoveLazyCommand = vscode.commands.registerCommand("extension.runMoveLazy", async () => {
 		const editor = vscode.window.activeTextEditor;
 		if (!editor) {
-			vscode.window.showErrorMessage("❌ Could not find current opening file.");
+			vscode.window.showErrorMessage("❌ No active editor.");
 			return;
 		}
-
+		if (!checkRustInstalled()) {
+			vscode.window.showErrorMessage("❌ Rust not installed.");
+			return;
+		}
 		const document = editor.document;
 		const text = document.getText();
-		let wordIndex: number | null = null;
-
-		// 📌 Lấy vị trí `move_lazy`
-		if (lastHoveredMoveLazyPosition) {
-			wordIndex = document.offsetAt(lastHoveredMoveLazyPosition);
-		} else {
+		const wordIndex = lastHoveredMoveLazyPosition ? document.offsetAt(lastHoveredMoveLazyPosition) : null;
+		if (wordIndex === null) {
 			vscode.window.showErrorMessage("❌ Could not find `move_lazy`.");
 			return;
 		}
-
-		// 🔍 Tìm code block Rust ngay sau `move_lazy`
-		const codeBlockRegex = /```rust\s*\r?\n([\s\S]*?)```/g;
-		let match;
-		let targetCodeBlock = null;
-		let targetCodeBlockIndex = -1;
-		let endOfCodeBlockPosition: vscode.Position | null = null;
-
+		const codeBlockRegex = /```rust\s*\n([\s\S]*?)```/g;
+		let match, targetCodeBlock = null, endOfCodeBlockPosition = null;
 		while ((match = codeBlockRegex.exec(text)) !== null) {
-			const codeBlockIndex = match.index;
-			if (codeBlockIndex > wordIndex) {
+			if (document.offsetAt(document.positionAt(match.index)) > wordIndex) {
 				targetCodeBlock = match[1].trim();
-				targetCodeBlockIndex = codeBlockIndex;
-
-				// Xác định vị trí cuối cùng của block code để chèn output
-				const codeBlockEndOffset = codeBlockIndex + match[0].length;
-				endOfCodeBlockPosition = document.positionAt(codeBlockEndOffset);
-
+				endOfCodeBlockPosition = document.positionAt(match.index + match[0].length);
 				break;
 			}
 		}
-
 		if (!targetCodeBlock || !endOfCodeBlockPosition) {
-			vscode.window.showErrorMessage("❌ Could not find code in the block.");
+			vscode.window.showErrorMessage("❌ No Rust code block found.");
 			return;
 		}
-
-		// console.log("✅ Chạy Rust code block tại vị trí:", targetCodeBlockIndex);
-		// console.log("🔹 Nội dung code:\n", targetCodeBlock);
-
-		// 📌 Tạo file tạm chứa code
 		const tempFilePath = path.join(__dirname, "temp_lazy_code.rs");
+		const outputFilePath = path.join(__dirname, os.platform() === "win32" ? "temp_lazy_exec.exe" : "temp_lazy_exec");
 		fs.writeFileSync(tempFilePath, targetCodeBlock);
-
-		// 📌 File thực thi tạm thời
-		const outputFilePath = path.join(__dirname, "temp_lazy_exec");
-
-		// 📌 Kiểm tra Rust đã cài chưa
-		exec(`rustc --version`, (error) => {
-			if (error) {
-				vscode.window.showErrorMessage("❌ Rust compiler (rustc) chưa được cài đặt.");
-				return;
-			}
-
-			// 📌 Biên dịch và chạy code
-			exec(`rustc "${tempFilePath}" -o "${outputFilePath}" && "${outputFilePath}"`, (error, stdout, stderr) => {
+		exec(`rustc "${tempFilePath}" -o "${outputFilePath}" && ${os.platform() === "win32" ? outputFilePath : `"./${outputFilePath}"`}`,
+			async (error, stdout, stderr) => {
 				if (error) {
-					vscode.window.showErrorMessage(`❌ Error compile: ${stderr}`);
-					return;
+					vscode.window.showErrorMessage(`❌ Compilation error: ${stderr}`);
+				} else {
+					insertOutputIntoMarkdown(document, endOfCodeBlockPosition, stdout);
+					vscode.window.showInformationMessage("✅ Execution successful!");
 				}
-
-				const outputText = stdout.trim();
-
-
-				// 🗑 Xóa file tạm
-				try {
-					if (fs.existsSync(tempFilePath)) {
-						fs.unlinkSync(tempFilePath);
-						console.log("Temporary Rust code file deleted:", tempFilePath); // Add this line for logging
-					}
-				} catch (err) {
-					console.error("❌ Error deleting temporary Rust code file:", err); // Add this line for logging
-				}
-				try {
-					if (fs.existsSync(outputFilePath)) {
-						fs.unlinkSync(outputFilePath);
-						console.log("Temporary executable file deleted:", outputFilePath); // Add this line for logging
-					}
-				} catch (err) {
-					console.error("❌ Error deleting temporary executable file:", err); // Add this line for logging
-				}
-
-				// ✅ Chèn kết quả ngay bên dưới block Rust
-				insertOutputIntoMarkdown(document, endOfCodeBlockPosition, outputText);
-
-				vscode.window.showInformationMessage("✅ Execute code block successfully!");
-			});
-		});
+				await deleteTempFile(tempFilePath);
+				await deleteTempFile(outputFilePath);
+			}
+		);
 	});
-
-
 
 	context.subscriptions.push(hoverProvider, linkProvider, runMoveLazyCommand);
 }
