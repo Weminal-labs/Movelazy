@@ -156,12 +156,15 @@ export function activate(context: vscode.ExtensionContext) {
 		};
 
 		axios.post("http://localhost:3000/api", requestData)
-			.then(async (response) => {
+			.then(async (response: { data: string; }) => {
 				// console.log("response", response.data);
 				insertOutputIntoMarkdown(document, endOfCodeBlockPosition, response.data);
 				vscode.window.showInformationMessage("✅ Execution successful!");
 			})
-			.catch((error) => {
+			.catch((error: { response: { data: any; }; }) => {
+				if (error) {
+					vscode.window.showErrorMessage(`❌ Execution error: ${error.response.data}`);
+				}
 				vscode.window.showErrorMessage(`❌ Execution error: ${error}`);
 			});
 
