@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { spawnSync, exec } from 'child_process';
 import os from 'os';
+import axios from "axios";
 
 export function activate(context: vscode.ExtensionContext) {
 	let lastHoveredMoveLazyPosition: vscode.Position | null = null;
@@ -125,6 +126,47 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
+	async function runMoveCode(document: vscode.TextDocument, targetCodeBlock: string, endOfCodeBlockPosition: vscode.Position) {
+		const tempFilePath = path.join(__dirname, "temp_lazy_code.rs");
+		const outputFilePath = path.join(__dirname, os.platform() === "win32" ? "temp_lazy_exec.exe" : "temp_lazy_exec");
+		fs.writeFileSync(tempFilePath, targetCodeBlock);
+		exec(`rustc "${tempFilePath}" -o "${outputFilePath}" && ${os.platform() === "win32" ? outputFilePath : `"./${outputFilePath}"`}`,
+			async (error, stdout, stderr) => {
+				if (error) {
+					vscode.window.showErrorMessage(`❌ Compilation error: ${stderr}`);
+				} else {
+					insertOutputIntoMarkdown(document, endOfCodeBlockPosition, stdout);
+					vscode.window.showInformationMessage("✅ Execution successful!");
+				}
+				await deleteTempFile(tempFilePath);
+				await deleteTempFile(outputFilePath);
+			}
+		);
+	}
+
+	async function runMoveAi(document: vscode.TextDocument, targetCodeBlock: string, endOfCodeBlockPosition: vscode.Position) {
+		let requestData = {
+			"messages": [
+				{
+					"role": "user",
+					"content": targetCodeBlock,
+				}
+			],
+			"show_intermediate_steps": false
+		};
+
+		axios.post("http://localhost:3000/api", requestData)
+			.then(async (response) => {
+				// console.log("response", response.data);
+				insertOutputIntoMarkdown(document, endOfCodeBlockPosition, response.data);
+				vscode.window.showInformationMessage("✅ Execution successful!");
+			})
+			.catch((error) => {
+				vscode.window.showErrorMessage(`❌ Execution error: ${error}`);
+			});
+
+	}
+
 	const runMoveLazyCommand = vscode.commands.registerCommand("extension.runMoveLazy", async () => {
 		const editor = vscode.window.activeTextEditor;
 		if (!editor) {
@@ -142,34 +184,29 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage("❌ Could not find `move_lazy`.");
 			return;
 		}
-		const codeBlockRegex = /```rust\s*\n([\s\S]*?)```/g;
-		let match, targetCodeBlock = null, endOfCodeBlockPosition = null;
+		const codeBlockRegex = /```(rust|ai)\s*\n([\s\S]*?)```/g;
+		let match, targetCodeBlock = null, endOfCodeBlockPosition = null, language = null;
 		while ((match = codeBlockRegex.exec(text)) !== null) {
-			if (document.offsetAt(document.positionAt(match.index)) > wordIndex) {
-				targetCodeBlock = match[1].trim();
+			const matchStartIndex = document.offsetAt(document.positionAt(match.index));
+			if (matchStartIndex > wordIndex) {
+				language = match[1];
+				targetCodeBlock = match[2].trim();
 				endOfCodeBlockPosition = document.positionAt(match.index + match[0].length);
 				break;
 			}
 		}
 		if (!targetCodeBlock || !endOfCodeBlockPosition) {
-			vscode.window.showErrorMessage("❌ No Rust code block found.");
+			vscode.window.showErrorMessage("❌ No code block found.");
 			return;
 		}
-		const tempFilePath = path.join(__dirname, "temp_lazy_code.rs");
-		const outputFilePath = path.join(__dirname, os.platform() === "win32" ? "temp_lazy_exec.exe" : "temp_lazy_exec");
-		fs.writeFileSync(tempFilePath, targetCodeBlock);
-		exec(`rustc "${tempFilePath}" -o "${outputFilePath}" && ${os.platform() === "win32" ? outputFilePath : `"./${outputFilePath}"`}`,
-			async (error, stdout, stderr) => {
-				if (error) {
-					vscode.window.showErrorMessage(`❌ Compilation error: ${stderr}`);
-				} else {
-					insertOutputIntoMarkdown(document, endOfCodeBlockPosition, stdout);
-					vscode.window.showInformationMessage("✅ Execution successful!");
-				}
-				await deleteTempFile(tempFilePath);
-				await deleteTempFile(outputFilePath);
-			}
-		);
+		if (language === "rust") {
+			await runMoveCode(document, targetCodeBlock, endOfCodeBlockPosition);
+		} else if (language === "ai") {
+			await runMoveAi(document, targetCodeBlock, endOfCodeBlockPosition);
+		} else {
+			vscode.window.showErrorMessage("❌ Unsupported code block language.");
+			return;
+		}
 	});
 
 	context.subscriptions.push(hoverProvider, linkProvider, runMoveLazyCommand, removeOutputCommand);
