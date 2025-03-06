@@ -16,7 +16,7 @@ export const AptosNavbar = () => {
 
       <ul className="flex gap-4">
         <li>
-          <Link to="/aptos/compiler" className="text-white hover:text-white/80">
+          <Link to="/aptos/move/compiler" className="text-white hover:text-white/80">
             Compile
           </Link>
         </li>

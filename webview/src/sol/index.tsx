@@ -1,8 +1,8 @@
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { SolNavbar } from './components/SolNavbar';
-import { useState, useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { SolNavbar } from "./components/SolNavbar";
+import { useState, useEffect } from "react";
 
-interface WorkspaceStatus {
+interface cliStatus {
   loading: boolean;
   initialized?: boolean;
   error?: string;
@@ -11,41 +11,45 @@ interface WorkspaceStatus {
 const SolPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [status, setStatus] = useState<WorkspaceStatus>({ loading: true });
+  const [status, setStatus] = useState<cliStatus>({ loading: true });
 
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       const message = event.data;
-      
+
       switch (message.type) {
-        case 'settings':
+        case "settings":
           setStatus({
             loading: false,
-            initialized: true
+            initialized: true,
           });
-          if (location.pathname === '/sol') {
-            navigate('/sol/project');
+          if (location.pathname === "/sol") {
+            navigate("/sol/project");
           }
           break;
-        case 'workspaceStatus':
+        case "cliStatus":
           setStatus({
             loading: message.loading,
             initialized: message.initialized,
-            error: message.error
+            error: message.error,
           });
           break;
       }
     };
 
-    window.addEventListener('message', messageHandler);
-    window.vscode.postMessage({ command: 'solidity.getSettings' });
+    window.addEventListener("message", messageHandler);
+    window.vscode.postMessage({ command: "solidity.getSettings" });
 
-    return () => window.removeEventListener('message', messageHandler);
+    return () => window.removeEventListener("message", messageHandler);
   }, [navigate, location]);
 
   useEffect(() => {
-    if (!status.loading && !status.initialized && location.pathname === '/sol/compiler') {
-      navigate('/sol/project');
+    if (
+      !status.loading &&
+      !status.initialized &&
+      location.pathname === "/sol/compiler"
+    ) {
+      navigate("/sol/project");
     }
   }, [status, navigate, location.pathname]);
 
