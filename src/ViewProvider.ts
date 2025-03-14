@@ -15,7 +15,7 @@ import { AiCmd } from "./ai/chatbot";
 import compile from "./contract/aptos/compile";
 import { checkProfile, deploy } from "./contract/aptos/deploy";
 import { createFileSystem } from "./lib/filesystem"; // Import FileSystem
-import * as path from "path";
+
 
 export class ViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "MovelazyView";
