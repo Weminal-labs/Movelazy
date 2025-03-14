@@ -56,18 +56,18 @@ export class WorkspaceService {
             // Check if npm is installed
             await execAsync('npm --version');
 
-            // Initialize npm if needed
-            if (!fs.existsSync(path.join(workspacePath, 'package.json'))) {
-                await execAsync('npm init -y', { cwd: workspacePath });
-            }
-
-            // Install Hardhat if not installed
-            if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'))) {
-                await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox hardhat-deploy dotenv typescript ts-node ethers', {
-                    cwd: workspacePath
-                });
-            }
-
+            /*  // Initialize npm if needed
+             if (!fs.existsSync(path.join(workspacePath, 'package.json'))) {
+                 await execAsync('npm init -y', { cwd: workspacePath });
+             }
+ 
+             // Install Hardhat if not installed
+             if (!fs.existsSync(path.join(workspacePath, 'node_modules', 'hardhat'))) {
+                 await execAsync('npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox hardhat-deploy dotenv typescript ts-node ethers', {
+                     cwd: workspacePath
+                 });
+             }
+  */
             // Create tsconfig.json if it doesn't exist
             const tsconfigPath = path.join(workspacePath, 'tsconfig.json');
             if (!fs.existsSync(tsconfigPath)) {
@@ -156,7 +156,7 @@ export default config;
         try {
             // Check 1: npx hardhat --version
             try {
-                await execAsync('npx hardhat --version', { cwd: workspacePath });
+                // await execAsync('npx hardhat --version', { cwd: workspacePath });
             } catch {
                 return false;
             }

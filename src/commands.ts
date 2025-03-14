@@ -6,6 +6,13 @@ import { spawnSync } from 'child_process';
 import os from 'os';
 import fs from 'fs';
 import { lastHoveredMoveLazyPosition } from './state';
+import path from 'path';
+import { getCachedOutput, setCachedOutput } from './utils/cache';
+
+const executingDecorationType = vscode.window.createTextEditorDecorationType({
+    backgroundColor: 'rgba(255, 255, 0, 0.3)',
+    isWholeLine: true,
+});
 
 export function registerCommands(context: vscode.ExtensionContext) {
     const removeOutputCommand = vscode.commands.registerCommand("extension.removeOutput", async () => {
@@ -34,7 +41,8 @@ export function registerCommands(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage("❌ Could not find `move_lazy`.");
             return;
         }
-        const codeBlockRegex = /```(rust|ai)\s*\n([\s\S]+?)\n```/g;
+        const codeBlockRegex = /```(rust|ai)(?:\s+\w+)?\s*\n([\s\S]+?)\n```/g;
+        const referenceRegex = /<!--\s*@movelazy:\s*(.+?)#(.+?)\s*-->/;
         let match, targetCodeBlock = null, endOfCodeBlockPosition = null, language = null;
         while ((match = codeBlockRegex.exec(text)) !== null) {
             const matchStartIndex = document.offsetAt(document.positionAt(match.index));
@@ -45,18 +53,53 @@ export function registerCommands(context: vscode.ExtensionContext) {
                 break;
             }
         }
+
+        if (!targetCodeBlock || !endOfCodeBlockPosition) {
+            const referenceMatch = referenceRegex.exec(text);
+            if (referenceMatch) {
+                const referencePath = referenceMatch[1].trim();
+                const blockId = referenceMatch[2].trim();
+                const absolutePath = path.isAbsolute(referencePath) ? referencePath : path.join(path.dirname(document.uri.fsPath), referencePath);
+                const referencedDocument = await vscode.workspace.openTextDocument(absolutePath);
+                const referencedText = referencedDocument.getText();
+                const referencedCodeBlockMatch = new RegExp(`\`\`\`(rust|ai)\\s+${blockId}\\s*\\n([\\s\\S]+?)\\n\`\`\``).exec(referencedText);
+                if (referencedCodeBlockMatch) {
+                    language = referencedCodeBlockMatch[1];
+                    targetCodeBlock = referencedCodeBlockMatch[2].trim();
+                    endOfCodeBlockPosition = document.positionAt(referenceMatch.index + referenceMatch[0].length);
+                }
+            }
+        }
+
         if (!targetCodeBlock || !endOfCodeBlockPosition) {
             vscode.window.showErrorMessage("❌ No code block found.");
             return;
         }
+
+        const cacheKey = `${language}:${targetCodeBlock}`;
+        const cachedOutput = getCachedOutput(cacheKey);
+        if (cachedOutput) {
+            insertOutputIntoMarkdown(document, endOfCodeBlockPosition, cachedOutput);
+            vscode.window.showInformationMessage("✅ Execution successful (cached)!");
+            return;
+        }
+
+        const codeBlockRange = new vscode.Range(
+            document.positionAt(text.indexOf(targetCodeBlock)),
+            document.positionAt(text.indexOf(targetCodeBlock) + targetCodeBlock.length)
+        );
+        editor.setDecorations(executingDecorationType, [codeBlockRange]);
+
         if (language === "rust") {
-            await runMoveCode(document, targetCodeBlock, endOfCodeBlockPosition);
+            await runMoveCode(document, targetCodeBlock, endOfCodeBlockPosition, cacheKey);
         } else if (language === "ai") {
-            await runMoveAi(document, targetCodeBlock, endOfCodeBlockPosition);
+            await runMoveAi(document, targetCodeBlock, endOfCodeBlockPosition, cacheKey);
         } else {
             vscode.window.showErrorMessage("❌ Unsupported code block language.");
             return;
         }
+
+        editor.setDecorations(executingDecorationType, []);
     });
 
     context.subscriptions.push(removeOutputCommand, runMoveLazyCommand);
@@ -97,7 +140,7 @@ function checkRustInstalled(): boolean {
     return !spawnSync("rustc", ["--version"], { encoding: "utf-8" }).error;
 }
 
-async function runMoveCode(document: vscode.TextDocument, targetCodeBlock: string, endOfCodeBlockPosition: vscode.Position) {
+async function runMoveCode(document: vscode.TextDocument, targetCodeBlock: string, endOfCodeBlockPosition: vscode.Position, cacheKey: string) {
     const tempFilePath = getTempFilePath('rs');
     const outputFilePath = getTempFilePath(os.platform() === "win32" ? "exe" : "");
 
@@ -110,6 +153,7 @@ async function runMoveCode(document: vscode.TextDocument, targetCodeBlock: strin
         const { stdout } = await execAsync(runCommand);
 
         insertOutputIntoMarkdown(document, endOfCodeBlockPosition, stdout);
+        setCachedOutput(cacheKey, stdout);
         vscode.window.showInformationMessage("✅ Execution successful!");
     } catch (error: any) {
         vscode.window.showErrorMessage(`❌ Error: ${error.stderr || error.message}`);
@@ -119,7 +163,7 @@ async function runMoveCode(document: vscode.TextDocument, targetCodeBlock: strin
     }
 }
 
-async function runMoveAi(document: vscode.TextDocument, targetCodeBlock: string, endOfCodeBlockPosition: vscode.Position) {
+async function runMoveAi(document: vscode.TextDocument, targetCodeBlock: string, endOfCodeBlockPosition: vscode.Position, cacheKey: string) {
     let requestData = {
         "messages": [
             {
@@ -133,6 +177,7 @@ async function runMoveAi(document: vscode.TextDocument, targetCodeBlock: string,
     axios.post("http://localhost:3000/api", requestData)
         .then(async (response: { data: string; }) => {
             insertOutputIntoMarkdown(document, endOfCodeBlockPosition, response.data);
+            setCachedOutput(cacheKey, response.data);
             vscode.window.showInformationMessage("✅ Execution successful!");
         })
         .catch((error: { response: { data: any; }; }) => {

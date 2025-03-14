@@ -5,16 +5,16 @@ import { registerHoverProvider } from './hoverProvider';
 import { registerLinkProvider } from './linkProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "movelazy" is now active!');
+    console.log('Congratulations, your extension "movelazy" is now active!');
 
-	const provider = new ViewProvider(context);
-	context.subscriptions.push(vscode.window.registerWebviewViewProvider(ViewProvider.viewType, provider));
+    const provider = new ViewProvider(context);
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider(ViewProvider.viewType, provider));
 
-	registerHoverProvider(context);
-	registerLinkProvider(context);
-	registerCommands(context);
+    registerHoverProvider(context);
+    registerLinkProvider(context);
+    registerCommands(context);
 }
 
 export function deactivate() {
-	console.log('Your extension "movelazy" is now deactivated!');
+    console.log('Your extension "movelazy" is now deactivated!');
 }
