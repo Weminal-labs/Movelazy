@@ -1,11 +1,13 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet } from "react-router-dom";
+import { PathTracker } from "./PathTracker";
 
 export const RootLayout = () => {
-    return (
-        <div className="min-h-screen bg-[#0e0f0e]">
-            <main>
-                <Outlet />
-            </main>
-        </div>
-    )
-}
+  return (
+    <div className="min-h-screen bg-black">
+      <main>
+        <Outlet />
+        <PathTracker />
+      </main>
+    </div>
+  );
+};

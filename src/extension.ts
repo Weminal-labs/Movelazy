@@ -1,14 +1,20 @@
 import * as vscode from 'vscode';
-import { MovelazyViewProvider } from './MovelazyViewProvider';
+import { ViewProvider } from './ViewProvider';
+import { registerCommands } from './commands';
+import { registerHoverProvider } from './hoverProvider';
+import { registerLinkProvider } from './linkProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "movelazy" is now active!');
+    console.log('Congratulations, your extension "movelazy" is now active!');
 
-	const provider = new MovelazyViewProvider(context);
+    const provider = new ViewProvider(context);
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider(ViewProvider.viewType, provider));
 
-	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(MovelazyViewProvider.viewType, provider)
-	);
+    registerHoverProvider(context);
+    registerLinkProvider(context);
+    registerCommands(context);
 }
 
-export function deactivate() { }
+export function deactivate() {
+    console.log('Your extension "movelazy" is now deactivated!');
+}
