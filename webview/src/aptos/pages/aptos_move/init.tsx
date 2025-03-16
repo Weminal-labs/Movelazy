@@ -12,6 +12,7 @@ import { Checkbox } from "../../components/ui/checkbox"
 import { useNavigate } from "react-router-dom"
 import { Loader2 } from "lucide-react"
 import { StatusDialog } from "../../components/status-dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 
 export default function MoveInit() {
     const navigate = useNavigate();
@@ -31,6 +32,8 @@ export default function MoveInit() {
         skipFetchLatestGitDeps: false,
     })
 
+    const templates = ["hello-blockchain", "moon_coin", "mint_nft"]; 
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type } = e.target
         setInitArgs((prev) => ({
@@ -38,6 +41,13 @@ export default function MoveInit() {
             [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
         }))
     }
+
+    const handleTemplateChange = (value: string) => {
+        setInitArgs((prev) => ({
+            ...prev,
+            template: value,
+        }));
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -91,7 +101,7 @@ export default function MoveInit() {
                     <CardTitle className="text-2xl font-bold text-white">Init Project</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "simple" | "advanced")}>
+                    <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as "simple" | "advanced")}>
                         <TabsList className="grid w-full grid-cols-2 bg-gray-800">
                             <TabsTrigger value="simple" className="data-[state=active]:bg-gray-700">
                                 Simple
@@ -116,24 +126,26 @@ export default function MoveInit() {
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
                             <TabsContent value="simple">
-
                                 <div className="space-y-2">
                                     <Label htmlFor="template" className="text-white">
                                         Template (Optional)
                                     </Label>
-                                    <Input
-                                        id="template"
-                                        name="template"
-                                        value={initArgs.template}
-                                        onChange={handleInputChange}
-                                        placeholder="[possible values: hello-blockchain]"
-                                        className="bg-gray-800 border-gray-700 text-white"
-                                    />
+                                    <Select onValueChange={handleTemplateChange} value={initArgs.template}>
+                                        <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                                            <SelectValue placeholder="[Please select a template]" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                                            {templates.map((template) => (
+                                                <SelectItem key={template} value={template}>
+                                                    {template}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </TabsContent>
                             <TabsContent value="advanced">
                                 <div className="space-y-4">
-
                                     <div className="space-y-2">
                                         <Label htmlFor="packageDir" className="text-white">
                                             Package Directory
@@ -162,13 +174,18 @@ export default function MoveInit() {
                                         <Label htmlFor="template" className="text-white">
                                             Template
                                         </Label>
-                                        <Input
-                                            id="template"
-                                            name="template"
-                                            value={initArgs.template}
-                                            onChange={handleInputChange}
-                                            className="bg-gray-800 border-gray-700 text-white"
-                                        />
+                                        <Select onValueChange={handleTemplateChange} value={initArgs.template}>
+                                            <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                                                <SelectValue placeholder="[Please select a template]" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                                                {templates.map((template) => (
+                                                    <SelectItem key={template} value={template}>
+                                                        {template}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox
@@ -244,7 +261,6 @@ export default function MoveInit() {
                                 ) : (
                                     "Initialize Project"
                                 )}
-
                             </Button>
                         </form>
                     </Tabs>
@@ -267,4 +283,3 @@ export default function MoveInit() {
         </div>
     )
 }
-

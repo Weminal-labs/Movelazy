@@ -279,7 +279,44 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
     if (namedAddresses !== "") {
         command += " --named-addresses " + namedAddresses;
     }
-    if (template !== "") {
+    if (template === "moon_coin") {
+        command += " --template hello-blockchain";
+    }
+    if (template === "moon_coin") {
+        try {
+            // Execute the initial command
+            const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+            webview.postMessage({
+                type: "cliStatus",
+                success: true,
+                message: stderr + stdout,
+            });
+
+            await execAsync("mv sources/hello_blockchain.move sources/Coin.move", { cwd: workspacePath });
+
+            await execAsync(`cat <<EOL > sources/Coin.move
+            //:!:>moon
+            module MoonCoin::moon_coin {
+                struct MoonCoin {}
+
+                fun init_module(sender: &signer) {
+                    aptos_framework::managed_coin::initialize<MoonCoin>(
+                        sender,
+                        b"Moon Coin",
+                        b"MOON",
+                        6,
+                        false,
+                    );
+                }
+            }
+            //<:!:moon
+            `, { cwd: workspacePath });
+
+            await execAsync("sed -i 's/hello_blockchain/MoonCoin/' Move.toml", { cwd: workspacePath });
+        } catch (error) {
+            throw new Error("Failed to execute moon_coin template commands: " + error);
+        }
+    } else if (template !== "") {
         command += " --template " + template;
     }
     if (assumeYes) {
