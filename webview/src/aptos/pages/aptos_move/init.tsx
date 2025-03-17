@@ -32,7 +32,7 @@ export default function MoveInit() {
         skipFetchLatestGitDeps: false,
     })
 
-    const templates = ["hello-blockchain", "moon_coin", "mint_nft"]; 
+    const templates = ["hello-blockchain", "moon_coin", "NFT_Marketplace"]; 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type } = e.target
