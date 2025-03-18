@@ -1,329 +1,362 @@
-import { exec, spawn } from 'child_process';
-import * as vscode from 'vscode';
-import { promisify } from 'util';
-import { TestArgs } from '../contract/aptos/types';
-import path from 'path';
-import * as fs from 'fs';
-import { stderr } from 'process';
+import { exec, spawn } from "child_process";
+import * as vscode from "vscode";
+import { promisify } from "util";
+import { TestArgs } from "../contract/aptos/types";
+import path from "path";
+import * as fs from "fs";
+import { stderr } from "process";
 
 const execAsync = promisify(exec);
 
 async function CheckAptos(): Promise<Boolean> {
-    try {
-        // Run command "aptos --version"
-        const { stdout } = await execAsync("aptos --version");
+  try {
+    // Run command "aptos --version"
+    const { stdout } = await execAsync("aptos --version");
 
-        // If has output, Aptos has been installed
-        if (stdout.trim().length > 0) { return true; }
-
-        // Other case, Aptos has not been installed
-        return false;
-    } catch (error) {
-        return false;
+    // If has output, Aptos has been installed
+    if (stdout.trim().length > 0) {
+      return true;
     }
+
+    // Other case, Aptos has not been installed
+    return false;
+  } catch (error) {
+    return false;
+  }
 }
 
 async function CheckAptosInit(): Promise<boolean> {
-    return new Promise<boolean>((resolve) => {
-        // Get workspace path
-        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-        if (!workspacePath) {
-            resolve(false);
-            return;
-        }
-
-        const aptosProcess = spawn("aptos", ["init"], {
-            cwd: workspacePath,  // Set current working directory
-            stdio: ["pipe", "pipe", "pipe"],  // Connect stdin, stdout, stderr
-        });
-
-        // Listen output (stdout) from process
-        aptosProcess.stdout.on("data", (data) => {
-            const output = data.toString();
-
-            // Check notify "Aptos already initialized for profile default"
-            if (output.includes("Aptos already initialized for profile default")) {
-                aptosProcess.kill(); // terminate process
-                resolve(true); // Return true
-            }
-
-            // If have other input request, return false
-            if (output.includes("Please choose a network")) {
-                aptosProcess.kill(); // terminate process
-                resolve(false); // Return false
-            }
-        });
-
-        // Listen error (stderr)
-        aptosProcess.stderr.on("data", (data) => {
-            console.error("Error:", data.toString());
-            aptosProcess.kill(); // Terminate process when error
-            resolve(false); // Return false when error
-        });
-
-        // Listen when process end
-        aptosProcess.on("close", (code) => {
-            if (code !== 0) {
-                console.error(`Aptos process failed with exit code ${code}`);
-                resolve(false); // Return false when process failed
-            }
-        });
-    });
-}
-
-async function deleteAptosFolder() {
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-
-    if (!workspacePath) {
-        vscode.window.showErrorMessage("Workspace path not found.");
-        return;
-    }
-
-    const aptosFolderPath = path.join(workspacePath, '.aptos');
-
-    try {
-        // Kiểm tra xem thư mục .aptos có tồn tại không
-        if (fs.existsSync(aptosFolderPath)) {
-            // Xóa thư mục .aptos nếu tồn tại
-            await fs.promises.rm(aptosFolderPath, { recursive: true, force: true });
-        }
-    } catch (error) {
-        throw new Error("Failed to delete .aptos folder: " + error);
-    }
-}
-
-async function AptosInit(webview: vscode.Webview, network: string = "devnet", endpoint: string, faucetEndpoint: string, privateKey: string) {
+  return new Promise<boolean>((resolve) => {
     // Get workspace path
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspacePath) {
-        throw new Error("Workspace path not found");
+      resolve(false);
+      return;
     }
 
-    const isAptosInit = await CheckAptosInit();
-    if (isAptosInit) {
-        await deleteAptosFolder();
+    const aptosProcess = spawn("aptos", ["init"], {
+      cwd: workspacePath, // Set current working directory
+      stdio: ["pipe", "pipe", "pipe"], // Connect stdin, stdout, stderr
+    });
+
+    // Listen output (stdout) from process
+    aptosProcess.stdout.on("data", (data) => {
+      const output = data.toString();
+
+      // Check notify "Aptos already initialized for profile default"
+      if (output.includes("Aptos already initialized for profile default")) {
+        aptosProcess.kill(); // terminate process
+        resolve(true); // Return true
+      }
+
+      // If have other input request, return false
+      if (output.includes("Please choose a network")) {
+        aptosProcess.kill(); // terminate process
+        resolve(false); // Return false
+      }
+    });
+
+    // Listen error (stderr)
+    aptosProcess.stderr.on("data", (data) => {
+      console.error("Error:", data.toString());
+      aptosProcess.kill(); // Terminate process when error
+      resolve(false); // Return false when error
+    });
+
+    // Listen when process end
+    aptosProcess.on("close", (code) => {
+      if (code !== 0) {
+        console.error(`Aptos process failed with exit code ${code}`);
+        resolve(false); // Return false when process failed
+      }
+    });
+  });
+}
+
+async function deleteAptosFolder() {
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+
+  if (!workspacePath) {
+    vscode.window.showErrorMessage("Workspace path not found.");
+    return;
+  }
+
+  const aptosFolderPath = path.join(workspacePath, ".aptos");
+
+  try {
+    // Kiểm tra xem thư mục .aptos có tồn tại không
+    if (fs.existsSync(aptosFolderPath)) {
+      // Xóa thư mục .aptos nếu tồn tại
+      await fs.promises.rm(aptosFolderPath, { recursive: true, force: true });
     }
+  } catch (error) {
+    throw new Error("Failed to delete .aptos folder: " + error);
+  }
+}
 
-    function custom(network: string, endpoint: string, faucetEndpoint: string, privateKey: string) {
-        const aptosProcess = spawn("aptos", ["init"], {
-            cwd: workspacePath,
-            stdio: ["pipe", "pipe", "pipe"],
+async function AptosInit(
+  webview: vscode.Webview,
+  network: string = "devnet",
+  endpoint: string,
+  faucetEndpoint: string,
+  privateKey: string
+) {
+  // Get workspace path
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  if (!workspacePath) {
+    throw new Error("Workspace path not found");
+  }
+
+  const isAptosInit = await CheckAptosInit();
+  if (isAptosInit) {
+    await deleteAptosFolder();
+  }
+
+  function custom(
+    network: string,
+    endpoint: string,
+    faucetEndpoint: string,
+    privateKey: string
+  ) {
+    const aptosProcess = spawn("aptos", ["init"], {
+      cwd: workspacePath,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    let outputData = "";
+    aptosProcess.stderr.on("data", (data) => {
+      const output = data.toString();
+
+      if (output.includes("Choose network")) {
+        aptosProcess.stdin.write(`${network}\n`);
+      }
+
+      if (output.includes("Enter your rest endpoint")) {
+        aptosProcess.stdin.write(`${endpoint || ""}\n`);
+      }
+
+      if (output.includes("Enter your faucet endpoint")) {
+        aptosProcess.stdin.write(`${faucetEndpoint || ""}\n`);
+      }
+
+      if (output.includes("Enter your private key as a hex literal")) {
+        aptosProcess.stdin.write(`${privateKey || ""}\n`);
+      }
+
+      if (output.includes("creating it and funding it")) {
+        console.log("Creating and funding account...");
+        aptosProcess.stdin.write(`\n`);
+      }
+
+      if (output.includes("account") || output.includes("Account")) {
+        outputData += output;
+      }
+    });
+
+    aptosProcess.on("close", (code) => {
+      if (code === 0) {
+        webview.postMessage({
+          type: "cliStatus",
+          success: true,
+          message: outputData,
         });
-
-        let outputData = "";
-        aptosProcess.stderr.on("data", (data) => {
-            const output = data.toString();
-
-            if (output.includes("Choose network")) {
-                aptosProcess.stdin.write(`${network}\n`);
-            }
-
-            if (output.includes("Enter your rest endpoint")) {
-                aptosProcess.stdin.write(`${endpoint || ""}\n`);
-            }
-
-            if (output.includes("Enter your faucet endpoint")) {
-                aptosProcess.stdin.write(`${faucetEndpoint || ""}\n`);
-            }
-
-            if (output.includes("Enter your private key as a hex literal")) {
-                aptosProcess.stdin.write(`${privateKey || ""}\n`);
-            }
-
-            if (output.includes("creating it and funding it")) {
-                console.log("Creating and funding account...");
-                aptosProcess.stdin.write(`\n`);
-            }
-
-            if (output.includes("account") || output.includes("Account")) {
-                outputData += output;
-            }
+      } else {
+        webview.postMessage({
+          type: "cliStatus",
+          success: false,
+          message: `Aptos initialization failed with exit code ${code}`,
         });
+      }
+    });
+  }
 
-        aptosProcess.on("close", (code) => {
-            if (code === 0) {
-                webview.postMessage({
-                    type: "cliStatus",
-                    success: true,
-                    message: outputData,
-                });
-            } else {
-                webview.postMessage({
-                    type: "cliStatus",
-                    success: false,
-                    message: `Aptos initialization failed with exit code ${code}`,
-                });
-            }
-        });
-    }
+  function notCustom(network: string, privateKey: string) {
+    console.log("Initializing Aptos CLI...");
 
-    function notCustom(network: string, privateKey: string) {
-        console.log("Initializing Aptos CLI...");
+    let isDevnet = network === "devnet";
 
-        let isDevnet = network === "devnet";
+    const aptosProcess = spawn("aptos", ["init"], {
+      cwd: workspacePath,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
 
-        const aptosProcess = spawn("aptos", ["init"], {
-            cwd: workspacePath,
-            stdio: ["pipe", "pipe", "pipe"],
-        });
+    let outputData = "";
 
-        let outputData = "";
+    aptosProcess.stderr.on("data", (data) => {
+      const output = data.toString();
+      console.log("CLI Output:", output);
 
-        aptosProcess.stderr.on("data", (data) => {
-            const output = data.toString();
-            console.log("CLI Output:", output);
-
-            if (output.includes("already initialized")) {
-                console.log("Aptos already initialized, confirming overwrite...");
-                aptosProcess.stdin.write("yes\n");
-            } else if (output.includes("Choose network")) {
-                console.log(`Selecting network: ${network}`);
-                aptosProcess.stdin.write(`${network}\n`);
-            } else if (output.includes("Enter your private key as a hex literal")) {
-                console.log("Entering private key...");
-                aptosProcess.stdin.write(`${privateKey || ""}\n`);
-            } else if (output.includes("The account has not been created on chain yet")) {
-                if (network === "testnet") {
-                    webview.postMessage({
-                        type: "cliStatus",
-                        success: true,
-                        message: "Success initialized with network " + network + output,
-                    });
-                }
-                else if (network === "mainnet") {
-                    webview.postMessage({
-                        type: "cliStatus",
-                        success: true,
-                        message: "Success initialized with network " + network,
-                    });
-                }
-
-                aptosProcess.kill();
-            } else {
-                console.log("Skip init...");
-                aptosProcess.stdin.write("\n");
-                webview.postMessage({
-                    type: "cliStatus",
-                    success: true,
-                    message: outputData.trim(),
-                });
-            }
-
-            if (output.match(/Account\s0x[a-fA-F0-9]+/)) {
-                outputData += output;
-            }
-        });
-
-        if (isDevnet) {
-            aptosProcess.on("close", (code) => {
-                if (code === 0) {
-                    webview.postMessage({
-                        type: "cliStatus",
-                        success: true,
-                        message: outputData.trim(),
-                    });
-                } else {
-                    webview.postMessage({
-                        type: "cliStatus",
-                        success: false,
-                        message: `Aptos initialization failed with exit code ${code}`,
-                    });
-                }
-            });
+      if (output.includes("already initialized")) {
+        console.log("Aptos already initialized, confirming overwrite...");
+        aptosProcess.stdin.write("yes\n");
+      } else if (output.includes("Choose network")) {
+        console.log(`Selecting network: ${network}`);
+        aptosProcess.stdin.write(`${network}\n`);
+      } else if (output.includes("Enter your private key as a hex literal")) {
+        console.log("Entering private key...");
+        aptosProcess.stdin.write(`${privateKey || ""}\n`);
+      } else if (
+        output.includes("The account has not been created on chain yet")
+      ) {
+        if (network === "testnet") {
+          webview.postMessage({
+            type: "cliStatus",
+            success: true,
+            message: "Success initialized with network " + network + output,
+          });
+        } else if (network === "mainnet") {
+          webview.postMessage({
+            type: "cliStatus",
+            success: true,
+            message: "Success initialized with network " + network,
+          });
         }
-    }
 
-    if (network === 'custom') {
-        custom(network, endpoint, faucetEndpoint, privateKey);
+        aptosProcess.kill();
+      } else {
+        console.log("Skip init...");
+        aptosProcess.stdin.write("\n");
+        webview.postMessage({
+          type: "cliStatus",
+          success: true,
+          message: outputData.trim(),
+        });
+      }
+
+      if (output.match(/Account\s0x[a-fA-F0-9]+/)) {
+        outputData += output;
+      }
+    });
+
+    if (isDevnet) {
+      aptosProcess.on("close", (code) => {
+        if (code === 0) {
+          webview.postMessage({
+            type: "cliStatus",
+            success: true,
+            message: outputData.trim(),
+          });
+        } else {
+          webview.postMessage({
+            type: "cliStatus",
+            success: false,
+            message: `Aptos initialization failed with exit code ${code}`,
+          });
+        }
+      });
     }
-    else {
-        notCustom(network, privateKey);
-    }
+  }
+
+  if (network === "custom") {
+    custom(network, endpoint, faucetEndpoint, privateKey);
+  } else {
+    notCustom(network, privateKey);
+  }
 }
 
 async function AptosInfo(webview: vscode.Webview) {
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    if (!workspacePath) {
-        throw new Error("Workspace path not found");
-    }
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  if (!workspacePath) {
+    throw new Error("Workspace path not found");
+  }
 
-    try {
-        const { stdout, stderr } = await execAsync("aptos info", { cwd: workspacePath });
-        webview.postMessage({
-            type: "cliStatus",
-            success: true,
-            message: stderr + stdout,
-        });
-    } catch (error) {
-        webview.postMessage({
-            type: "cliStatus",
-            success: false,
-            message: (error as Error).message,
-        });
-    }
+  try {
+    const { stdout, stderr } = await execAsync("aptos info", {
+      cwd: workspacePath,
+    });
+    webview.postMessage({
+      type: "cliStatus",
+      success: true,
+      message: stderr + stdout,
+    });
+  } catch (error) {
+    webview.postMessage({
+      type: "cliStatus",
+      success: false,
+      message: (error as Error).message,
+    });
+  }
 }
 
-async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: string, namedAddresses: string, template: string, assumeYes: boolean, assumeNo: boolean, frameworkGitRev: string, frameworkLocalDir: string, skipFetchLatestGitDeps: boolean) {
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    if (!workspacePath) {
-        throw new Error("Workspace path not found");
+async function AptosMoveInit(
+  webview: vscode.Webview,
+  name: string,
+  packageDir: string,
+  namedAddresses: string,
+  template: string,
+  assumeYes: boolean,
+  assumeNo: boolean,
+  frameworkGitRev: string,
+  frameworkLocalDir: string,
+  skipFetchLatestGitDeps: boolean
+) {
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  if (!workspacePath) {
+    throw new Error("Workspace path not found");
+  }
+
+  let command = "aptos move init";
+  if (name) {
+    command += " --name " + name;
+  }
+  if (packageDir !== "") {
+    command += " --package-dir " + packageDir;
+  }
+  if (namedAddresses !== "") {
+    command += " --named-addresses " + namedAddresses;
+  }
+  if (
+    template === "NFT_Marketplace" ||
+    template === "moon_coin" ||
+    template === "ToDo_list" ||
+    template === "hello_prover" ||
+    template === ""
+  ) {
+    command += " --template hello-blockchain";
+  }
+
+  try {
+    const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+    webview.postMessage({
+      type: "cliStatus",
+      success: true,
+      message: stderr + stdout,
+    });
+
+    const sourcePath = path.join(workspacePath, "sources");
+    const oldFile = path.join(sourcePath, "hello_blockchain.move");
+    const moveTomlPath = path.join(workspacePath, "Move.toml");
+
+    if (template === "moon_coin") {
+      const newFile = path.join(sourcePath, "Coin.move");
+      await fs.promises.rename(oldFile, newFile);
+
+      const coinContent = `
+module MoonCoin::moon_coin {
+    struct MoonCoin {}
+
+    fun init_module(sender: &signer) {
+        aptos_framework::managed_coin::initialize<MoonCoin>(
+            sender,
+            b"Moon Coin",
+            b"MOON",
+            6,
+            false,
+        );
     }
+}`;
+      await fs.promises.writeFile(newFile, coinContent.trim());
 
-    let command = "aptos move init";
-    if (name) {
-        command += " --name " + name;
-    }
-    if (packageDir !== "") {
-        command += " --package-dir " + packageDir;
-    }
-    if (namedAddresses !== "") {
-        command += " --named-addresses " + namedAddresses;
-    }
-    if (template === "NFT_Marketplace") {
-        command += " --template hello-blockchain";
-    } else if (template === "moon_coin") {
-        command += " --template hello-blockchain";
-    } else if (template === "ToDo_list") {
-        command += " --template hello-blockchain";
-    } else if (template === "hello_prover") {
-        command += " --template hello-blockchain";
-    } else {
-        command += " --template hello-blockchain";
-    }
+      const moveTomlContent = await fs.promises.readFile(moveTomlPath, "utf8");
+      await fs.promises.writeFile(
+        moveTomlPath,
+        moveTomlContent.replace(/hello_blockchain/g, "MoonCoin")
+      );
+    } else if (template === "NFT_Marketplace") {
+      const newFile = path.join(sourcePath, "Marketplace_NFT.move");
+      await fs.promises.rename(oldFile, newFile);
 
-    try {
-        const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
-        webview.postMessage({
-            type: "cliStatus",
-            success: true,
-            message: stderr + stdout,
-        });
-
-        if (template === "moon_coin") {
-            await execAsync("mv sources/hello_blockchain.move sources/Coin.move", { cwd: workspacePath });
-
-            await execAsync(`cat <<EOL > sources/Coin.move
-            module MoonCoin::moon_coin {
-                struct MoonCoin {}
-
-                fun init_module(sender: &signer) {
-                    aptos_framework::managed_coin::initialize<MoonCoin>(
-                        sender,
-                        b"Moon Coin",
-                        b"MOON",
-                        6,
-                        false,
-                    );
-                }
-            }
-            `, { cwd: workspacePath });
-
-            await execAsync("sed -i 's/hello_blockchain/MoonCoin/' Move.toml", { cwd: workspacePath });
-        } else if (template === "NFT_Marketplace") {
-            await execAsync("mv sources/hello_blockchain.move sources/Marketplace_NFT.move", { cwd: workspacePath });
-
-            await execAsync(`cat <<EOL > sources/Marketplace_NFT.move
-            module marketplace_addr::marketplace {
+      const nftContent = `module marketplace_addr::marketplace {
                 use std::error;
                 use std::signer;
                 use std::option;
@@ -625,15 +658,19 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
                     );
                     (token, listing)
                 }
-            }
-            `, { cwd: workspacePath });
+            }`; // Your NFT marketplace content here
+      await fs.promises.writeFile(newFile, nftContent);
 
-            await execAsync("sed -i 's/hello_blockchain/marketplace_addr/' Move.toml", { cwd: workspacePath });
-        } else if (template === "ToDo_list") {
-            await execAsync("mv sources/hello_blockchain.move sources/AdvancedTodoList.move", { cwd: workspacePath });
+      const moveTomlContent = await fs.promises.readFile(moveTomlPath, "utf8");
+      await fs.promises.writeFile(
+        moveTomlPath,
+        moveTomlContent.replace(/hello_blockchain/g, "marketplace_addr")
+      );
+    } else if (template === "ToDo_list") {
+      const newFile = path.join(sourcePath, "AdvancedTodoList.move");
+      await fs.promises.rename(oldFile, newFile);
 
-            await execAsync(`cat <<EOL > sources/AdvancedTodoList.move
-            module advanced_todo_list_addr::advanced_todo_list {
+      const todoContent = `module advanced_todo_list_addr::advanced_todo_list {
                 use std::bcs;
                 use std::signer;
                 use std::vector;
@@ -885,150 +922,163 @@ async function AptosMoveInit(webview: vscode.Webview, name: string, packageDir: 
                     complete_todo(&admin, todo_list_idx, 0);
                     complete_todo(&admin, todo_list_idx, 0);
                 }
-            }
-            `, { cwd: workspacePath });
+            }`; // Your Todo list content here
+      await fs.promises.writeFile(newFile, todoContent);
 
-            await execAsync("sed -i 's/hello_blockchain/advanced_todo_list_addr/' Move.toml", { cwd: workspacePath });
-        } else if (template === "hello_prover") {
-            await execAsync("mv sources/hello_blockchain.move sources/HelloProver.move", { cwd: workspacePath });
+      const moveTomlContent = await fs.promises.readFile(moveTomlPath, "utf8");
+      await fs.promises.writeFile(
+        moveTomlPath,
+        moveTomlContent.replace(/hello_blockchain/g, "advanced_todo_list_addr")
+      );
+    } else if (template === "hello_prover") {
+      const newFile = path.join(sourcePath, "HelloProver.move");
+      await fs.promises.rename(oldFile, newFile);
 
-            await execAsync(`cat <<EOL > sources/HelloProver.move
-                    module hello_prover::prove {
-                        fun plus1(x: u64): u64 {
-                            x+1
-                        }
-                        spec plus1 {
-                            ensures result == x+1;
-                        }
-
-                        fun abortsIf0(x: u64) {
-                            if (x == 0) {
-                                abort(0)
-                            };
-                        }
-                        spec abortsIf0 {
-                            aborts_if x == 0;
-                        }
-                }
-            `, { cwd: workspacePath });
-
-            await execAsync("sed -i 's/hello_blockchain/hello_prover/' Move.toml", { cwd: workspacePath });
-        }
-    } catch (error) {
-        throw new Error("Failed to execute template commands: " + error);
+      const proverContent = `
+module hello_prover::prove {
+    fun plus1(x: u64): u64 {
+        x+1
+    }
+    spec plus1 {
+        ensures result == x+1;
     }
 
-    if (assumeYes) {
-        command += " --assume-yes";
+    fun abortsIf0(x: u64) {
+        if (x == 0) {
+            abort(0)
+        };
     }
-    if (assumeNo) {
-        command += " --assume-no";
+    spec abortsIf0 {
+        aborts_if x == 0;
     }
-    if (frameworkGitRev !== "") {
-        command += " --framework-git-rev " + frameworkGitRev;
-    }
-    if (frameworkLocalDir !== "") {
-        command += " --framework-local-dir " + frameworkLocalDir;
-    }
-    if (skipFetchLatestGitDeps) {
-        command += " --skip-fetch-latest-git-deps";
-    }
+}`;
+      await fs.promises.writeFile(newFile, proverContent.trim());
 
-    try {
-        const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
-        webview.postMessage({
-            type: "cliStatus",
-            success: true,
-            message: stderr + stdout,
-        });
-    } catch (error) {
-        webview.postMessage({
-            type: "cliStatus",
-            success: false,
-            message: (error as Error).message,
-        });
-
+      const moveTomlContent = await fs.promises.readFile(moveTomlPath, "utf8");
+      await fs.promises.writeFile(
+        moveTomlPath,
+        moveTomlContent.replace(/hello_blockchain/g, "hello_prover")
+      );
     }
+  } catch (error) {
+    throw new Error("Failed to execute template commands: " + error);
+  }
+
+  if (assumeYes) {
+    command += " --assume-yes";
+  }
+  if (assumeNo) {
+    command += " --assume-no";
+  }
+  if (frameworkGitRev !== "") {
+    command += " --framework-git-rev " + frameworkGitRev;
+  }
+  if (frameworkLocalDir !== "") {
+    command += " --framework-local-dir " + frameworkLocalDir;
+  }
+  if (skipFetchLatestGitDeps) {
+    command += " --skip-fetch-latest-git-deps";
+  }
+
+  try {
+    const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+    webview.postMessage({
+      type: "cliStatus",
+      success: true,
+      message: stderr + stdout,
+    });
+  } catch (error) {
+    webview.postMessage({
+      type: "cliStatus",
+      success: false,
+      message: (error as Error).message,
+    });
+  }
 }
 
 async function MoveTest(webview: vscode.Webview, args: TestArgs) {
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    if (!workspacePath) {
-        throw new Error("Workspace path not found");
-    }
+  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  if (!workspacePath) {
+    throw new Error("Workspace path not found");
+  }
 
-    let command = "aptos move test";
-    if (args.namedAddresses !== "") {
-        command += " --named-addresses " + args.namedAddresses + "=default";;
-    }
-    if (args.filter !== "") {
-        command += " --filter " + args.filter;
-    }
-    if (args.ignoreCompileWarnings) {
-        command += " --ignore-compile-warnings";
-    }
-    if (args.packageDir !== "") {
-        command += " --package-dir " + args.packageDir;
-    }
-    if (args.outputDir !== "") {
-        command += " --output-dir " + args.outputDir;
-    }
-    if (args.overrideStd !== "") {
-        command += " --override-std " + args.overrideStd;
-    }
-    if (args.skipFetchLatestGitDeps) {
-        command += " --skip-fetch-latest-git-deps";
-    }
-    if (args.skipAttributeChecks) {
-        command += " --skip-attribute-checks";
-    }
-    if (args.dev) {
-        command += " --dev";
-    }
-    if (args.checkTestCode) {
-        command += " --check-test-code";
-    }
-    if (args.optimize !== "") {
-        command += " --optimize " + args.optimize;
-    }
-    if (args.bytecodeVersion !== "") {
-        command += " --bytecode-version " + args.bytecodeVersion;
-    }
-    if (args.compilerVersion !== "") {
-        command += " --compiler-version " + args.compilerVersion;
-    }
-    if (args.languageVersion !== "") {
-        command += " --language-version " + args.languageVersion;
-    }
-    if (args.moveVersion !== "") {
-        command += " --move-version " + args.moveVersion;
-    }
-    if (args.instructions !== "") {
-        command += " --instructions " + args.instructions;
-    }
-    if (args.coverage) {
-        command += " --coverage";
-    }
-    if (args.dump) {
-        command += " --dump";
-    }
+  let command = "aptos move test";
+  if (args.namedAddresses !== "") {
+    command += " --named-addresses " + args.namedAddresses + "=default";
+  }
+  if (args.filter !== "") {
+    command += " --filter " + args.filter;
+  }
+  if (args.ignoreCompileWarnings) {
+    command += " --ignore-compile-warnings";
+  }
+  if (args.packageDir !== "") {
+    command += " --package-dir " + args.packageDir;
+  }
+  if (args.outputDir !== "") {
+    command += " --output-dir " + args.outputDir;
+  }
+  if (args.overrideStd !== "") {
+    command += " --override-std " + args.overrideStd;
+  }
+  if (args.skipFetchLatestGitDeps) {
+    command += " --skip-fetch-latest-git-deps";
+  }
+  if (args.skipAttributeChecks) {
+    command += " --skip-attribute-checks";
+  }
+  if (args.dev) {
+    command += " --dev";
+  }
+  if (args.checkTestCode) {
+    command += " --check-test-code";
+  }
+  if (args.optimize !== "") {
+    command += " --optimize " + args.optimize;
+  }
+  if (args.bytecodeVersion !== "") {
+    command += " --bytecode-version " + args.bytecodeVersion;
+  }
+  if (args.compilerVersion !== "") {
+    command += " --compiler-version " + args.compilerVersion;
+  }
+  if (args.languageVersion !== "") {
+    command += " --language-version " + args.languageVersion;
+  }
+  if (args.moveVersion !== "") {
+    command += " --move-version " + args.moveVersion;
+  }
+  if (args.instructions !== "") {
+    command += " --instructions " + args.instructions;
+  }
+  if (args.coverage) {
+    command += " --coverage";
+  }
+  if (args.dump) {
+    command += " --dump";
+  }
 
-    try {
-        const { stdout } = await execAsync(command, { cwd: workspacePath });
-        webview.postMessage({
-            type: "cliStatus",
-            success: true,
-            message: stdout,
-        });
-
-    }
-    catch (error) {
-        webview.postMessage({
-            type: "cliStatus",
-            success: false,
-            message: (error as Error).message,
-        });
-    }
+  try {
+    const { stdout } = await execAsync(command, { cwd: workspacePath });
+    webview.postMessage({
+      type: "cliStatus",
+      success: true,
+      message: stdout,
+    });
+  } catch (error) {
+    webview.postMessage({
+      type: "cliStatus",
+      success: false,
+      message: (error as Error).message,
+    });
+  }
 }
 
-export { CheckAptos, CheckAptosInit, AptosInit, AptosMoveInit, AptosInfo, MoveTest };
+export {
+  CheckAptos,
+  CheckAptosInit,
+  AptosInit,
+  AptosMoveInit,
+  AptosInfo,
+  MoveTest,
+};
