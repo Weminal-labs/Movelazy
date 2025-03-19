@@ -278,6 +278,31 @@ async function AptosInfo(webview: vscode.Webview) {
   }
 }
 
+async function cleanProjectFiles(workspacePath: string) {
+  const dirsToClean = ["sources", "scripts", "tests"];
+  const filesToClean = [".gitignore", "Move.toml"];
+
+  try {
+    // Clean directories
+    for (const dir of dirsToClean) {
+      const dirPath = path.join(workspacePath, dir);
+      if (fs.existsSync(dirPath)) {
+        await fs.promises.rm(dirPath, { recursive: true, force: true });
+      }
+    }
+
+    // Clean files
+    for (const file of filesToClean) {
+      const filePath = path.join(workspacePath, file);
+      if (fs.existsSync(filePath)) {
+        await fs.promises.unlink(filePath);
+      }
+    }
+  } catch (error) {
+    throw new Error(`Failed to clean project files: ${error}`);
+  }
+}
+
 async function AptosMoveInit(
   webview: vscode.Webview,
   name: string,
@@ -290,10 +315,39 @@ async function AptosMoveInit(
   frameworkLocalDir: string,
   skipFetchLatestGitDeps: boolean
 ) {
+  if (!name || name.trim() === "") {
+    webview.postMessage({
+      type: "cliStatus",
+      success: false,
+      message: "Error: Project name is required",
+    });
+    return;
+  }
   const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
   if (!workspacePath) {
     throw new Error("Workspace path not found");
   }
+
+  const sourcesPath = path.join(workspacePath, "sources");
+  if (fs.existsSync(sourcesPath)) {
+    try {
+      const files = await fs.promises.readdir(sourcesPath);
+      if (files.length > 0) {
+        // Send confirmation request to webview
+        webview.postMessage({
+          type: "cliStatus",
+          success: false,
+          message:
+            "Sources directory already contains files. Delete to continue init?",
+        });
+        return; // Wait for user response before proceeding
+      }
+    } catch (error) {
+      throw new Error("Failed to read sources directory: " + error);
+    }
+  }
+
+  await cleanProjectFiles(workspacePath);
 
   let command = "aptos move init";
   if (name) {
@@ -310,7 +364,7 @@ async function AptosMoveInit(
     template === "moon_coin" ||
     template === "ToDo_list" ||
     template === "hello_prover" ||
-    template === ""
+    template === "hello-blockchain"
   ) {
     command += " --template hello-blockchain";
   }
@@ -332,7 +386,7 @@ async function AptosMoveInit(
       await fs.promises.rename(oldFile, newFile);
 
       const coinContent = `
-module MoonCoin::moon_coin {
+module ${name}::moon_coin {
     struct MoonCoin {}
 
     fun init_module(sender: &signer) {
@@ -350,13 +404,13 @@ module MoonCoin::moon_coin {
       const moveTomlContent = await fs.promises.readFile(moveTomlPath, "utf8");
       await fs.promises.writeFile(
         moveTomlPath,
-        moveTomlContent.replace(/hello_blockchain/g, "MoonCoin")
+        moveTomlContent.replace(/hello_blockchain/g, name)
       );
     } else if (template === "NFT_Marketplace") {
       const newFile = path.join(sourcePath, "Marketplace_NFT.move");
       await fs.promises.rename(oldFile, newFile);
 
-      const nftContent = `module marketplace_addr::marketplace {
+      const nftContent = `module ${name}::marketplace {
                 use std::error;
                 use std::signer;
                 use std::option;
@@ -573,7 +627,7 @@ module MoonCoin::moon_coin {
             }
 
             #[test_only]
-            module marketplace_addr::test_marketplace {
+            module ${name}::test_marketplace {
                 use std::option;
                 use aptos_framework::aptos_coin;
                 use aptos_framework::coin;
@@ -664,13 +718,13 @@ module MoonCoin::moon_coin {
       const moveTomlContent = await fs.promises.readFile(moveTomlPath, "utf8");
       await fs.promises.writeFile(
         moveTomlPath,
-        moveTomlContent.replace(/hello_blockchain/g, "marketplace_addr")
+        moveTomlContent.replace(/hello_blockchain/g, name)
       );
     } else if (template === "ToDo_list") {
       const newFile = path.join(sourcePath, "AdvancedTodoList.move");
       await fs.promises.rename(oldFile, newFile);
 
-      const todoContent = `module advanced_todo_list_addr::advanced_todo_list {
+      const todoContent = `module ${name}::advanced_todo_list {
                 use std::bcs;
                 use std::signer;
                 use std::vector;
@@ -928,14 +982,14 @@ module MoonCoin::moon_coin {
       const moveTomlContent = await fs.promises.readFile(moveTomlPath, "utf8");
       await fs.promises.writeFile(
         moveTomlPath,
-        moveTomlContent.replace(/hello_blockchain/g, "advanced_todo_list_addr")
+        moveTomlContent.replace(/hello_blockchain/g, name)
       );
     } else if (template === "hello_prover") {
       const newFile = path.join(sourcePath, "HelloProver.move");
       await fs.promises.rename(oldFile, newFile);
 
       const proverContent = `
-module hello_prover::prove {
+module ${name}::prove {
     fun plus1(x: u64): u64 {
         x+1
     }
@@ -957,7 +1011,7 @@ module hello_prover::prove {
       const moveTomlContent = await fs.promises.readFile(moveTomlPath, "utf8");
       await fs.promises.writeFile(
         moveTomlPath,
-        moveTomlContent.replace(/hello_blockchain/g, "hello_prover")
+        moveTomlContent.replace(/hello_blockchain/g, name)
       );
     }
   } catch (error) {
