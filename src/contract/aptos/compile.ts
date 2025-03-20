@@ -69,7 +69,7 @@ export default async function compile(
   }
 
   console.log("compile command ai che: ", cmdArgs);
-  let output = ""
+  let output = "";
   // try {
   //   const { stdout, stderr } = await execAsync(command, {
   //     cwd: workspacePath,
