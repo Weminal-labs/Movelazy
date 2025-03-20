@@ -3,6 +3,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { CompileArgs } from "./types";
 import processCLI from "./excute";
+import { getWorkSpacePath } from "../../utils/path";
 
 const execAsync = promisify(exec);
 
@@ -10,7 +11,7 @@ export default async function compile(
   webview: vscode.Webview,
   args: CompileArgs
 ) {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     throw new Error("Workspace path not found");
   }
@@ -68,7 +69,7 @@ export default async function compile(
   }
 
   console.log("compile command ai che: ", cmdArgs);
-let output = ""
+  let output = ""
   // try {
   //   const { stdout, stderr } = await execAsync(command, {
   //     cwd: workspacePath,
@@ -89,7 +90,7 @@ let output = ""
   try {
     output = await processCLI(command, cmdArgs, workspacePath);
     console.log("Deploy output:", output);
-     webview.postMessage({
+    webview.postMessage({
       type: "cliStatus",
       success: true,
       message: output,

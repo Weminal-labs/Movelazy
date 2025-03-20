@@ -4,7 +4,7 @@ import { promisify } from "util";
 import { TestArgs } from "../contract/aptos/types";
 import path from "path";
 import * as fs from "fs";
-import { stderr } from "process";
+import { getWorkSpacePath } from "../utils/path";
 
 const execAsync = promisify(exec);
 
@@ -28,7 +28,7 @@ async function CheckAptos(): Promise<Boolean> {
 async function CheckAptosInit(): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     // Get workspace path
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    const workspacePath = getWorkSpacePath();
     if (!workspacePath) {
       resolve(false);
       return;
@@ -74,7 +74,7 @@ async function CheckAptosInit(): Promise<boolean> {
 }
 
 async function deleteAptosFolder() {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
 
   if (!workspacePath) {
     vscode.window.showErrorMessage("Workspace path not found.");
@@ -102,7 +102,7 @@ async function AptosInit(
   privateKey: string
 ) {
   // Get workspace path
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     throw new Error("Workspace path not found");
   }
@@ -255,7 +255,7 @@ async function AptosInit(
 }
 
 async function AptosInfo(webview: vscode.Webview) {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     throw new Error("Workspace path not found");
   }
@@ -323,7 +323,7 @@ async function AptosMoveInit(
     });
     return;
   }
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     throw new Error("Workspace path not found");
   }
@@ -1051,7 +1051,7 @@ module ${name}::prove {
 }
 
 async function MoveTest(webview: vscode.Webview, args: TestArgs) {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     throw new Error("Workspace path not found");
   }

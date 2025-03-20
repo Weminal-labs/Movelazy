@@ -4,12 +4,13 @@ import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs';
 import { CompilerConfig } from './types';
+import { getWorkSpacePath } from '../../utils/path';
 
 const execAsync = promisify(exec);
 
 export class CompilerService {
     async compile(webview: vscode.Webview) {
-        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const workspacePath = getWorkSpacePath();
         if (!workspacePath) {
             webview.postMessage({
                 type: 'compileStatus',
@@ -50,7 +51,7 @@ export class CompilerService {
         }
     }
     async updateCompilerConfig(settings: CompilerConfig) {
-        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const workspacePath = getWorkSpacePath();
         if (!workspacePath) {
             return;
         }
@@ -90,7 +91,7 @@ export class CompilerService {
         await fs.promises.writeFile(hardhatConfigPath, configContent);
     }
     async clean(webview: vscode.Webview) {
-        const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const workspacePath = getWorkSpacePath();
         if (!workspacePath) {
             webview.postMessage({
                 type: 'cleanStatus',

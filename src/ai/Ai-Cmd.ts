@@ -3,13 +3,14 @@ import * as fs from "fs";
 import * as path from "path";
 import SplitCmd from "../utils/SplitCmd";
 import * as aptosCli from "../services/Aptos-Cli";
-import { ViewProvider } from "../ViewProvider";
+import { ViewProvider } from "../providers/ViewProvider";
 import { CompileArgs, DeployArgs, TestArgs } from "../contract/aptos/types";
 import compile from "../contract/aptos/compile";
 import { deploy } from "../contract/aptos/deploy";
+import { getWorkSpacePath } from "../utils/path";
 
 export function GetCmd(): string {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     throw new Error("Workspace path not found");
   }
@@ -217,12 +218,12 @@ export function ProcCmdCase(ai_out: string) {
           throw new Error("Command not found in switch case with cmd: " + cmd);
       }
     } catch (error) {
-    webviewView.webview.postMessage({
-      type: "cliStatus",
-      success: false,
-      message: (error as Error).message,
-    });
-  }
+      webviewView.webview.postMessage({
+        type: "cliStatus",
+        success: false,
+        message: (error as Error).message,
+      });
+    }
   } else {
     throw new Error("Webview view is null");
   }
@@ -260,7 +261,7 @@ function ProcDeploy(
     maxGas = "",
     expirationSecs = "";
 
-   const deployArgs:DeployArgs = {
+  const deployArgs: DeployArgs = {
     overrideSizeCheck: Boolean(args?.overrideSizeCheck) || false,
     chunkedPublish: Boolean(args?.chunkedPublish) || false,
     largePackagesModuleAddress: args?.largePackagesModuleAddress || "",

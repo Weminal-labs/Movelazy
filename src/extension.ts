@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { ViewProvider } from './ViewProvider';
+import { ViewProvider } from './providers/ViewProvider';
 import { registerCommands } from './commands';
-import { registerHoverProvider } from './hoverProvider';
-import { registerLinkProvider } from './linkProvider';
+import { registerHoverProvider } from './providers/hoverProvider';
+import { registerLinkProvider } from './providers/linkProvider';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "movelazy" is now active!');

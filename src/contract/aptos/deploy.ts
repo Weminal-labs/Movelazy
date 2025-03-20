@@ -2,11 +2,15 @@ import * as vscode from "vscode";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { DeployArgs } from "./types";
-import { spawn } from "child_process";
+import { getWorkSpacePath } from "../../utils/path";
 import processCLI from "./excute";
+
 const execAsync = promisify(exec);
-async function deploy(webview: vscode.Webview, args: DeployArgs) {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+async function deploy(
+  webview: vscode.Webview,
+  args: DeployArgs
+) {
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     throw new Error("Workspace path not found");
   }
@@ -27,15 +31,8 @@ async function deploy(webview: vscode.Webview, args: DeployArgs) {
   if (args.chunkedPublish) {
     cmdArgs.push("--chunked-publish");
   }
-  if (
-    args.largePackagesModuleAddress &&
-    args.largePackagesModuleAddress !==
-      "0x0e1ca3011bdd07246d4d16d909dbb2d6953a86c4735d5acf5865d962c630cce7"
-  ) {
-    cmdArgs.push(
-      "--large-packages-module-address",
-      args.largePackagesModuleAddress
-    );
+  if (args.largePackagesModuleAddress && args.largePackagesModuleAddress !== "0x0e1ca3011bdd07246d4d16d909dbb2d6953a86c4735d5acf5865d962c630cce7") {
+    cmdArgs.push("--large-packages-module-address", args.largePackagesModuleAddress);
   }
   if (args.chunkSize && args.chunkSize !== "55000") {
     cmdArgs.push("--chunk-size", args.chunkSize);
@@ -115,7 +112,7 @@ async function deploy(webview: vscode.Webview, args: DeployArgs) {
 }
 
 async function checkProfile(webview: vscode.Webview) {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     console.error("Workspace path is undefined.");
     return null;
@@ -137,7 +134,7 @@ async function checkProfile(webview: vscode.Webview) {
   return Promise.reject("Failed to read account from config");
 }
 async function checkBalance() {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     console.log("No workspace");
     return;
@@ -160,7 +157,7 @@ async function checkBalance() {
 }
 
 async function getAccount() {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     console.log("No workspace");
     return;
@@ -183,7 +180,7 @@ async function getAccount() {
 }
 
 async function getNetWork() {
-  const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
     console.log("No workspace");
     return;

@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { SolidityService } from "./contract/solidity";
+import { SolidityService } from "../contract/solidity";
 // import { AptosService } from "./contract/aptos";
-import { WorkspaceService } from "./contract/aptos/workspace";
-import { DeployerService } from "./contract/solidity/deployer";
+import { WorkspaceService } from "../contract/aptos/workspace";
+import { DeployerService } from "../contract/solidity/deployer";
 import {
   CheckAptos,
   CheckAptosInit,
@@ -10,11 +10,11 @@ import {
   AptosMoveInit,
   AptosInfo,
   MoveTest,
-} from "./services/Aptos-Cli";
-import { AiCmd } from "./ai/chatbot";
-import compile from "./contract/aptos/compile";
-import { checkProfile, deploy } from "./contract/aptos/deploy";
-import { createFileSystem } from "./lib/filesystem"; // Import FileSystem
+} from "../services/Aptos-Cli";
+import { AiCmd } from "../ai/chatbot";
+import compile from "../contract/aptos/compile";
+import { checkProfile, deploy } from "../contract/aptos/deploy";
+import { createFileSystem } from "../lib/filesystem"; // Import FileSystem
 
 
 export class ViewProvider implements vscode.WebviewViewProvider {
