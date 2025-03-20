@@ -5,10 +5,7 @@ import { DeployArgs } from "./types";
 import { spawn } from "child_process";
 import processCLI from "./excute";
 const execAsync = promisify(exec);
-async function deploy(
-  webview: vscode.Webview,
-  args: DeployArgs
-) {
+async function deploy(webview: vscode.Webview, args: DeployArgs) {
   const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
   if (!workspacePath) {
     throw new Error("Workspace path not found");
@@ -18,7 +15,11 @@ async function deploy(
   const command = "aptos";
   const cmdArgs: string[] = ["move", "publish"];
 
-  cmdArgs.push("--named-addresses", `${args.named_addresses}=default`, "--assume-yes");
+  cmdArgs.push(
+    "--named-addresses",
+    `${args.named_addresses}=default`,
+    "--assume-yes"
+  );
 
   if (args.overrideSizeCheck) {
     cmdArgs.push("--override-size-check");
@@ -26,8 +27,15 @@ async function deploy(
   if (args.chunkedPublish) {
     cmdArgs.push("--chunked-publish");
   }
-  if (args.largePackagesModuleAddress && args.largePackagesModuleAddress !== "0x0e1ca3011bdd07246d4d16d909dbb2d6953a86c4735d5acf5865d962c630cce7") {
-    cmdArgs.push("--large-packages-module-address", args.largePackagesModuleAddress);
+  if (
+    args.largePackagesModuleAddress &&
+    args.largePackagesModuleAddress !==
+      "0x0e1ca3011bdd07246d4d16d909dbb2d6953a86c4735d5acf5865d962c630cce7"
+  ) {
+    cmdArgs.push(
+      "--large-packages-module-address",
+      args.largePackagesModuleAddress
+    );
   }
   if (args.chunkSize && args.chunkSize !== "55000") {
     cmdArgs.push("--chunk-size", args.chunkSize);
@@ -74,12 +82,9 @@ async function deploy(
   if (args.expirationSecs && args.expirationSecs !== "30") {
     cmdArgs.push("--expiration-secs", args.expirationSecs);
   }
-  if (args.assume_yes) {
-    cmdArgs.push("--assume-yes");
-  }
-  if (args.assume_no) {
-    cmdArgs.push("--assume-no");
-  }
+  // if (args.assume_no) {
+  //   cmdArgs.push("--assume-no");
+  // }
   if (args.local) {
     cmdArgs.push("--local");
   }
@@ -101,7 +106,10 @@ async function deploy(
     webview.postMessage({
       type: "cliStatus",
       success: false,
-      message: { out: `${error}\n{${output ? `Output: ${output}` : ""}}`, isProfile: false },
+      message: {
+        out: `${error}\n{${output ? `Output: ${output}` : ""}}`,
+        isProfile: false,
+      },
     });
   }
 }
@@ -145,8 +153,7 @@ async function checkBalance() {
     const result = JSON.parse(stdout);
     const balance = result.Result[0].balance;
     return balance;
-  }
-  catch (error: any) {
+  } catch (error: any) {
     console.error("Error executing command:", error);
     return null;
   }
@@ -197,6 +204,5 @@ async function getNetWork() {
     return null;
   }
 }
-
 
 export { deploy, checkProfile, checkBalance, getAccount, getNetWork };

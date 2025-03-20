@@ -612,7 +612,7 @@ module ${name}::moon_coin {
                 }
 
                 fun get_marketplace_signer_addr(): address {
-                    object::create_object_address(&@marketplace_addr, APP_OBJECT_SEED)
+                    object::create_object_address(&@0x1, APP_OBJECT_SEED)
                 }
 
                 fun get_marketplace_signer(marketplace_signer_addr: address): signer acquires MarketplaceSigner {

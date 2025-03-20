@@ -392,29 +392,6 @@ export default function MoveDeploy() {
                     className="bg-gray-800 border-gray-700 text-white"
                   />
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <Label>Assume Yes</Label>
-                  <Switch
-                    checked={deployArgs.assume_yes}
-                    onCheckedChange={(checked) =>
-                      handleChange("assume_yes", checked)
-                    }
-                    className="bg-white"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label>Assume No</Label>
-                  <Switch
-                    checked={deployArgs.assume_no}
-                    onCheckedChange={(checked) =>
-                      handleChange("assume_no", checked)
-                    }
-                    className="bg-white"
-                  />
-                </div>
-
                 <div className="flex items-center justify-between">
                   <Label>Local</Label>
                   <Switch
