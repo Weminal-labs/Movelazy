@@ -871,7 +871,7 @@ module ${name}::moon_coin {
                 }
 
                 fun construct_todo_list_object_seed(counter: u64): vector<u8> {
-                    bcs::to_bytes(&string_utils::format2(&b"{}_{}", @advanced_todo_list_addr, counter))
+                    bcs::to_bytes(&string_utils::format2(&b"{}_{}", @0x1, counter))
                 }
 
                 #[test_only]
