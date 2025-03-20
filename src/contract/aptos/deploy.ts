@@ -4,6 +4,7 @@ import { promisify } from "util";
 import { DeployArgs } from "./types";
 import { getWorkSpacePath } from "../../utils/path";
 import processCLI from "./excute";
+import { saveCommandHistory } from "../../services/cmd-history";
 
 const execAsync = promisify(exec);
 async function deploy(
@@ -12,9 +13,9 @@ async function deploy(
 ) {
   const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
+    saveCommandHistory("aptos move publish", "Workspace path not found");
     throw new Error("Workspace path not found");
   }
-  console.log("deploychekc: ");
 
   const command = "aptos";
   const cmdArgs: string[] = ["move", "publish"];
@@ -90,16 +91,18 @@ async function deploy(
   }
 
   console.log("Deploy command:", command, cmdArgs.join(" "));
+  let commandHistory = command + " " + cmdArgs.join(" ");
   let output = "";
   try {
     output = await processCLI(command, cmdArgs, workspacePath);
-    console.log("Deploy output:", output);
+    saveCommandHistory(commandHistory, output);
     webview.postMessage({
       type: "cliStatus",
       success: true,
       message: { out: output, isProfile: false },
     });
   } catch (error) {
+    saveCommandHistory(commandHistory, `Error: ${error}\n{${output ? `Output: ${output}` : ""}}`);
     webview.postMessage({
       type: "cliStatus",
       success: false,

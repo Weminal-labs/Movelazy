@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { setLastHoveredMoveLazyPosition } from './state';
+import { setLastHoveredMoveLazyPosition } from '../state';
 
 export function registerHoverProvider(context: vscode.ExtensionContext) {
     const hoverDecorationType = vscode.window.createTextEditorDecorationType({

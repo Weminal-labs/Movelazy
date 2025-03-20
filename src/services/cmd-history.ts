@@ -25,7 +25,7 @@ export function cleanHistoryFile() {
     fs.writeFileSync(filePath, "");
 }
 
-export function saveCommandHistory(command: string) {
+export function saveCommandHistory(command: string, output: string) {
     createHistoryFileIfNotExists();
 
     const workspacePath = getWorkSpacePath();
@@ -38,7 +38,7 @@ export function saveCommandHistory(command: string) {
 
     const now = new Date();
     const timestamp = now.toISOString(); // You can format this as needed
-    const newHistory = `[${timestamp}] - ${command}\n\n---\n${history}`;
+    const newHistory = `[${timestamp}] - ${command}\n${output}\n---\n${history}`;
 
     fs.writeFileSync(filePath, newHistory);
 }

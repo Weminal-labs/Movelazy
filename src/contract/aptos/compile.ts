@@ -4,6 +4,7 @@ import { promisify } from "util";
 import { CompileArgs } from "./types";
 import processCLI from "./excute";
 import { getWorkSpacePath } from "../../utils/path";
+import { saveCommandHistory } from "../../services/cmd-history";
 
 const execAsync = promisify(exec);
 
@@ -87,15 +88,17 @@ export default async function compile(
   //   });
   // }
 
+  let commandHistory = command + " " + cmdArgs.join(" ");
   try {
     output = await processCLI(command, cmdArgs, workspacePath);
-    console.log("Deploy output:", output);
+    saveCommandHistory(commandHistory, output);
     webview.postMessage({
       type: "cliStatus",
       success: true,
       message: output,
     });
   } catch (error) {
+    saveCommandHistory(commandHistory, `Error: ${error}\n{${output ? `Output: ${output}` : ""}}`);
     webview.postMessage({
       type: "cliStatus",
       success: false,

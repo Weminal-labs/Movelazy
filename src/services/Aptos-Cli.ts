@@ -5,6 +5,7 @@ import { TestArgs } from "../contract/aptos/types";
 import path from "path";
 import * as fs from "fs";
 import { getWorkSpacePath } from "../utils/path";
+import { saveCommandHistory } from "./cmd-history";
 
 const execAsync = promisify(exec);
 
@@ -28,6 +29,7 @@ async function CheckAptos(): Promise<Boolean> {
 async function CheckAptosInit(): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     // Get workspace path
+    const historyOutput = "";
     const workspacePath = getWorkSpacePath();
     if (!workspacePath) {
       resolve(false);
@@ -38,6 +40,7 @@ async function CheckAptosInit(): Promise<boolean> {
       cwd: workspacePath, // Set current working directory
       stdio: ["pipe", "pipe", "pipe"], // Connect stdin, stdout, stderr
     });
+
 
     // Listen output (stdout) from process
     aptosProcess.stdout.on("data", (data) => {
@@ -89,7 +92,9 @@ async function deleteAptosFolder() {
       // Xóa thư mục .aptos nếu tồn tại
       await fs.promises.rm(aptosFolderPath, { recursive: true, force: true });
     }
+    saveCommandHistory("Remove .aptos folder", "Success");
   } catch (error) {
+    saveCommandHistory("Remove folder .aptos", "Failed to remove .aptos folder: " + error);
     throw new Error("Failed to delete .aptos folder: " + error);
   }
 }
@@ -102,8 +107,10 @@ async function AptosInit(
   privateKey: string
 ) {
   // Get workspace path
+  let cmdHistory = "Aptos init ";
   const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
+    saveCommandHistory("Aptos init", "Error: Workspace path not found");
     throw new Error("Workspace path not found");
   }
 
@@ -112,12 +119,13 @@ async function AptosInit(
     await deleteAptosFolder();
   }
 
-  function custom(
+  function customNetwork(
     network: string,
     endpoint: string,
     faucetEndpoint: string,
     privateKey: string
   ) {
+    console.log("Initializing Aptos CLI...");
     const aptosProcess = spawn("aptos", ["init"], {
       cwd: workspacePath,
       stdio: ["pipe", "pipe", "pipe"],
@@ -128,18 +136,22 @@ async function AptosInit(
       const output = data.toString();
 
       if (output.includes("Choose network")) {
+        cmdHistory += network + " ";
         aptosProcess.stdin.write(`${network}\n`);
       }
 
       if (output.includes("Enter your rest endpoint")) {
+        cmdHistory += endpoint + " ";
         aptosProcess.stdin.write(`${endpoint || ""}\n`);
       }
 
       if (output.includes("Enter your faucet endpoint")) {
+        cmdHistory += faucetEndpoint + " ";
         aptosProcess.stdin.write(`${faucetEndpoint || ""}\n`);
       }
 
       if (output.includes("Enter your private key as a hex literal")) {
+        cmdHistory += privateKey + " ";
         aptosProcess.stdin.write(`${privateKey || ""}\n`);
       }
 
@@ -161,6 +173,7 @@ async function AptosInit(
           message: outputData,
         });
       } else {
+        saveCommandHistory("Apots init", "Aptos initialization failed with exit code " + code);
         webview.postMessage({
           type: "cliStatus",
           success: false,
@@ -168,11 +181,10 @@ async function AptosInit(
         });
       }
     });
+    saveCommandHistory("Apots init", outputData);
   }
 
-  function notCustom(network: string, privateKey: string) {
-    console.log("Initializing Aptos CLI...");
-
+  function notCustomNetwork(network: string, privateKey: string) {
     let isDevnet = network === "devnet";
 
     const aptosProcess = spawn("aptos", ["init"], {
@@ -190,31 +202,29 @@ async function AptosInit(
         console.log("Aptos already initialized, confirming overwrite...");
         aptosProcess.stdin.write("yes\n");
       } else if (output.includes("Choose network")) {
-        console.log(`Selecting network: ${network}`);
+        cmdHistory += network + " ";
         aptosProcess.stdin.write(`${network}\n`);
       } else if (output.includes("Enter your private key as a hex literal")) {
-        console.log("Entering private key...");
+        cmdHistory += privateKey + " ";
         aptosProcess.stdin.write(`${privateKey || ""}\n`);
-      } else if (
-        output.includes("The account has not been created on chain yet")
-      ) {
+      } else if (output.includes("The account has not been created on chain yet")) {
         if (network === "testnet") {
+          saveCommandHistory(cmdHistory, `Success initialized with network ${network}\n` + output);
           webview.postMessage({
             type: "cliStatus",
             success: true,
             message: "Success initialized with network " + network + output,
           });
         } else if (network === "mainnet") {
+          saveCommandHistory(cmdHistory, "Success initialized with network " + network);
           webview.postMessage({
             type: "cliStatus",
             success: true,
             message: "Success initialized with network " + network,
           });
         }
-
         aptosProcess.kill();
       } else {
-        console.log("Skip init...");
         aptosProcess.stdin.write("\n");
         webview.postMessage({
           type: "cliStatus",
@@ -231,12 +241,14 @@ async function AptosInit(
     if (isDevnet) {
       aptosProcess.on("close", (code) => {
         if (code === 0) {
+          saveCommandHistory(cmdHistory, `Success initialized with network devnet\n${outputData}`);
           webview.postMessage({
             type: "cliStatus",
             success: true,
             message: outputData.trim(),
           });
         } else {
+          saveCommandHistory(cmdHistory, "Aptos initialization failed with exit code " + code);
           webview.postMessage({
             type: "cliStatus",
             success: false,
@@ -248,15 +260,16 @@ async function AptosInit(
   }
 
   if (network === "custom") {
-    custom(network, endpoint, faucetEndpoint, privateKey);
+    customNetwork(network, endpoint, faucetEndpoint, privateKey);
   } else {
-    notCustom(network, privateKey);
+    notCustomNetwork(network, privateKey);
   }
 }
 
 async function AptosInfo(webview: vscode.Webview) {
   const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
+    saveCommandHistory("Aptos info", "Error: Workspace path not found");
     throw new Error("Workspace path not found");
   }
 
@@ -264,12 +277,14 @@ async function AptosInfo(webview: vscode.Webview) {
     const { stdout, stderr } = await execAsync("aptos info", {
       cwd: workspacePath,
     });
+    saveCommandHistory("Aptos info", stdout + stderr);
     webview.postMessage({
       type: "cliStatus",
       success: true,
       message: stderr + stdout,
     });
   } catch (error) {
+    saveCommandHistory("Aptos info", (error as Error).message);
     webview.postMessage({
       type: "cliStatus",
       success: false,
@@ -316,6 +331,7 @@ async function AptosMoveInit(
   skipFetchLatestGitDeps: boolean
 ) {
   if (!name || name.trim() === "") {
+    saveCommandHistory("Aptos move init", "Error: Project name is required");
     webview.postMessage({
       type: "cliStatus",
       success: false,
@@ -325,6 +341,7 @@ async function AptosMoveInit(
   }
   const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
+    saveCommandHistory("Aptos move init", "Error: Workspace path not found");
     throw new Error("Workspace path not found");
   }
 
@@ -334,6 +351,7 @@ async function AptosMoveInit(
       const files = await fs.promises.readdir(sourcesPath);
       if (files.length > 0) {
         // Send confirmation request to webview
+        saveCommandHistory("Aptos move init", "Sources directory already contains files. Delete to continue init?");
         webview.postMessage({
           type: "cliStatus",
           success: false,
@@ -371,6 +389,7 @@ async function AptosMoveInit(
 
   try {
     const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+    saveCommandHistory("Aptos move init", stdout + stderr + `\nTemplate: ${template}`);
     webview.postMessage({
       type: "cliStatus",
       success: true,
@@ -1015,6 +1034,7 @@ module ${name}::prove {
       );
     }
   } catch (error) {
+    saveCommandHistory("Aptos move init", "Failed to execute template commands: " + error);
     throw new Error("Failed to execute template commands: " + error);
   }
 
@@ -1036,12 +1056,14 @@ module ${name}::prove {
 
   try {
     const { stdout, stderr } = await execAsync(command, { cwd: workspacePath });
+    saveCommandHistory("Aptos move init", stdout + stderr);
     webview.postMessage({
       type: "cliStatus",
       success: true,
       message: stderr + stdout,
     });
   } catch (error) {
+    saveCommandHistory("Aptos move init", (error as Error).message);
     webview.postMessage({
       type: "cliStatus",
       success: false,
@@ -1053,6 +1075,7 @@ module ${name}::prove {
 async function MoveTest(webview: vscode.Webview, args: TestArgs) {
   const workspacePath = getWorkSpacePath();
   if (!workspacePath) {
+    saveCommandHistory("Aptos move test", "Error: Workspace path not found");
     throw new Error("Workspace path not found");
   }
 
@@ -1114,12 +1137,14 @@ async function MoveTest(webview: vscode.Webview, args: TestArgs) {
 
   try {
     const { stdout } = await execAsync(command, { cwd: workspacePath });
+    saveCommandHistory("Aptos move test", stdout);
     webview.postMessage({
       type: "cliStatus",
       success: true,
       message: stdout,
     });
   } catch (error) {
+    saveCommandHistory("Aptos move test", `Error: ${(error as Error).message}`);
     webview.postMessage({
       type: "cliStatus",
       success: false,
