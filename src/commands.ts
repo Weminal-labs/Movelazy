@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
 import { getTempFilePath, deleteTempFile } from './utils/tempFile';
 import { execAsync } from './utils/execAsync';
+import { promisify } from "util";
 import axios from 'axios';
-import { spawnSync } from 'child_process';
+import { exec, spawnSync } from 'child_process';
 import os from 'os';
 import fs from 'fs';
 import { lastHoveredMoveLazyPosition } from './state';
 import path from 'path';
 import { getCachedOutput, setCachedOutput } from './utils/cache';
+import { getWorkSpacePath } from './utils/path';
 
 const executingDecorationType = vscode.window.createTextEditorDecorationType({
     backgroundColor: 'rgba(255, 255, 0, 0.3)',
@@ -163,7 +165,18 @@ async function runMoveCode(document: vscode.TextDocument, targetCodeBlock: strin
     }
 }
 
+async function execAiOutputCmd(command: string) {
+    return new Promise((resolve, reject) => {
+        execAsync(command).then((result: any) => {
+            resolve(result);
+        }).catch((error: any) => {
+            reject(error);
+        });
+    });
+}
+
 async function runMoveAi(document: vscode.TextDocument, targetCodeBlock: string, endOfCodeBlockPosition: vscode.Position, cacheKey: string) {
+    const workspacePath = getWorkSpacePath();
     let requestData = {
         "messages": [
             {
@@ -174,9 +187,17 @@ async function runMoveAi(document: vscode.TextDocument, targetCodeBlock: string,
         "show_intermediate_steps": false
     };
 
+    console.log("Sending request to AI...");
+    const execAsync = promisify(exec);
     axios.post("http://localhost:3000/api", requestData)
         .then(async (response: { data: string; }) => {
-            insertOutputIntoMarkdown(document, endOfCodeBlockPosition, response.data);
+            console.log("AI agent exectuting command: ", response.data);
+            const { stdout, stderr } = await execAsync(response.data, {
+                cwd: workspacePath,
+            });
+            console.log("AI agent output: ", stdout + stderr);
+            insertOutputIntoMarkdown(document, endOfCodeBlockPosition, stdout + stderr);
+            console.log("Wrote output to markdown...");
             setCachedOutput(cacheKey, response.data);
             vscode.window.showInformationMessage("✅ Execution successful!");
         })
