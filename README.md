@@ -1,8 +1,19 @@
 # Movelazy
 The Movement extension 
 
+## Documentation
 
-# Vision  
+### Core Documentation
+- [Main Documentation](DOCUMENTATION.md) - Comprehensive guide to Movelazy features and usage
+- [Technical Details](TECHNICAL_DETAILS.md) - In-depth technical information about the extension's architecture
+- [Troubleshooting Guide](TROUBLESHOOTING.md) - Common issues and their solutions
+
+### Feature Documentation
+- [AI Features](AI_FEATURES.md) - Guide to AI-powered features and capabilities
+- [Aptos Development](APTOS_DEVELOPMENT.md) - Comprehensive guide for Aptos development
+- [VSCode extension quickstart](vsc-extension-quickstart.md) - Document for extension development
+
+## Vision  
 I believe the team is young and needs time to grow with the product. That's why I will help, mentor, and inspire them. This plan focuses on three main goals: 
 * Improving our product for the Move ecosystem,
 * Developing our brand profile
@@ -10,17 +21,15 @@ I believe the team is young and needs time to grow with the product. That's why 
 
 <img width="1023" alt="image" src="https://github.com/user-attachments/assets/0cd09e12-c17c-49f9-9ab8-8441e232f2f6">
 
-
-# Features
+## Features
 * Creat Account
 * Check Balance
 * Deploy Contract
 
-# Discover how to use Movelazy and what all it offers:
+## Discover how to use Movelazy and what all it offers:
 ### Open Movelazy extension: You can open by Command Palette if you're using on MacOS. Or you can click on the Movement logo in the sidebar/Activity Bar to open the extension.
 
-
-# If you are a Aptos developer, please select the Aptos feature.
+## If you are a Aptos developer, please select the Aptos feature.
 * Step 1: Create a Working Folder**
   Before you get started with Movelazy, you need to create an empty folder in your working directory. This is the first step to make sure that all the proper organization is done.
 * Step 2: Open this folder in Visual Studio Code.**
@@ -98,7 +107,7 @@ After copying to config.yaml, you must recompile to continue the deployment proc
 
 https://github.com/user-attachments/assets/0d8a847c-4267-4009-83d9-cd017c447189
 
-# If you are a Solidity developer, please select the Solidity feature.
+## If you are a Solidity developer, please select the Solidity feature.
 - **Project Verification:** Upon accessing the tool, the system will automatically check whether the current workspace is a Solidity contract project. If not, you will be prompted to initialize a new workspace.
 - **Access the Compiler Page:** After initialization, you will be directed to the **Compiler** page.
 - **Write Smart Contracts:**
@@ -116,3 +125,10 @@ https://github.com/user-attachments/assets/0d8a847c-4267-4009-83d9-cd017c447189
     - **Upon successful deployment**, the system will return the **hash** of the deployed contract on the network.
  
   https://github.com/user-attachments/assets/2e22dd1d-735c-47ff-99e8-8b7972cf29cb
+
+## Support
+For additional help and support:
+- Check our [Troubleshooting Guide](TROUBLESHOOTING.md) for common issues
+- Visit our [Documentation](DOCUMENTATION.md) for detailed guides
+- Join our community on [Discord](https://discord.gg/movelazy)
+- Report issues on [GitHub](https://github.com/movelazy/issues)
