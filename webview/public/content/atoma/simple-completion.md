@@ -1,3 +1,0 @@
-Hey!
-
-{% atoma_completion /%}

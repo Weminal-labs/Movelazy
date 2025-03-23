@@ -34,7 +34,20 @@ export function EditorDialog({
 }: EditorDialogProps) {
   const [showInputDialog, setShowInputDialog] = React.useState(false);
   const [inputValues, setInputValues] = React.useState<Record<string, any>>({});
+  const [hasChanges, setHasChanges] = React.useState(false);
   const resultRef = React.useRef<HTMLDivElement>(null);
+
+  const handleEditorChange = (value: string | undefined) => {
+    if (value && file?.path.endsWith('.md')) {
+      onCodeChange(value);
+      setHasChanges(true);
+    }
+  };
+
+  const handleSave = () => {
+    // Implement save functionality here
+    setHasChanges(false);
+  };
 
   // Parse frontmatter if present and extract input fields
   const hasFrontmatter = code.trim().startsWith("---");
@@ -134,7 +147,7 @@ export function EditorDialog({
             {!result ? (
               <MonacoEditor
                 height="100%"
-                defaultLanguage="aim"
+                defaultLanguage={file.path.endsWith('.md') ? 'markdown' : 'aim'}
                 theme="aim-dark"
                 value={code}
                 options={{
@@ -146,8 +159,9 @@ export function EditorDialog({
                   lineNumbers: 'on',
                   padding: { top: 8 },
                   fontFamily: 'JetBrains Mono, monospace',
-                  readOnly: true
+                  readOnly: !file.path.endsWith('.md') // Only allow editing for .md files
                 }}
+                onChange={onCodeChange} // Add this line to handle changes
                 beforeMount={configurePrismSyntax}
               />
             ) : (
@@ -330,31 +344,41 @@ export function EditorDialog({
             )}
           </div>
 
-          <div className="mt-4">
-            {!result || isRunning ? (
+          <div className="mt-4 flex justify-between">
+            <div>
+              {!result || isRunning ? (
+                <Button
+                  onClick={handleRunClick}
+                  disabled={isRunning}
+                  className={`bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 ${isRunning ? "animate-pulse" : ""
+                    }`}
+                >
+                  {isRunning ? (
+                    <>
+                      <div className="loading mr-2">
+                        <div />
+                      </div>
+                      Running...
+                    </>
+                  ) : (
+                    "Run Code"
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={onBack}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  Back to Code
+                </Button>
+              )}
+            </div>
+            {file?.path.endsWith('.md') && hasChanges && (
               <Button
-                onClick={handleRunClick}
-                disabled={isRunning}
-                className={`bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 ${isRunning ? "animate-pulse" : ""
-                  }`}
+                onClick={handleSave}
+                className="bg-green-500 hover:bg-green-600"
               >
-                {isRunning ? (
-                  <>
-                    <div className="loading mr-2">
-                      <div />
-                    </div>
-                    Running...
-                  </>
-                ) : (
-                  "Run Code"
-                )}
-              </Button>
-            ) : (
-              <Button
-                onClick={onBack}
-                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-              >
-                Back to Code
+                Save Changes
               </Button>
             )}
           </div>

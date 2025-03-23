@@ -4,6 +4,7 @@ import { useState } from "react";
 import { type CodeFile } from "../lib/types";
 import { FileGrid } from "./FileGrid";
 import { EditorDialog } from "./EditorDialog";
+import axios from 'axios';
 
 interface FileEditorProps {
   files: CodeFile[];
@@ -26,41 +27,46 @@ export function FileEditor({ files }: FileEditorProps) {
     setResult(""); // Clear previous results
 
     try {
-      const response = await fetch("/api", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // Extract command details from code if it contains "call function"
+      const message = {
+        role: "user",
+        content: code
+      };
+
+      const response = await axios.post("http://localhost:3000/api",
+        {
+          messages: [message],  // Wrap message in array as server expects
+          show_intermediate_steps: false
         },
-        body: JSON.stringify({ content: code, inputs: inputs }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (!reader) {
-        throw new Error("No reader available");
-      }
-
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) {
-          break;
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
+      );
 
-        const chunk = decoder.decode(value, { stream: true });
-        setResult((prev) => prev + chunk);
+      // Handle plain text response
+      if (typeof response.data === 'string') {
+        setResult(response.data);
       }
+      // Handle stream response
+      else if (response.data.getReader) {
+        const reader = response.data.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          setResult(prev => prev + chunk);
+        }
+      }
+
     } catch (error) {
       console.error("Error running code:", error);
       setResult(
-        `Error: ${
-          error instanceof Error ? error.message : "Unknown error occurred"
-        }`
+        `Error: ${axios.isAxiosError(error) ? error.message : "Unknown error occurred"}`
       );
     } finally {
       setIsRunning(false);

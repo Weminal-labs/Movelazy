@@ -1,0 +1,5 @@
+I want to call function with
+moduleaddress=a02a821ada9af357949c3fd934ef6da80c8a31d73c8da0e152f4f63eb03e327f
+modulename=fa_coin
+function=mint
+args=address:a02a821ada9af357949c3fd934ef6da80c8a31d73c8da0e152f4f63eb03e327f u64:100000000 and show me the result
